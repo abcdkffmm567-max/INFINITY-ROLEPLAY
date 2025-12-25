@@ -1,1 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>INFINITY ROLE PLAY | Whitelist</title>
 
+<style>
+/* ---------- ANIMATIONS ---------- */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes neonPulse {
+    0% { text-shadow: 0 0 8px #22c55e; }
+    50% { text-shadow: 0 0 22px #22c55e, 0 0 40px #22c55e; }
+    100% { text-shadow: 0 0 8px #22c55e; }
+}
+
+@keyframes borderGlow {
+    0% { box-shadow: 0 0 10px rgba(34,197,94,0.3); }
+    50% { box-shadow: 0 0 30px rgba(34,197,94,0.7); }
+    100% { box-shadow: 0 0 10px rgba(34,197,94,0.3); }
+}
+
+/* ---------- LOADER ---------- */
+#loader {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: #020617;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 9999;
+}
+
+.loader-circle {
+    width: 80px;
+    height: 80px;
+    border: 6px solid #052e16;
+    border-top: 6px solid #22c55e;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loader-text {
+    margin-top: 15px;
+    color: #22c55e;
+    font-size: 18px;
+    letter-spacing: 2px;
+    animation: neonPulse 2s infinite;
+}
+
+/* ---------- MAIN STYLE ---------- */
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #020617;
+    color: #e5e7eb;
+    display: none;
+}
+
+header {
+    background: linear-gradient(135deg, #020617, #052e16);
+    padding: 60px 20px;
+    text-align: center;
+    border-bottom: 2px solid #22c55e;
+}
+
+header h1 {
+    color: #22c55e;
+    font-size: 50px;
+    letter-spacing: 3px;
+    animation: neonPulse 2.5s infinite;
+}
+
+header p {
+    margin-top: 12px;
+    font-size: 18px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 45px auto;
+    padding: 20px;
+}
+
+.section {
+    background: #020617;
+    border: 1px solid #22c55e;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 35px;
+    animation: borderGlow 3s infinite;
+}
+
+.section h2 {
+    color: #22c55e;
+    margin-bottom: 15px;
+}
+
+input, textarea, select {
+    width: 100%;
+    margin-top: 10px;
+    padding: 11px;
+    background: #020617;
+    border: 1px solid #22c55e;
+    color: white;
+    border-radius: 6px;
+}
+
+textarea {
+    height: 115px;
+}
+
+button {
+    margin-top: 22px;
+    width: 100%;
+    padding: 15px;
+    background: #22c55e;
+    color: black;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+footer {
+    text-align: center;
+    padding: 15px;
+    border-top: 1px solid #22c55e;
+    background: #020617;
+    font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loader">
+    <div class="loader-circle"></div>
+    <div class="loader-text">LOADING INFINITY ROLE PLAY</div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="content">
+
+<header>
+    <h1>INFINITY ROLE PLAY</h1>
+    <p>GTA SA-MP | Serious Advanced Roleplay Server</p>
+</header>
+
+<div class="container">
+
+<div class="section">
+    <h2>📜 Server Rules</h2>
+    <ul>
+        <li>No Deathmatch (DM)</li>
+        <li>No Metagaming (MG)</li>
+        <li>No Powergaming (PG)</li>
+        <li>No Revenge Kill (RK)</li>
+        <li>Fear RP is mandatory</li>
+        <li>Respect admins & players</li>
+    </ul>
+</div>
+
+<div class="section">
+    <h2>📝 Whitelist Application</h2>
+    <form>
+        <input type="text" placeholder="IC Name (Firstname_Lastname)" required>
+        <input type="text" placeholder="OOC Name" required>
+        <input type="number" placeholder="Age" required>
+        <textarea placeholder="Explain Metagaming." required></textarea>
+        <textarea placeholder="Explain Powergaming." required></textarea>
+        <textarea placeholder="Explain Fear RP." required></textarea>
+        <textarea placeholder="Character backstory (5+ lines)." required></textarea>
+        <button type="submit">SUBMIT APPLICATION</button>
+    </form>
+</div>
+
+</div>
+
+<footer>
+    © 2025 INFINITY ROLE PLAY | SA-MP Advanced Roleplay
+</footer>
+
+</div>
+
+<!-- LOADER SCRIPT -->
+<script>
+window.onload = function () {
+    setTimeout(function () {
+        document.getElementById("loader").style.display = "none";
+        document.body.style.display = "block";
+    }, 2500);
+};
+</script>
+
+</body>
+</html>
