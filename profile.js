@@ -7,7 +7,7 @@ auth.onAuthStateChanged(async user=>{
   currentUser=user;
   const ban=await getBanState(user);
   if(ban.banned){
-    alert("Your Infinity Role Play account is banned."+ (ban.banReason ? "\nReason: "+ban.banReason : ""));
+    showNotice("Your Infinity Role Play account is banned."+ (ban.banReason ? " Reason: "+ban.banReason : ""),"Account Banned","danger");
     await auth.signOut();
     location.href="login.html";
     return;
@@ -20,6 +20,7 @@ auth.onAuthStateChanged(async user=>{
   const photoURL=currentProfile.photoURL||user.photoURL||"";
 
   $("#profileName").textContent=displayName;
+  if(currentProfile.verified===true) $("#profileVerifiedBadge").classList.remove("hidden"); else $("#profileVerifiedBadge").classList.add("hidden");
   $("#profileEmail").textContent=user.email||"";
   $("#profileInfinityId").textContent=currentProfile.infinityId||makeInfinityId(user.uid);
   $("#displayNameInput").value=displayName;
@@ -39,8 +40,8 @@ $("#profileForm").onsubmit=async e=>{
     });
     currentProfile.displayName=displayName;
     $("#profileName").textContent=displayName;
-    alert("Profile name updated.");
-  }catch(err){ alert(err.message); }
+    showNotice("Profile name updated successfully.","Profile Updated","success");
+  }catch(err){ showNotice(err.message,"Error","danger"); }
 };
 
 $("#profilePhotoInput").addEventListener("change",async e=>{
@@ -100,7 +101,7 @@ $("#profilePhotoInput").addEventListener("change",async e=>{
 
 $("#resetGooglePhotoBtn").onclick=async()=>{
   if(!googlePhoto){
-    alert("No Google profile photo found for this account.");
+    showNotice("No Google profile photo found for this account.","Photo Not Found","info");
     return;
   }
   try{
@@ -111,8 +112,8 @@ $("#resetGooglePhotoBtn").onclick=async()=>{
     });
     currentProfile.photoURL=googlePhoto;
     setAvatar(googlePhoto,currentProfile.displayName);
-    alert("Google profile photo restored.");
-  }catch(err){ alert(err.message); }
+    showNotice("Google profile photo restored.","Profile Updated","success");
+  }catch(err){ showNotice(err.message,"Error","danger"); }
 };
 
 function setAvatar(url,name){

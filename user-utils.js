@@ -15,6 +15,7 @@ async function ensureInfinityUser(user, extra={}){
     photoURL: old.photoURL || extra.photoURL || user.photoURL || "",
     infinityId: old.infinityId || makeInfinityId(user.uid),
     banned: old.banned === true,
+    verified: old.verified === true,
     updatedAt: firebase.database.ServerValue.TIMESTAMP
   };
 

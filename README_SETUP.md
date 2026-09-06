@@ -240,3 +240,19 @@ Admin Panel > Server & Download Settings now includes:
 Paste a public PNG/JPG/WebP image URL and save. The header logo on the website pages updates automatically.
 
 Note: the Admin Panel login is local/static. Firebase Realtime Database may still reject protected reads/writes depending on your database rules, because this login does not create a Firebase authenticated admin session.
+
+
+## Custom notifications + Verified Blue Badge
+Browser `alert()` messages such as account-ban notices have been replaced with a styled Infinity Role Play modal.
+
+User records now support:
+`users/{uid}/verified = true`
+
+Admin Panel > User Management now includes:
+- Give Verified
+- Remove Verified
+- Ban / Unban
+
+Verified users display a blue check badge beside their username in Live Chat and on their Profile page.
+
+Important: your current Admin Panel login is still a local/static username/password. If Firebase rules require an authenticated Firebase admin, Verified/Ban/Unban writes can be denied. A backend or Firebase-authenticated admin session is the secure production solution.

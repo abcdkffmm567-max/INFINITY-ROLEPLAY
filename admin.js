@@ -116,12 +116,15 @@ function renderUsersManagement(){
    return `<article class="admin-user-card">
      <img class="admin-user-avatar" src="${escAttr(avatar)}" alt="">
      <div class="admin-user-info">
-       <div class="admin-user-name">${esc(u.displayName||"User")}</div>
+       <div class="admin-user-name">${esc(u.displayName||"User")}${u.verified===true?'<span class="verified" title="Verified User">✓</span>':""}</div>
        <div class="infinity-id-badge small">${esc(id)}</div>
        <small>${esc(u.email||"No email")}</small>
        ${banned?`<div class="ban-reason">BANNED${u.banReason?": "+esc(u.banReason):""}</div>`:'<div class="active-user-status">ACTIVE</div>'}
      </div>
      <div class="admin-user-actions">
+       ${u.verified===true
+         ? `<button class="btn ghost small" onclick="removeVerified('${u.uid}')">Remove Verified</button>`
+         : `<button class="btn primary small" onclick="giveVerified('${u.uid}')">Give Verified</button>`}
        ${banned
          ? `<button class="btn success small" onclick="unbanUser('${u.uid}')">Unban</button>`
          : `<button class="btn danger small" onclick="banUser('${u.uid}')">Ban</button>`}
@@ -131,6 +134,33 @@ function renderUsersManagement(){
 }
 
 if($("#userSearch")) $("#userSearch").oninput=renderUsersManagement;
+
+
+window.giveVerified=async uid=>{
+ const user=allUsers[uid]||{};
+ if(!confirm(`Give verified blue badge to ${user.displayName||user.infinityId||"this user"}?`))return;
+ try{
+   await db.ref("users/"+uid).update({
+     verified:true,
+     verifiedAt:firebase.database.ServerValue.TIMESTAMP,
+     verifiedBy:"Infinity Admin"
+   });
+   showNotice("Verified blue badge added successfully.","Verified","success");
+ }catch(err){showNotice("Could not add verified badge: "+err.message,"Error","danger")}
+};
+
+window.removeVerified=async uid=>{
+ const user=allUsers[uid]||{};
+ if(!confirm(`Remove verified badge from ${user.displayName||user.infinityId||"this user"}?`))return;
+ try{
+   await db.ref("users/"+uid).update({
+     verified:false,
+     verifiedAt:null,
+     verifiedBy:null
+   });
+   showNotice("Verified blue badge removed.","Updated","success");
+ }catch(err){showNotice("Could not remove verified badge: "+err.message,"Error","danger")}
+};
 
 window.banUser=async uid=>{
  const user=allUsers[uid]||{};
@@ -191,12 +221,13 @@ $("#adminChatForm").onsubmit=async e=>{
    photoURL,
    text,
    isAdmin:true,
+   verified:true,
    createdAt:firebase.database.ServerValue.TIMESTAMP
  });$("#adminChatInput").value="";
 }
 function messageHtml(m){
  const avatar=m.photoURL||`https://ui-avatars.com/api/?name=${encodeURIComponent(m.name||"User")}&background=111827&color=ffffff`;
- return `<div class="msg${m.uid===adminUser?.uid?" mine":""}"><div class="msg-row"><img class="chat-avatar" src="${escAttr(avatar)}" alt=""><div class="msg-body"><div class="msg-head">${esc(m.name||"User")}${m.isAdmin?'<span class="verified">✓</span>':""}<small>${fmt(m.createdAt)}</small></div><p>${esc(m.text||"")}</p></div></div></div>`
+ return `<div class="msg${m.uid===adminUser?.uid?" mine":""}"><div class="msg-row"><img class="chat-avatar" src="${escAttr(avatar)}" alt=""><div class="msg-body"><div class="msg-head">${esc(m.name||"User")}${(m.isAdmin||m.verified)?'<span class="verified" title="'+(m.isAdmin?"Verified Admin":"Verified User")+'">✓</span>':""}<small>${fmt(m.createdAt)}</small></div><p>${esc(m.text||"")}</p></div></div></div>`
 }
 function fmt(t){return t?new Date(t).toLocaleString():"now"}
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}

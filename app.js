@@ -48,7 +48,7 @@ auth.onAuthStateChanged(async user=>{
     currentProfile=profile||{};
     if(currentProfile.banned===true){
       const reason=currentProfile.banReason||"";
-      alert("Your Infinity Role Play account is banned."+ (reason ? "\nReason: "+reason : ""));
+      showNotice("Your Infinity Role Play account is banned."+ (reason ? " Reason: "+reason : ""),"Account Banned","danger");
       await auth.signOut();
       return;
     }
@@ -82,13 +82,13 @@ $("#chatForm").onsubmit=async e=>{
   if(!currentUser){location.href="login.html";return}
   const text=$("#chatInput").value.trim();if(!text)return;
   const isAdmin=(await db.ref("admins/"+currentUser.uid).once("value")).val()===true;
-  await db.ref("chat").push().set({uid:currentUser.uid,name:currentProfile?.displayName||currentUser.displayName||"User",photoURL:currentProfile?.photoURL||currentUser.photoURL||"",infinityId:currentProfile?.infinityId||makeInfinityId(currentUser.uid),text,isAdmin,createdAt:firebase.database.ServerValue.TIMESTAMP});
+  await db.ref("chat").push().set({uid:currentUser.uid,name:currentProfile?.displayName||currentUser.displayName||"User",photoURL:currentProfile?.photoURL||currentUser.photoURL||"",infinityId:currentProfile?.infinityId||makeInfinityId(currentUser.uid),verified:currentProfile?.verified===true,text,isAdmin,createdAt:firebase.database.ServerValue.TIMESTAMP});
   $("#chatInput").value="";
 };
 function messageHtml(m){
  const mine=currentUser&&m.uid===currentUser.uid?" mine":"";
  const avatar=m.photoURL||`https://ui-avatars.com/api/?name=${encodeURIComponent(m.name||"User")}&background=111827&color=ffffff`;
- return `<div class="msg${mine}"><div class="msg-row"><img class="chat-avatar" src="${escAttr(avatar)}" alt=""><div class="msg-body"><div class="msg-head">${esc(m.name||"User")}<span class="chat-user-id">${esc(m.infinityId||"")}</span>${m.isAdmin?'<span class="verified" title="Verified Admin">✓</span>':""}<small>${fmt(m.createdAt)}</small></div><p>${esc(m.text||"")}</p></div></div></div>`
+ return `<div class="msg${mine}"><div class="msg-row"><img class="chat-avatar" src="${escAttr(avatar)}" alt=""><div class="msg-body"><div class="msg-head">${esc(m.name||"User")}<span class="chat-user-id">${esc(m.infinityId||"")}</span>${(m.isAdmin||m.verified)?'<span class="verified" title="'+(m.isAdmin?"Verified Admin":"Verified User")+'">✓</span>':""}<small>${fmt(m.createdAt)}</small></div><p>${esc(m.text||"")}</p></div></div></div>`
 }
 function fmt(t){return t?new Date(t).toLocaleString():"now"}
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
