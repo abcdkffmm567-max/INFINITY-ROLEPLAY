@@ -1,21 +1,28 @@
 const $=s=>document.querySelector(s);
-let currentUser=null, googlePhoto="";
+let currentUser=null,currentProfile=null,googlePhoto="";
 
 auth.onAuthStateChanged(async user=>{
   if(!user){ location.href="login.html"; return; }
+
   currentUser=user;
+  const ban=await getBanState(user);
+  if(ban.banned){
+    alert("Your Infinity Role Play account is banned."+ (ban.banReason ? "\nReason: "+ban.banReason : ""));
+    await auth.signOut();
+    location.href="login.html";
+    return;
+  }
 
-  const snap=await db.ref("users/"+user.uid).once("value");
-  const data=snap.val()||{};
+  currentProfile=await ensureInfinityUser(user);
+  googlePhoto=user.providerData?.find(p=>p.providerId==="google.com")?.photoURL || "";
 
-  googlePhoto=user.providerData?.find(p=>p.providerId==="google.com")?.photoURL || user.photoURL || "";
-  const displayName=data.displayName || user.displayName || "Player";
-  const photoURL=data.photoURL || user.photoURL || "";
+  const displayName=currentProfile.displayName||user.displayName||"Player";
+  const photoURL=currentProfile.photoURL||user.photoURL||"";
 
   $("#profileName").textContent=displayName;
   $("#profileEmail").textContent=user.email||"";
+  $("#profileInfinityId").textContent=currentProfile.infinityId||makeInfinityId(user.uid);
   $("#displayNameInput").value=displayName;
-  $("#photoUrlInput").value=photoURL;
   setAvatar(photoURL,displayName);
 });
 
@@ -23,39 +30,91 @@ $("#profileForm").onsubmit=async e=>{
   e.preventDefault();
   if(!currentUser)return;
 
-  const displayName=$("#displayNameInput").value.trim();
-  const photoURL=$("#photoUrlInput").value.trim();
-
+  const displayName=$("#displayNameInput").value.trim()||"Player";
   try{
-    await currentUser.updateProfile({
-      displayName: displayName || "Player",
-      photoURL: photoURL || null
-    });
-
+    await currentUser.updateProfile({displayName});
     await db.ref("users/"+currentUser.uid).update({
-      displayName: displayName || "Player",
-      email: currentUser.email || "",
-      photoURL: photoURL || "",
-      updatedAt: firebase.database.ServerValue.TIMESTAMP
+      displayName,
+      updatedAt:firebase.database.ServerValue.TIMESTAMP
     });
-
-    $("#profileName").textContent=displayName || "Player";
-    setAvatar(photoURL,displayName);
-    alert("Profile updated successfully.");
-  }catch(err){
-    alert(err.message);
-  }
+    currentProfile.displayName=displayName;
+    $("#profileName").textContent=displayName;
+    alert("Profile name updated.");
+  }catch(err){ alert(err.message); }
 };
 
-$("#resetGooglePhotoBtn").onclick=()=>{
+$("#profilePhotoInput").addEventListener("change",async e=>{
+  const file=e.target.files && e.target.files[0];
+  if(!file||!currentUser)return;
+
+  if(!["image/jpeg","image/png","image/webp"].includes(file.type)){
+    $("#profileUploadStatus").textContent="Please choose JPG, PNG or WEBP.";
+    e.target.value="";
+    return;
+  }
+  if(file.size>5*1024*1024){
+    $("#profileUploadStatus").textContent="Image is too large. Maximum size is 5 MB.";
+    e.target.value="";
+    return;
+  }
+
+  const ban=await getBanState(currentUser);
+  if(ban.banned){
+    $("#profileUploadStatus").textContent="Your account is banned.";
+    return;
+  }
+
+  const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"");
+  const ref=storage.ref(`profilePhotos/${currentUser.uid}/avatar.${ext}`);
+  const task=ref.put(file,{contentType:file.type});
+
+  $("#profileUploadStatus").textContent="Uploading...";
+  task.on("state_changed",
+    snap=>{
+      const p=Math.round((snap.bytesTransferred/snap.totalBytes)*100);
+      $("#profileUploadBar").style.width=p+"%";
+      $("#profileUploadStatus").textContent=`Uploading ${p}%`;
+    },
+    err=>{
+      $("#profileUploadStatus").textContent=err.message;
+      $("#profileUploadBar").style.width="0%";
+    },
+    async()=>{
+      try{
+        const photoURL=await task.snapshot.ref.getDownloadURL();
+        await currentUser.updateProfile({photoURL});
+        await db.ref("users/"+currentUser.uid).update({
+          photoURL,
+          updatedAt:firebase.database.ServerValue.TIMESTAMP
+        });
+        currentProfile.photoURL=photoURL;
+        setAvatar(photoURL,currentProfile.displayName);
+        $("#profileUploadStatus").textContent="Profile photo updated successfully.";
+        $("#profileUploadBar").style.width="100%";
+      }catch(err){
+        $("#profileUploadStatus").textContent=err.message;
+      }
+    }
+  );
+});
+
+$("#resetGooglePhotoBtn").onclick=async()=>{
   if(!googlePhoto){
     alert("No Google profile photo found for this account.");
     return;
   }
-  $("#photoUrlInput").value=googlePhoto;
-  setAvatar(googlePhoto,$("#displayNameInput").value);
+  try{
+    await currentUser.updateProfile({photoURL:googlePhoto});
+    await db.ref("users/"+currentUser.uid).update({
+      photoURL:googlePhoto,
+      updatedAt:firebase.database.ServerValue.TIMESTAMP
+    });
+    currentProfile.photoURL=googlePhoto;
+    setAvatar(googlePhoto,currentProfile.displayName);
+    alert("Google profile photo restored.");
+  }catch(err){ alert(err.message); }
 };
 
 function setAvatar(url,name){
-  $("#profileAvatar").src=url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name||"User")}&background=111827&color=ffffff`;
+  $("#profileAvatar").src=url||`https://ui-avatars.com/api/?name=${encodeURIComponent(name||"User")}&background=111827&color=ffffff`;
 }

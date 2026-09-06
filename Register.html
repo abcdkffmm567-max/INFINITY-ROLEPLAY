@@ -50,6 +50,8 @@
   </main>
 
   <script src="firebase-config.js"></script>
+<script src="site-brand.js"></script>
+  <script src="user-utils.js"></script>
   <script>
     const form=document.getElementById("pageRegisterForm");
     const status=document.getElementById("pageAuthStatus");
@@ -64,10 +66,9 @@
       try{
         const cred=await auth.createUserWithEmailAndPassword(f.get("email"),f.get("password"));
         await cred.user.updateProfile({displayName:f.get("displayName")});
-        await db.ref("users/"+cred.user.uid).set({
+        await ensureInfinityUser(cred.user,{
           displayName:f.get("displayName"),
-          email:f.get("email"),
-          createdAt:firebase.database.ServerValue.TIMESTAMP
+          email:f.get("email")
         });
         status.textContent="Account created. Redirecting...";
         setTimeout(()=>location.href="index.html",700);
@@ -80,12 +81,11 @@
       try{
         const result=await auth.signInWithPopup(googleProvider);
         const user=result.user;
-        await db.ref("users/"+user.uid).update({
+        await ensureInfinityUser(user,{
           displayName:user.displayName||"Player",
           email:user.email||"",
           photoURL:user.photoURL||"",
-          provider:"google",
-          createdAt:firebase.database.ServerValue.TIMESTAMP
+          provider:"google"
         });
         status.textContent="Google account connected.";
         setTimeout(()=>location.href="index.html",500);
@@ -99,12 +99,11 @@
     auth.getRedirectResult().then(async result=>{
       if(result && result.user){
         const user=result.user;
-        await db.ref("users/"+user.uid).update({
+        await ensureInfinityUser(user,{
           displayName:user.displayName||"Player",
           email:user.email||"",
           photoURL:user.photoURL||"",
-          provider:"google",
-          createdAt:firebase.database.ServerValue.TIMESTAMP
+          provider:"google"
         });
         location.href="index.html";
       }

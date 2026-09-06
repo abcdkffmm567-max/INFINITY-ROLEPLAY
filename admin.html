@@ -56,7 +56,12 @@
         <label class="full">Server IP
           <input id="adminServerIp" required placeholder="51.68.107.75:11999">
         </label>
-        <label class="full">Hero Banner / Server Logo Image Link
+        
+    <label class="full">Server Logo Image Link
+      <input id="serverLogoUrl" type="url" placeholder="https://example.com/server-logo.png">
+      <small>This changes the Infinity logo shown in the website header/navigation.</small>
+    </label>
+    <label class="full">Hero Banner / Server Logo Image Link
       <input id="heroBannerUrl" type="url" placeholder="https://example.com/infinity-server-logo.jpg">
       <small>Paste your server logo/banner image URL. This image will appear as the background of the Home hero section.</small>
     </label>
@@ -87,6 +92,18 @@
       <div id="rulesAdmin"></div>
     </section>
 
+    
+    <section class="card admin-section">
+      <div class="section-row">
+        <div>
+          <h2>User Management</h2>
+          <p>View Infinity IDs and ban or unban users.</p>
+        </div>
+        <input id="userSearch" class="admin-user-search" placeholder="Search name, email or INF ID">
+      </div>
+      <div id="usersManagementList" class="users-management-list"></div>
+    </section>
+
     <section class="card admin-section">
       <div class="section-row"><h2>Whitelist Applications</h2><select id="filterApps"><option value="all">All</option><option value="pending">Pending</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option></select></div>
       <div id="applicationsList" class="applications-list"></div>
@@ -101,6 +118,7 @@
   </div>
 </main>
 
-<script src="firebase-config.js"></script><script src="admin.js"></script>
+<script src="firebase-config.js"></script>
+<script src="site-brand.js"></script><script src="admin.js"></script>
 </body>
 </html>

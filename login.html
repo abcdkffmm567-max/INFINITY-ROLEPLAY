@@ -44,6 +44,8 @@
   </main>
 
   <script src="firebase-config.js"></script>
+<script src="site-brand.js"></script>
+  <script src="user-utils.js"></script>
   <script>
     const form=document.getElementById("pageLoginForm");
     const status=document.getElementById("pageAuthStatus");
@@ -52,7 +54,14 @@
       const f=new FormData(form);
       status.textContent="Logging in...";
       try{
-        await auth.signInWithEmailAndPassword(f.get("email"),f.get("password"));
+        const cred=await auth.signInWithEmailAndPassword(f.get("email"),f.get("password"));
+        const profile=await ensureInfinityUser(cred.user);
+        if(profile.banned===true){
+          const reason=profile.banReason||"";
+          await auth.signOut();
+          status.textContent="This account is banned."+ (reason ? " Reason: "+reason : "");
+          return;
+        }
         status.textContent="Login successful. Redirecting...";
         setTimeout(()=>location.href="index.html",600);
       }catch(err){ status.textContent=err.message; }
@@ -63,13 +72,19 @@
       try{
         const result=await auth.signInWithPopup(googleProvider);
         const user=result.user;
-        await db.ref("users/"+user.uid).update({
+        const profile=await ensureInfinityUser(user,{
           displayName:user.displayName||"Player",
           email:user.email||"",
           photoURL:user.photoURL||"",
-          provider:"google",
-          lastLoginAt:firebase.database.ServerValue.TIMESTAMP
+          provider:"google"
         });
+        if(profile.banned===true){
+          const reason=profile.banReason||"";
+          await auth.signOut();
+          status.textContent="This account is banned."+ (reason ? " Reason: "+reason : "");
+          return;
+        }
+        await db.ref("users/"+user.uid+"/lastLoginAt").set(firebase.database.ServerValue.TIMESTAMP);
         status.textContent="Google login successful.";
         setTimeout(()=>location.href="index.html",500);
       }catch(err){
@@ -82,13 +97,19 @@
     auth.getRedirectResult().then(async result=>{
       if(result && result.user){
         const user=result.user;
-        await db.ref("users/"+user.uid).update({
+        const profile=await ensureInfinityUser(user,{
           displayName:user.displayName||"Player",
           email:user.email||"",
           photoURL:user.photoURL||"",
-          provider:"google",
-          lastLoginAt:firebase.database.ServerValue.TIMESTAMP
+          provider:"google"
         });
+        if(profile.banned===true){
+          const reason=profile.banReason||"";
+          await auth.signOut();
+          status.textContent="This account is banned."+ (reason ? " Reason: "+reason : "");
+          return;
+        }
+        await db.ref("users/"+user.uid+"/lastLoginAt").set(firebase.database.ServerValue.TIMESTAMP);
         location.href="index.html";
       }
     }).catch(err=>status.textContent=err.message);

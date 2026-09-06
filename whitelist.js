@@ -8,8 +8,12 @@ auth.onAuthStateChanged(async user=>{
     $("#myApplication").textContent="Login to view your latest application.";
     return;
   }
-  const prof=await db.ref("users/"+user.uid).once("value");
-  currentProfile=prof.val()||{displayName:user.displayName||"User",email:user.email,photoURL:user.photoURL||""};
+  currentProfile=await ensureInfinityUser(user);
+  if(currentProfile.banned===true){
+    $("#wlStatus").textContent="Your account is banned. Whitelist applications are disabled.";
+    $("#whitelistForm").querySelectorAll("input,textarea,button").forEach(el=>el.disabled=true);
+    return;
+  }
   loadMyApplication();
 });
 
@@ -19,7 +23,7 @@ $("#whitelistForm").onsubmit=async e=>{
   const f=new FormData(e.target);
   const data={
     uid:currentUser.uid,email:currentUser.email,
-    displayName:currentProfile?.displayName||currentUser.displayName||"User",
+    displayName:currentProfile?.displayName||currentUser.displayName||"User",infinityId:currentProfile?.infinityId||makeInfinityId(currentUser.uid),
     realName:f.get("realName"),age:Number(f.get("age")),discord:f.get("discord"),rpName:f.get("rpName"),
     reason:f.get("reason"),rpExplain:f.get("rpExplain"),scenario:f.get("scenario"),
     status:"pending",createdAt:firebase.database.ServerValue.TIMESTAMP

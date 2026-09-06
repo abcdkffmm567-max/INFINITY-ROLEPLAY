@@ -11,6 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 </head>
 <body>
   <div class="bg-grid"></div>
@@ -27,6 +28,7 @@
           <span class="eyebrow">PLAYER PROFILE</span>
           <h1 id="profileName">Loading...</h1>
           <p id="profileEmail"></p>
+          <div id="profileInfinityId" class="infinity-id-badge">INF--------</div>
         </div>
       </div>
 
@@ -35,23 +37,30 @@
           <input id="displayNameInput" maxlength="32" required>
         </label>
 
-        <label class="full">Profile Photo URL
-          <input id="photoUrlInput" type="url" placeholder="https://example.com/photo.jpg">
-        </label>
+        <div class="full profile-upload-box">
+          <label class="upload-label">Profile Photo
+            <input id="profilePhotoInput" type="file" accept="image/jpeg,image/png,image/webp">
+          </label>
+          <div class="upload-help">Choose JPG, PNG or WEBP. Maximum 5 MB.</div>
+          <div class="upload-progress"><div id="profileUploadBar"></div></div>
+          <span id="profileUploadStatus"></span>
+        </div>
 
         <div class="full profile-actions">
-          <button class="btn primary" type="submit">Save Profile</button>
-          <button class="btn ghost" type="button" id="resetGooglePhotoBtn">Use Google Photo</button>
+          <button class="btn primary" type="submit">Save Name</button>
+          <button class="btn ghost" type="button" id="resetGooglePhotoBtn">Restore Google Photo</button>
         </div>
       </form>
 
       <div class="profile-note">
-        <b>Tip:</b> You can paste any public image URL as your profile photo. If you logged in with Google, your Google profile photo is used automatically.
+        <b>Tip:</b> Tap Profile Photo and choose an image from your phone. If you logged in with Google, you can also restore your Google profile photo.
       </div>
     </section>
   </main>
 
   <script src="firebase-config.js"></script>
+<script src="site-brand.js"></script>
+  <script src="user-utils.js"></script>
   <script src="profile.js"></script>
 </body>
 </html>

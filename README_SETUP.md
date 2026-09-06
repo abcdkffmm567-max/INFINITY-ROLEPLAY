@@ -183,3 +183,60 @@ Default admin login:
 The Admin Panel still uses Firebase Realtime Database for website data such as settings, whitelist applications, rules and chat.
 
 IMPORTANT: Because this website is static HTML/JS, the username/password is stored in JavaScript and can be discovered by someone inspecting the site source. For real production security, use a backend/serverless authentication system.
+
+
+## Profile Photo Upload + INF User ID + Ban/Unban
+
+### Profile photo
+The old profile-photo URL box was removed.
+Users now select a JPG/PNG/WEBP image from their device and it uploads to Firebase Storage.
+
+Firebase Storage must be enabled. This project currently expects:
+`l2k-top-up-store.firebasestorage.app`
+
+If Firebase Console shows a different Storage bucket, replace `storageBucket` in `firebase-config.js`.
+
+Deploy the included `storage.rules`.
+
+### Infinity user IDs
+Every registered/login user gets an automatic public ID beginning with `INF`.
+Example: `INFXY12AB34`.
+
+The ID is saved under:
+`users/{firebaseUid}/infinityId`
+
+### User ban/unban
+Admin Panel now has a **User Management** section showing:
+- Profile photo
+- Display name
+- INF user ID
+- Email
+- Active/Banned state
+- Ban / Unban buttons
+
+Ban state is stored under:
+`users/{uid}/banned`
+
+Banned users are blocked by the website from profile updates, chat, and whitelist actions.
+
+### Important admin security note
+Your current Admin Panel uses a local/static username and password rather than Firebase Admin Authentication.
+The secure `database.rules.json` included here only allows true Firebase admins (`admins/{uid}=true`) to change another user's ban state.
+
+For Ban/Unban to be securely functional on a public site, the Admin Panel should use Firebase admin authentication behind the UI, or a backend/serverless admin API.
+Do NOT make the whole `users` database publicly writable just to bypass this rule.
+
+
+## Admin login fix + server logo setting
+The normal Admin Panel login has been fixed.
+
+Default login:
+- Username: `infinityadmin`
+- Password: `Infinity@11999`
+
+Admin Panel > Server & Download Settings now includes:
+- **Server Logo Image Link**
+
+Paste a public PNG/JPG/WebP image URL and save. The header logo on the website pages updates automatically.
+
+Note: the Admin Panel login is local/static. Firebase Realtime Database may still reject protected reads/writes depending on your database rules, because this login does not create a Firebase authenticated admin session.

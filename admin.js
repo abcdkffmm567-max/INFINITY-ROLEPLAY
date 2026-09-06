@@ -1,6 +1,8 @@
 const $=s=>document.querySelector(s);
 let adminUser={uid:"local-admin",displayName:"Infinity Admin",photoURL:""};
 let allApps={};
+let allUsers={};
+let dashboardStarted=false;
 
 const ADMIN_USERNAME="infinityadmin";
 const ADMIN_PASSWORD="Infinity@11999";
@@ -8,7 +10,11 @@ const ADMIN_PASSWORD="Infinity@11999";
 function openAdminDashboard(){
   $("#adminLoginCard").classList.add("hidden");
   $("#adminDashboard").classList.remove("hidden");
-  startDashboard();
+  try{ startDashboard(); }
+  catch(err){
+    console.error("Dashboard data error:",err);
+    if($("#settingsStatus")) $("#settingsStatus").textContent="Dashboard opened. Firebase data could not be loaded: "+err.message;
+  }
 }
 
 $("#adminLoginForm").onsubmit=e=>{
@@ -36,11 +42,14 @@ $("#adminLogout").onclick=()=>{
 };
 
 function startDashboard(){
+ if(dashboardStarted)return;
+ dashboardStarted=true;
  db.ref("settings").on("value",s=>{
    const v=s.val()||{};
    $("#adminServerIp").value=v.serverIp||"51.68.107.75:11999";
    $("#sampUrl").value=v.sampUrl||"";
    $("#dataUrl").value=v.dataUrl||"";
+   if($("#serverLogoUrl")) $("#serverLogoUrl").value=v.serverLogoUrl||"";
    if($("#heroBannerUrl")) $("#heroBannerUrl").value=v.heroBannerUrl||"";
    if($("#communityBannerUrl")) $("#communityBannerUrl").value=v.communityBannerUrl||"";
    if($("#communityBannerClickUrl")) $("#communityBannerClickUrl").value=v.communityBannerClickUrl||"";
@@ -50,11 +59,12 @@ function startDashboard(){
    const serverIp=$("#adminServerIp").value.trim();
    const sampUrl=$("#sampUrl").value.trim();
    const dataUrl=$("#dataUrl").value.trim();
+   const serverLogoUrl=$("#serverLogoUrl") ? $("#serverLogoUrl").value.trim() : "";
    const heroBannerUrl=$("#heroBannerUrl") ? $("#heroBannerUrl").value.trim() : "";
    const communityBannerUrl=$("#communityBannerUrl") ? $("#communityBannerUrl").value.trim() : "";
    const communityBannerClickUrl=$("#communityBannerClickUrl") ? $("#communityBannerClickUrl").value.trim() : "";
    try{
-     await db.ref("settings").update({serverIp,sampUrl,dataUrl,heroBannerUrl,communityBannerUrl,communityBannerClickUrl});
+     await db.ref("settings").update({serverIp,sampUrl,dataUrl,serverLogoUrl,heroBannerUrl,communityBannerUrl,communityBannerClickUrl});
      $("#settingsStatus").textContent="Saved successfully.";
      setTimeout(()=>$("#settingsStatus").textContent="",2000);
    }catch(err){
@@ -63,9 +73,12 @@ function startDashboard(){
  };
  db.ref("rules").on("value",renderRules);
  db.ref("whitelist").on("value",s=>{allApps=s.val()||{};renderApps();updateStats()});
- db.ref("users").on("value",s=>$("#userCount").textContent=s.numChildren());
+ db.ref("users").on("value",s=>{
+   allUsers=s.val()||{};
+   $("#userCount").textContent=s.numChildren();
+   renderUsersManagement();
+ });
  db.ref("chat").limitToLast(100).on("value",renderAdminChat);
-}catch(err){$(statusSel).textContent=err.message}
 }
 function renderRules(snap){
  const box=$("#rulesAdmin"), rules=snap.val()||{};box.innerHTML="";
@@ -84,6 +97,69 @@ async function seedRules(){const defs=[
  {title:"Follow Staff Decisions",text:"Respect staff instructions and use proper appeals for disputes.",order:5}
  ];const obj={};defs.forEach(x=>obj[db.ref("rules").push().key]=x);await db.ref("rules").set(obj)}
 window.deleteRule=id=>{if(confirm("Delete this rule?"))db.ref("rules/"+id).remove()};
+
+
+function renderUsersManagement(){
+ const box=$("#usersManagementList");
+ if(!box)return;
+ const q=($("#userSearch")?.value||"").trim().toLowerCase();
+ const users=Object.entries(allUsers).map(([uid,u])=>({uid,...u}))
+   .filter(u=>!q||[u.displayName,u.email,u.infinityId].some(v=>String(v||"").toLowerCase().includes(q)))
+   .sort((a,b)=>String(a.displayName||"").localeCompare(String(b.displayName||"")));
+
+ if(!users.length){box.innerHTML="<p>No users found.</p>";return}
+
+ box.innerHTML=users.map(u=>{
+   const avatar=u.photoURL||`https://ui-avatars.com/api/?name=${encodeURIComponent(u.displayName||"User")}&background=111827&color=ffffff`;
+   const id=u.infinityId||("INF"+String(u.uid).replace(/[^a-zA-Z0-9]/g,"").toUpperCase().slice(0,8));
+   const banned=u.banned===true;
+   return `<article class="admin-user-card">
+     <img class="admin-user-avatar" src="${escAttr(avatar)}" alt="">
+     <div class="admin-user-info">
+       <div class="admin-user-name">${esc(u.displayName||"User")}</div>
+       <div class="infinity-id-badge small">${esc(id)}</div>
+       <small>${esc(u.email||"No email")}</small>
+       ${banned?`<div class="ban-reason">BANNED${u.banReason?": "+esc(u.banReason):""}</div>`:'<div class="active-user-status">ACTIVE</div>'}
+     </div>
+     <div class="admin-user-actions">
+       ${banned
+         ? `<button class="btn success small" onclick="unbanUser('${u.uid}')">Unban</button>`
+         : `<button class="btn danger small" onclick="banUser('${u.uid}')">Ban</button>`}
+     </div>
+   </article>`;
+ }).join("");
+}
+
+if($("#userSearch")) $("#userSearch").oninput=renderUsersManagement;
+
+window.banUser=async uid=>{
+ const user=allUsers[uid]||{};
+ const reason=prompt(`Ban ${user.displayName||"this user"} - reason:`,`Rule violation`);
+ if(reason===null)return;
+ if(!confirm(`Ban ${user.displayName||user.infinityId||"this user"}?`))return;
+ try{
+   await db.ref("users/"+uid).update({
+     banned:true,
+     banReason:reason.trim(),
+     bannedAt:firebase.database.ServerValue.TIMESTAMP,
+     bannedBy:"Infinity Admin"
+   });
+ }catch(err){alert("Ban failed: "+err.message)}
+};
+
+window.unbanUser=async uid=>{
+ const user=allUsers[uid]||{};
+ if(!confirm(`Unban ${user.displayName||user.infinityId||"this user"}?`))return;
+ try{
+   await db.ref("users/"+uid).update({
+     banned:false,
+     banReason:null,
+     bannedAt:null,
+     bannedBy:null,
+     unbannedAt:firebase.database.ServerValue.TIMESTAMP
+   });
+ }catch(err){alert("Unban failed: "+err.message)}
+};
 
 $("#filterApps").onchange=renderApps;
 function renderApps(){

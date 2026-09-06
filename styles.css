@@ -141,3 +141,42 @@ code{color:#9be7ff}
   .community-subtitle{font-size:16px}
   .chat-fab{right:16px;bottom:18px}
 }
+
+
+/* Profile upload + Infinity user ID */
+.infinity-id-badge{
+  display:inline-flex;align-items:center;width:max-content;
+  margin-top:8px;padding:7px 12px;border-radius:999px;
+  border:1px solid #4fdfff55;background:#4fdfff10;color:#75e7ff;
+  font-family:Orbitron,sans-serif;font-weight:700;letter-spacing:1px;font-size:13px
+}
+.infinity-id-badge.small{font-size:11px;padding:5px 9px;margin:5px 0}
+.profile-upload-box{padding:16px;border:1px dashed var(--line);border-radius:14px;background:#ffffff04}
+.upload-label{display:flex;flex-direction:column;gap:9px;font-weight:700}
+.upload-label input[type=file]{padding:12px;background:#080d19;border:1px solid var(--line);border-radius:12px;color:#dce7ff}
+.upload-help{color:var(--muted);font-size:12px;margin-top:7px}
+.upload-progress{height:7px;background:#0a1020;border-radius:999px;overflow:hidden;margin-top:12px}
+.upload-progress>div{height:100%;width:0;background:linear-gradient(90deg,#45dfff,#7664ff);transition:width .2s}
+#profileUploadStatus{display:block;color:#8ce9ff;margin-top:8px;font-size:13px}
+.chat-user-id{font-size:9px;margin-left:6px;padding:2px 5px;border-radius:999px;background:#4fdfff12;color:#71e6ff;border:1px solid #4fdfff35}
+
+/* Admin user management */
+.admin-user-search{max-width:280px}
+.users-management-list{display:grid;gap:12px;margin-top:18px}
+.admin-user-card{display:grid;grid-template-columns:54px 1fr auto;gap:14px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:16px;background:#ffffff04}
+.admin-user-avatar{width:54px;height:54px;border-radius:50%;object-fit:cover;border:1px solid #4fdfff44}
+.admin-user-info{min-width:0}.admin-user-name{font-weight:800;font-size:16px}.admin-user-info small{display:block;color:var(--muted);overflow-wrap:anywhere}
+.admin-user-actions{display:flex;gap:8px}
+.ban-reason{color:#ff808b;font-size:12px;font-weight:800;margin-top:6px}
+.active-user-status{color:#42dda3;font-size:11px;font-weight:800;margin-top:6px}
+@media(max-width:620px){
+ .admin-user-card{grid-template-columns:46px 1fr}.admin-user-avatar{width:46px;height:46px}
+ .admin-user-actions{grid-column:1/-1}.admin-user-actions .btn{width:100%}
+ .admin-user-search{max-width:100%;width:100%}
+}
+
+/* Dynamic server logo from Admin Panel */
+.logo-mark{overflow:hidden;display:inline-grid;place-items:center}
+.logo-mark .dynamic-server-logo{
+  width:100%;height:100%;display:block;object-fit:contain;border-radius:inherit
+}
