@@ -1,3 +1,40 @@
+
+// Fallback helpers for Live Chat/Profile initialization.
+// These are only used if user-utils.js failed to load for any reason.
+if(typeof window.makeInfinityId!=="function"){
+  window.makeInfinityId=function(uid){
+    const clean=String(uid||"USER").replace(/[^a-zA-Z0-9]/g,"").toUpperCase();
+    return "INF"+clean.slice(0,8).padEnd(8,"0");
+  };
+}
+
+if(typeof window.ensureInfinityUser!=="function"){
+  window.ensureInfinityUser=async function(user,extra={}){
+    if(!user) return null;
+
+    const ref=db.ref("users/"+user.uid);
+    const snap=await ref.once("value");
+    const old=snap.val()||{};
+
+    const updates={
+      displayName:extra.displayName||user.displayName||old.displayName||"Player",
+      email:extra.email||user.email||old.email||"",
+      photoURL:extra.photoURL||user.photoURL||old.photoURL||"",
+      infinityId:old.infinityId||window.makeInfinityId(user.uid),
+      banned:old.banned===true,
+      verified:old.verified===true,
+      updatedAt:firebase.database.ServerValue.TIMESTAMP
+    };
+
+    if(!old.createdAt) updates.createdAt=firebase.database.ServerValue.TIMESTAMP;
+    if(extra.provider && !old.provider) updates.provider=extra.provider;
+
+    await ref.update(updates);
+    const latest=await ref.once("value");
+    return latest.val()||updates;
+  };
+}
+
 const $ = (s)=>document.querySelector(s);
 const serverIpEl = $("#serverIp"), rulesGrid=$("#rulesGrid"), sampDownload=$("#sampDownload"), dataDownload=$("#dataDownload");
 let currentUser=null, currentProfile=null;
@@ -139,7 +176,7 @@ $("#chatForm").onsubmit=async e=>{
   input.disabled=true;
   try{
     // Make sure the user's profile exists before chat permission is checked.
-    currentProfile=await ensureInfinityUser(currentUser);
+    currentProfile=await window.ensureInfinityUser(currentUser);
 
     if(currentProfile?.banned===true){
       const reason=currentProfile.banReason||"";
@@ -163,7 +200,7 @@ $("#chatForm").onsubmit=async e=>{
       uid:currentUser.uid,
       name:currentProfile?.displayName||currentUser.displayName||"User",
       photoURL:currentProfile?.photoURL||currentUser.photoURL||"",
-      infinityId:currentProfile?.infinityId||makeInfinityId(currentUser.uid),
+      infinityId:currentProfile?.infinityId||window.makeInfinityId(currentUser.uid),
       verified:currentProfile?.verified===true,
       isAdmin,
       text,
