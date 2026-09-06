@@ -73,7 +73,7 @@ function startDashboard(){
  };
  db.ref("rules").on("value",renderRules);
  db.ref("whitelist").on("value",s=>{allApps=s.val()||{};renderApps();updateStats()});
- db.ref("users").on("value",s=>{
+ db.ref("publicUsers").on("value",s=>{
    allUsers=s.val()||{};
    $("#userCount").textContent=s.numChildren();
    renderUsersManagement();
@@ -118,7 +118,7 @@ function renderUsersManagement(){
      <div class="admin-user-info">
        <div class="admin-user-name">${esc(u.displayName||"User")}${u.verified===true?'<span class="verified" title="Verified User">✓</span>':""}</div>
        <div class="infinity-id-badge small">${esc(id)}</div>
-       <small>${esc(u.email||"No email")}</small>
+       <small>${esc(u.infinityId||"Registered User")}</small>
        ${banned?`<div class="ban-reason">BANNED${u.banReason?": "+esc(u.banReason):""}</div>`:'<div class="active-user-status">ACTIVE</div>'}
      </div>
      <div class="admin-user-actions">

@@ -23,6 +23,15 @@ async function ensureInfinityUser(user, extra={}){
   if(extra.provider && !old.provider) updates.provider=extra.provider;
 
   await ref.update(updates);
+
+  // Public directory used by the static Admin Panel for User Management.
+  // Only non-sensitive fields are mirrored here.
+  await db.ref("publicUsers/"+user.uid).update({
+    displayName:updates.displayName,
+    photoURL:updates.photoURL,
+    infinityId:updates.infinityId,
+    updatedAt:firebase.database.ServerValue.TIMESTAMP
+  });
   const latest=await ref.once("value");
   return latest.val()||updates;
 }
