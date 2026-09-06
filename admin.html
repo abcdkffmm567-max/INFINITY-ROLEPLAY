@@ -19,16 +19,20 @@
   <section id="adminLoginCard" class="card narrow">
     <span class="eyebrow">SECURE ACCESS</span>
     <h2>Admin Login</h2>
-    <p>Login with the Firebase admin account.</p>
+    <p>Login with your admin username and password.</p>
+
     <form id="adminLoginForm" class="auth-form">
-      <label>Email
-        <input required type="email" name="email" autocomplete="email">
+      <label>Username
+        <input required type="text" name="username" autocomplete="username" placeholder="infinityadmin">
       </label>
+
       <label>Password
-        <input required type="password" name="password" autocomplete="current-password">
+        <input required type="password" name="password" autocomplete="current-password" placeholder="••••••••">
       </label>
+
       <button class="btn primary" type="submit">Login</button>
     </form>
+
     <p id="adminLoginStatus"></p>
   </section>
 
@@ -52,7 +56,20 @@
         <label class="full">Server IP
           <input id="adminServerIp" required placeholder="51.68.107.75:11999">
         </label>
-        <label>SAMP APK Download Link
+        <label class="full">Hero Banner / Server Logo Image Link
+      <input id="heroBannerUrl" type="url" placeholder="https://example.com/infinity-server-logo.jpg">
+      <small>Paste your server logo/banner image URL. This image will appear as the background of the Home hero section.</small>
+    </label>
+    <label class="full">Home Middle Banner Image Link
+      <input id="communityBannerUrl" type="url" placeholder="https://example.com/infinity-banner.jpg">
+      <small>This replaces the INFINITY RP card shown above Server Rules.</small>
+    </label>
+    <label class="full">Banner Click Link (Optional)
+      <input id="communityBannerClickUrl" type="url" placeholder="https://discord.gg/...">
+      <small>When users tap the banner, this link will open. Leave empty if not needed.</small>
+    </label>
+
+    <label>SAMP APK Download Link
           <input id="sampUrl" type="url" placeholder="https://example.com/samp.apk">
         </label>
         <label>Infinity Data File Download Link

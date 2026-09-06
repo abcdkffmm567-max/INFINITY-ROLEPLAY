@@ -57,3 +57,87 @@ code{color:#9be7ff}
 .floating-chat-head button{background:none;border:none;color:white;font-size:26px;cursor:pointer}
 .floating-messages{height:auto;flex:1}
 @media(max-width:620px){.chat-fab{right:16px;bottom:16px}.floating-chat{right:14px;bottom:84px;height:70vh}}
+
+
+/* Admin-controlled Hero Banner */
+.hero-with-banner{position:relative;overflow:hidden;isolation:isolate}
+.hero-with-banner > *:not(.hero-banner-bg):not(.hero-banner-overlay){position:relative;z-index:2}
+.hero-banner-bg{
+  position:absolute;inset:0;z-index:0;
+  background-position:center;
+  background-size:cover;
+  background-repeat:no-repeat;
+  opacity:0;
+  transform:scale(1.02);
+  transition:opacity .35s ease;
+}
+.hero-banner-bg.has-image{opacity:1}
+.hero-banner-overlay{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(4,8,22,.92) 0%,rgba(7,12,35,.74) 46%,rgba(7,12,35,.48) 100%),
+    linear-gradient(180deg,rgba(5,10,28,.28),rgba(21,11,66,.62));
+}
+@media(max-width:700px){
+  .hero-banner-bg{background-position:center top}
+  .hero-banner-overlay{
+    background:
+      linear-gradient(180deg,rgba(4,8,22,.50) 0%,rgba(7,12,35,.75) 55%,rgba(22,11,66,.82) 100%);
+  }
+}
+
+
+/* Admin controlled banner replacing the INFINITY RP promo card */
+.community-banner-card{
+  max-width:1100px;
+  margin:42px auto 90px;
+  padding:0;
+  overflow:hidden;
+  border-radius:24px;
+}
+.community-banner-card > a{display:block;text-decoration:none;color:inherit}
+.community-banner-image{
+  display:block;
+  width:100%;
+  aspect-ratio:16/6;
+  object-fit:cover;
+  background:#0b1020;
+}
+.community-banner-fallback{
+  min-height:330px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background:radial-gradient(circle at 50% 45%,#284a7d,#11152e 55%,#101022);
+}
+.community-infinity{font-size:120px;line-height:.9;color:#dff8ff}
+.community-title{font-family:Orbitron,sans-serif;font-size:42px;margin-top:22px}
+.community-subtitle{color:var(--muted);font-size:18px;margin-top:8px}
+
+.chat-fab{
+  display:grid!important;
+  place-items:center;
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  z-index:9999;
+  width:60px;
+  height:60px;
+  border:0;
+  border-radius:50%;
+  cursor:pointer;
+  font-size:25px;
+  background:linear-gradient(135deg,#43dcff,#7060ff);
+  color:#07111a;
+  box-shadow:0 12px 38px rgba(0,0,0,.55),0 0 22px rgba(67,220,255,.3);
+}
+@media(max-width:700px){
+  .community-banner-card{margin:28px 26px 72px;border-radius:22px}
+  .community-banner-image{aspect-ratio:16/9}
+  .community-banner-fallback{min-height:300px}
+  .community-infinity{font-size:100px}
+  .community-title{font-size:34px}
+  .community-subtitle{font-size:16px}
+  .chat-fab{right:16px;bottom:18px}
+}

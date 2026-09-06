@@ -28,7 +28,7 @@
   </header>
 
   <main>
-    <section id="home" class="hero section">
+    <section id="home" class="hero-with-banner hero section"><div id="heroBannerBg" class="hero-banner-bg"></div><div class="hero-banner-overlay"></div>
       <div class="hero-copy">
         <div class="pill">SRI LANKAN SA-MP ROLEPLAY SERVER</div>
         <h1>WELCOME TO <span>INFINITY ROLE PLAY</span></h1>
@@ -37,16 +37,16 @@
           <a class="btn primary" href="whitelist.html">Apply Whitelist</a>
           <button class="btn ghost" id="copyIpBtn">Copy Server IP</button>
         </div>
-        <div class="server-card">
-          <div><small>SERVER IP</small><strong id="serverIp">51.68.107.75:11999</strong></div>
-          <span class="status-dot"></span><span>Online address</span>
-        </div>
-      </div>
-      <div class="hero-art card">
-        <div class="infinity-symbol">∞</div>
-        <h2>INFINITY RP</h2>
-        <p>Whitelist • Roleplay • Community</p>
-      </div>
+        <div class="card community-banner-card">
+  <a id="communityBannerLink" href="#" target="_blank" rel="noopener noreferrer">
+    <img id="communityBannerImage" class="community-banner-image hidden" alt="Infinity Role Play Banner">
+    <div id="communityBannerFallback" class="community-banner-fallback">
+      <div class="community-infinity">∞</div>
+      <div class="community-title">INFINITY RP</div>
+      <div class="community-subtitle">Whitelist • Roleplay • Community</div>
+    </div>
+  </a>
+</div>
     </section>
 
     <section id="rules" class="section">
@@ -96,5 +96,56 @@
 
   <script src="firebase-config.js"></script>
   <script src="app.js"></script>
+
+<script>
+(function(){
+  const heroBg = document.getElementById("heroBannerBg");
+  if(!heroBg || typeof db === "undefined") return;
+
+  db.ref("settings/heroBannerUrl").on("value", snap => {
+    const url = (snap.val() || "").trim();
+    if(url){
+      heroBg.style.backgroundImage = `url("${url.replace(/"/g,"%22")}")`;
+      heroBg.classList.add("has-image");
+    }else{
+      heroBg.style.backgroundImage = "";
+      heroBg.classList.remove("has-image");
+    }
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  if(typeof db === "undefined") return;
+  const img = document.getElementById("communityBannerImage");
+  const fallback = document.getElementById("communityBannerFallback");
+  const link = document.getElementById("communityBannerLink");
+  if(!img) return;
+
+  db.ref("settings").on("value", snap => {
+    const s = snap.val() || {};
+    const imageUrl = (s.communityBannerUrl || "").trim();
+    const clickUrl = (s.communityBannerClickUrl || "").trim();
+
+    if(imageUrl){
+      img.src = imageUrl;
+      img.classList.remove("hidden");
+      if(fallback) fallback.classList.add("hidden");
+    }else{
+      img.removeAttribute("src");
+      img.classList.add("hidden");
+      if(fallback) fallback.classList.remove("hidden");
+    }
+
+    if(link){
+      link.href = clickUrl || "#";
+      link.style.cursor = clickUrl ? "pointer" : "default";
+    }
+  });
+})();
+</script>
+
 </body>
 </html>

@@ -1,45 +1,39 @@
 const $=s=>document.querySelector(s);
-let adminUser=null, allApps={};
+let adminUser={uid:"local-admin",displayName:"Infinity Admin",photoURL:""};
+let allApps={};
 
-$("#adminLoginForm").onsubmit=async e=>{
-  e.preventDefault();
-  const f=new FormData(e.target);
-  $("#adminLoginStatus").textContent="Logging in...";
-  try{
-    const cred=await auth.signInWithEmailAndPassword(f.get("email"),f.get("password"));
-    const adminSnap=await db.ref("admins/"+cred.user.uid).once("value");
-    if(adminSnap.val()!==true){
-      await auth.signOut();
-      throw new Error("This Firebase account is not authorized as an admin.");
-    }
-    $("#adminLoginStatus").textContent="";
-  }catch(err){
-    $("#adminLoginStatus").textContent=err.message;
-  }
-};
+const ADMIN_USERNAME="infinityadmin";
+const ADMIN_PASSWORD="Infinity@11999";
 
-auth.onAuthStateChanged(async user=>{
-  if(!user){
-    adminUser=null;
-    $("#adminLoginCard").classList.remove("hidden");
-    $("#adminDashboard").classList.add("hidden");
-    return;
-  }
-
-  const adminSnap=await db.ref("admins/"+user.uid).once("value");
-  if(adminSnap.val()!==true){
-    $("#adminLoginStatus").textContent="This account is not authorized as an admin.";
-    await auth.signOut();
-    return;
-  }
-
-  adminUser=user;
+function openAdminDashboard(){
   $("#adminLoginCard").classList.add("hidden");
   $("#adminDashboard").classList.remove("hidden");
   startDashboard();
-});
+}
 
-$("#adminLogout").onclick=()=>auth.signOut();
+$("#adminLoginForm").onsubmit=e=>{
+  e.preventDefault();
+  const f=new FormData(e.target);
+  const username=String(f.get("username")||"").trim();
+  const password=String(f.get("password")||"");
+
+  if(username===ADMIN_USERNAME && password===ADMIN_PASSWORD){
+    sessionStorage.setItem("infinityAdminLoggedIn","1");
+    $("#adminLoginStatus").textContent="";
+    openAdminDashboard();
+  }else{
+    $("#adminLoginStatus").textContent="Invalid username or password.";
+  }
+};
+
+if(sessionStorage.getItem("infinityAdminLoggedIn")==="1"){
+  openAdminDashboard();
+}
+
+$("#adminLogout").onclick=()=>{
+  sessionStorage.removeItem("infinityAdminLoggedIn");
+  location.reload();
+};
 
 function startDashboard(){
  db.ref("settings").on("value",s=>{
@@ -47,14 +41,20 @@ function startDashboard(){
    $("#adminServerIp").value=v.serverIp||"51.68.107.75:11999";
    $("#sampUrl").value=v.sampUrl||"";
    $("#dataUrl").value=v.dataUrl||"";
+   if($("#heroBannerUrl")) $("#heroBannerUrl").value=v.heroBannerUrl||"";
+   if($("#communityBannerUrl")) $("#communityBannerUrl").value=v.communityBannerUrl||"";
+   if($("#communityBannerClickUrl")) $("#communityBannerClickUrl").value=v.communityBannerClickUrl||"";
  });
  $("#serverSettingsForm").onsubmit=async e=>{
    e.preventDefault();
    const serverIp=$("#adminServerIp").value.trim();
    const sampUrl=$("#sampUrl").value.trim();
    const dataUrl=$("#dataUrl").value.trim();
+   const heroBannerUrl=$("#heroBannerUrl") ? $("#heroBannerUrl").value.trim() : "";
+   const communityBannerUrl=$("#communityBannerUrl") ? $("#communityBannerUrl").value.trim() : "";
+   const communityBannerClickUrl=$("#communityBannerClickUrl") ? $("#communityBannerClickUrl").value.trim() : "";
    try{
-     await db.ref("settings").update({serverIp,sampUrl,dataUrl});
+     await db.ref("settings").update({serverIp,sampUrl,dataUrl,heroBannerUrl,communityBannerUrl,communityBannerClickUrl});
      $("#settingsStatus").textContent="Saved successfully.";
      setTimeout(()=>$("#settingsStatus").textContent="",2000);
    }catch(err){
@@ -107,10 +107,8 @@ function renderAdminChat(snap){
 }
 $("#adminChatForm").onsubmit=async e=>{
  e.preventDefault();if(!adminUser)return;const text=$("#adminChatInput").value.trim();if(!text)return;
- const userSnap=await db.ref("users/"+adminUser.uid).once("value");
- const userData=userSnap.val()||{};
- const name=userData.displayName||adminUser.displayName||"Infinity Admin";
- const photoURL=userData.photoURL||adminUser.photoURL||"";
+ const name="Infinity Admin";
+ const photoURL="";
  await db.ref("chat").push().set({
    uid:adminUser.uid,
    name,

@@ -140,3 +140,46 @@ To make an admin:
      YOUR_UID: true
 
 Only accounts with `/admins/{uid}: true` can open the Admin Dashboard.
+
+
+## Hero Banner / Server Logo Background
+Admin Panel > Server & Download Settings now includes:
+- Hero Banner / Server Logo Image Link
+
+Paste a public image URL and save settings. The image will automatically appear as the background of the Home hero section in `index.html`.
+
+Recommended image size: 1920x1080 or wider landscape image.
+
+
+## Admin Login now uses Username + Password
+The Admin Panel no longer asks the visitor to type an email address.
+
+It converts the username internally to a Firebase Authentication email:
+- Username `infinityadmin` -> Firebase email `infinityadmin@infinityrp.com`
+
+### Create the admin account
+In Firebase Console:
+1. Authentication > Users > Add user
+2. Email: `infinityadmin@infinityrp.com`
+3. Password: choose your admin password
+4. Copy that Firebase user's UID
+5. Realtime Database:
+   `admins/YOUR_UID = true`
+
+Then open `admin.html` and login using:
+- Username: `infinityadmin`
+- Password: the password you created in Firebase
+
+The browser UI only asks for Username + Password, while Firebase Authentication still handles the real login.
+
+
+## Admin Login (Normal Username + Password)
+Firebase Authentication is no longer used for the Admin Panel login.
+
+Default admin login:
+- Username: `infinityadmin`
+- Password: `Infinity@11999`
+
+The Admin Panel still uses Firebase Realtime Database for website data such as settings, whitelist applications, rules and chat.
+
+IMPORTANT: Because this website is static HTML/JS, the username/password is stored in JavaScript and can be discovered by someone inspecting the site source. For real production security, use a backend/serverless authentication system.
