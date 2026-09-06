@@ -276,3 +276,13 @@ Also verify:
 - Example host: `abcdkffmm567-max.github.io`
 
 After Google sign-in, the site now opens `profile.html` directly and shows the Google account display name and Google profile photo.
+
+## Profile menu fix
+After a successful login:
+- Login button is hidden
+- Register button is hidden
+- Profile button is shown in the navigation menu
+- The Profile button displays the user's Google/Firebase display name
+- Logout remains available
+
+If the Realtime Database profile read temporarily fails, the Profile button still appears using Firebase Auth data.

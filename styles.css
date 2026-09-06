@@ -221,3 +221,21 @@ code{color:#9be7ff}
 /* Google button with official-style G mark */
 .google-btn{display:flex!important;align-items:center;justify-content:center;gap:12px;background:#fff!important;color:#1f1f1f!important;border:1px solid #dadce0!important;font-weight:700}
 .google-btn:hover{background:#f8fafd!important}.google-logo{width:21px;height:21px;flex:0 0 21px}
+
+/* Profile nav logged-in state */
+#profileNavBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+#profileNavBtn.hidden{display:none!important}
+@media(max-width:760px){
+  #profileNavBtn{
+    width:100%;
+    min-height:54px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    margin-top:8px;
+  }
+}

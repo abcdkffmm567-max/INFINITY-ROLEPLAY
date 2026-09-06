@@ -43,31 +43,70 @@ function ruleHtml(r,i){return `<article class="card rule-card"><span class="num"
 
 auth.onAuthStateChanged(async user=>{
   currentUser=user;
-  if(user){
-    const [profile,admin]=await Promise.all([ensureInfinityUser(user),db.ref("admins/"+user.uid).once("value")]);
-    currentProfile=profile||{};
-    if(currentProfile.banned===true){
-      const reason=currentProfile.banReason||"";
-      showNotice("Your Infinity Role Play account is banned."+ (reason ? " Reason: "+reason : ""),"Account Banned","danger");
-      await auth.signOut();
-      return;
-    }
-    currentProfile.isAdmin=admin.val()===true;
-    const loginBtn=$("#loginNavBtn"), registerBtn=$("#registerNavBtn"), profileBtn=$("#profileNavBtn"), logoutBtn=$("#logoutNavBtn");
-    if(loginBtn) loginBtn.classList.add("hidden");
-    if(registerBtn) registerBtn.classList.add("hidden");
-    if(profileBtn) profileBtn.classList.remove("hidden");
-    if(logoutBtn){ logoutBtn.classList.remove("hidden"); logoutBtn.textContent="Logout"; logoutBtn.onclick=()=>auth.signOut(); }
-    $("#chatInput").placeholder="Type a message...";
 
+  const loginBtn=$("#loginNavBtn");
+  const registerBtn=$("#registerNavBtn");
+  const profileBtn=$("#profileNavBtn");
+  const logoutBtn=$("#logoutNavBtn");
+
+  if(user){
+    try{
+      const profile=await ensureInfinityUser(user);
+      currentProfile=profile||{};
+
+      if(currentProfile.banned===true){
+        const reason=currentProfile.banReason||"";
+        if(typeof showNotice==="function"){
+          showNotice("Your Infinity Role Play account is banned."+(reason ? " Reason: "+reason : ""),"Account Banned","danger");
+        }
+        await auth.signOut();
+        return;
+      }
+
+      if(loginBtn) loginBtn.classList.add("hidden");
+      if(registerBtn) registerBtn.classList.add("hidden");
+
+      if(profileBtn){
+        profileBtn.classList.remove("hidden");
+        const displayName=currentProfile.displayName||user.displayName||"Profile";
+        profileBtn.textContent="👤 "+displayName;
+        profileBtn.href="profile.html";
+      }
+
+      if(logoutBtn){
+        logoutBtn.classList.remove("hidden");
+        logoutBtn.textContent="Logout";
+        logoutBtn.onclick=()=>auth.signOut();
+      }
+
+      if($("#chatInput")) $("#chatInput").placeholder="Type a message...";
+    }catch(err){
+      console.error("Auth/profile load error:",err);
+
+      // Even if profile DB load fails, still show Profile for a valid logged-in Firebase user.
+      if(loginBtn) loginBtn.classList.add("hidden");
+      if(registerBtn) registerBtn.classList.add("hidden");
+      if(profileBtn){
+        profileBtn.classList.remove("hidden");
+        profileBtn.textContent="👤 "+(user.displayName||"Profile");
+        profileBtn.href="profile.html";
+      }
+      if(logoutBtn){
+        logoutBtn.classList.remove("hidden");
+        logoutBtn.onclick=()=>auth.signOut();
+      }
+    }
   }else{
     currentProfile=null;
-    const loginBtn=$("#loginNavBtn"), registerBtn=$("#registerNavBtn"), profileBtn=$("#profileNavBtn"), logoutBtn=$("#logoutNavBtn");
+
     if(loginBtn) loginBtn.classList.remove("hidden");
     if(registerBtn) registerBtn.classList.remove("hidden");
-    if(profileBtn) profileBtn.classList.add("hidden");
+    if(profileBtn){
+      profileBtn.classList.add("hidden");
+      profileBtn.textContent="Profile";
+    }
     if(logoutBtn) logoutBtn.classList.add("hidden");
-    $("#chatInput").placeholder="Login to send a message...";
+    if($("#chatInput")) $("#chatInput").placeholder="Login to send a message...";
   }
 });
 
