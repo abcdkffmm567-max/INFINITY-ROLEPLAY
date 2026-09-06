@@ -311,3 +311,69 @@ Firebase Console > Realtime Database > Rules
 
 Paste the contents of `database.rules.json` and press **Publish**.
 GitHub upload does not automatically publish Firebase Database rules.
+
+## Live Chat `ensureInfinityUser is not defined` fix
+This version guarantees `user-utils.js` loads before `app.js` on `index.html`.
+
+It also includes fallback `ensureInfinityUser()` and `makeInfinityId()` helpers inside `app.js`, so Live Chat will not break even if the helper script fails to load because of caching or a deployment mismatch.
+
+After uploading the new files to GitHub Pages:
+1. Wait for the green GitHub Pages deployment.
+2. Open the website.
+3. Hard refresh / clear site cache if the old JavaScript is still cached.
+
+
+## User Management list fix
+The Admin Panel previously tried to read `/users`, but the Firebase rules correctly protect that node.
+Because the Admin Panel currently uses a local/static username/password instead of Firebase Admin Authentication, Firebase rejected that read, so it showed **No users found**.
+
+This version adds a safe public directory:
+`publicUsers/{uid}`
+
+Each logged-in/registered user automatically mirrors only:
+- displayName
+- profile photo URL
+- INF ID
+
+The Admin Panel reads that safe directory, so registered users can be listed without exposing user emails.
+
+IMPORTANT:
+Publish the included `database.rules.json` in Firebase Realtime Database > Rules.
+
+Existing users may need to login once after this update so their `publicUsers/{uid}` entry is created.
+
+Ban/Unban/Verified writes still require a secure Firebase-authenticated admin or backend if your rules protect `/users`.
+
+
+## FIX: Ban / Unban / Verified Permission Denied
+The permission error happened because the Admin Panel was using only a local/static login, so Firebase saw the browser as an unauthenticated visitor.
+
+This version keeps the visible Admin UI as **Username + Password**, but authenticates that admin securely with Firebase in the background.
+
+### One-time Firebase setup
+1. Firebase Console > Authentication > Sign-in method > enable **Email/Password**.
+2. Firebase Console > Authentication > Users > Add user.
+3. Use:
+   - Email: `infinityadmin@infinityrp.com`
+   - Password: choose your admin password
+4. Copy that user's Firebase UID.
+5. Realtime Database > Data:
+   - create `admins`
+   - under it create the copied UID
+   - set its value to `true`
+6. Realtime Database > Rules:
+   - paste this ZIP's `database.rules.json`
+   - press **Publish**
+
+### Admin login on the website
+The website still asks for:
+- Username: `infinityadmin`
+- Password: the same password you created in Firebase
+
+After this, User Management can securely:
+- Give Verified
+- Remove Verified
+- Ban
+- Unban
+
+No email is shown or typed in the Admin Panel UI.

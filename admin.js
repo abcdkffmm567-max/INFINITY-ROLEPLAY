@@ -1,43 +1,85 @@
 const $=s=>document.querySelector(s);
-let adminUser={uid:"local-admin",displayName:"Infinity Admin",photoURL:""};
+let adminUser=null;
 let allApps={};
 let allUsers={};
 let dashboardStarted=false;
 
-const ADMIN_USERNAME="infinityadmin";
-const ADMIN_PASSWORD="Infinity@11999";
-
-function openAdminDashboard(){
-  $("#adminLoginCard").classList.add("hidden");
-  $("#adminDashboard").classList.remove("hidden");
-  try{ startDashboard(); }
-  catch(err){
-    console.error("Dashboard data error:",err);
-    if($("#settingsStatus")) $("#settingsStatus").textContent="Dashboard opened. Firebase data could not be loaded: "+err.message;
-  }
+// The Admin Panel still shows only Username + Password.
+// Internally, the username is mapped to a Firebase Authentication email.
+function adminUsernameToEmail(username){
+  return `${String(username||"").trim().toLowerCase()}@infinityrp.com`;
 }
 
-$("#adminLoginForm").onsubmit=e=>{
+async function openAdminDashboard(user){
+  adminUser=user;
+  $("#adminLoginCard").classList.add("hidden");
+  $("#adminDashboard").classList.remove("hidden");
+  startDashboard();
+}
+
+$("#adminLoginForm").onsubmit=async e=>{
   e.preventDefault();
+
   const f=new FormData(e.target);
   const username=String(f.get("username")||"").trim();
   const password=String(f.get("password")||"");
 
-  if(username===ADMIN_USERNAME && password===ADMIN_PASSWORD){
-    sessionStorage.setItem("infinityAdminLoggedIn","1");
+  if(!username || !password){
+    $("#adminLoginStatus").textContent="Enter username and password.";
+    return;
+  }
+
+  $("#adminLoginStatus").textContent="Logging in...";
+
+  try{
+    const email=adminUsernameToEmail(username);
+    const cred=await auth.signInWithEmailAndPassword(email,password);
+
+    const adminSnap=await db.ref("admins/"+cred.user.uid).once("value");
+    if(adminSnap.val()!==true){
+      await auth.signOut();
+      throw new Error("This account is not authorized as an admin.");
+    }
+
     $("#adminLoginStatus").textContent="";
-    openAdminDashboard();
-  }else{
-    $("#adminLoginStatus").textContent="Invalid username or password.";
+    await openAdminDashboard(cred.user);
+  }catch(err){
+    console.error("Admin login failed:",err);
+    let msg="Invalid admin username/password or admin access is not enabled.";
+    if(err.code==="auth/user-not-found" || err.code==="auth/invalid-credential" || err.code==="auth/wrong-password"){
+      msg="Invalid admin username or password.";
+    }else if(err.code==="auth/operation-not-allowed"){
+      msg="Firebase Email/Password sign-in is not enabled.";
+    }else if(err.message && err.message.includes("not authorized")){
+      msg=err.message;
+    }
+    $("#adminLoginStatus").textContent=msg;
+    if(typeof showNotice==="function") showNotice(msg,"Admin Login","danger");
   }
 };
 
-if(sessionStorage.getItem("infinityAdminLoggedIn")==="1"){
-  openAdminDashboard();
-}
+auth.onAuthStateChanged(async user=>{
+  if(!user){
+    adminUser=null;
+    $("#adminLoginCard").classList.remove("hidden");
+    $("#adminDashboard").classList.add("hidden");
+    return;
+  }
 
-$("#adminLogout").onclick=()=>{
-  sessionStorage.removeItem("infinityAdminLoggedIn");
+  try{
+    const adminSnap=await db.ref("admins/"+user.uid).once("value");
+    if(adminSnap.val()!==true){
+      await auth.signOut();
+      return;
+    }
+    await openAdminDashboard(user);
+  }catch(err){
+    console.error("Admin auth-state check failed:",err);
+  }
+});
+
+$("#adminLogout").onclick=async()=>{
+  await auth.signOut();
   location.reload();
 };
 
@@ -73,7 +115,7 @@ function startDashboard(){
  };
  db.ref("rules").on("value",renderRules);
  db.ref("whitelist").on("value",s=>{allApps=s.val()||{};renderApps();updateStats()});
- db.ref("publicUsers").on("value",s=>{
+ db.ref("users").on("value",s=>{
    allUsers=s.val()||{};
    $("#userCount").textContent=s.numChildren();
    renderUsersManagement();
