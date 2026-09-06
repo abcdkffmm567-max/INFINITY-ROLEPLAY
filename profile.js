@@ -5,6 +5,13 @@ auth.onAuthStateChanged(async user=>{
   if(!user){ location.href="login.html"; return; }
 
   currentUser=user;
+
+  // Show Google/Firebase profile immediately while database profile loads.
+  const quickName=user.displayName||"Player";
+  $("#profileName").textContent=quickName;
+  $("#profileEmail").textContent=user.email||"";
+  setAvatar(user.photoURL||"",quickName);
+
   const ban=await getBanState(user);
   if(ban.banned){
     showNotice("Your Infinity Role Play account is banned."+ (ban.banReason ? " Reason: "+ban.banReason : ""),"Account Banned","danger");

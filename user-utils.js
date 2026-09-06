@@ -10,9 +10,9 @@ async function ensureInfinityUser(user, extra={}){
   const old=snap.val()||{};
 
   const updates={
-    displayName: old.displayName || extra.displayName || user.displayName || "Player",
+    displayName: extra.displayName || user.displayName || old.displayName || "Player",
     email: old.email || extra.email || user.email || "",
-    photoURL: old.photoURL || extra.photoURL || user.photoURL || "",
+    photoURL: extra.photoURL || user.photoURL || old.photoURL || "",
     infinityId: old.infinityId || makeInfinityId(user.uid),
     banned: old.banned === true,
     verified: old.verified === true,

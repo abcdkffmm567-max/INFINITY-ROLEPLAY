@@ -82,7 +82,7 @@
       }
       await db.ref("users/"+user.uid+"/lastLoginAt").set(firebase.database.ServerValue.TIMESTAMP);
       status.textContent="Google login successful.";
-      setTimeout(()=>location.href="index.html",500);
+      setTimeout(()=>location.href="profile.html",500);
     }
 
     document.getElementById("googleLoginBtn").addEventListener("click",async()=>{

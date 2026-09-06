@@ -264,3 +264,15 @@ Important: your current Admin Panel login is still a local/static username/passw
 4. Save, then upload/redeploy this updated website.
 
 The code now shows a clear error when Google is disabled, the domain is unauthorized, or the popup is blocked.
+
+## IMPORTANT: Fix for Google login/profile
+This version fixes the user-profile database rule that could reject a brand-new Google user's first profile write.
+
+You MUST publish the included `database.rules.json` rules in Firebase Realtime Database > Rules, otherwise the old deployed rules can still return `PERMISSION_DENIED`.
+
+Also verify:
+- Firebase Authentication > Sign-in method > Google = Enabled
+- Firebase Authentication > Settings > Authorized domains includes your GitHub Pages host
+- Example host: `abcdkffmm567-max.github.io`
+
+After Google sign-in, the site now opens `profile.html` directly and shows the Google account display name and Google profile photo.
