@@ -1,19 +1,44 @@
-const $=s=>document.querySelector(s); let adminUser=null, allApps={};
+const $=s=>document.querySelector(s);
+let adminUser=null, allApps={};
 
 $("#adminLoginForm").onsubmit=async e=>{
- e.preventDefault();const f=new FormData(e.target);
- try{
-  const cred=await auth.signInWithEmailAndPassword(f.get("email"),f.get("password"));
-  const a=await db.ref("admins/"+cred.user.uid).once("value");
-  if(a.val()!==true){await auth.signOut();throw new Error("This account is not authorized as an admin.");}
- }catch(err){$("#adminLoginStatus").textContent=err.message}
+  e.preventDefault();
+  const f=new FormData(e.target);
+  $("#adminLoginStatus").textContent="Logging in...";
+  try{
+    const cred=await auth.signInWithEmailAndPassword(f.get("email"),f.get("password"));
+    const adminSnap=await db.ref("admins/"+cred.user.uid).once("value");
+    if(adminSnap.val()!==true){
+      await auth.signOut();
+      throw new Error("This Firebase account is not authorized as an admin.");
+    }
+    $("#adminLoginStatus").textContent="";
+  }catch(err){
+    $("#adminLoginStatus").textContent=err.message;
+  }
 };
-auth.onAuthStateChanged(async u=>{
- if(!u){adminUser=null;$("#adminLoginCard").classList.remove("hidden");$("#adminDashboard").classList.add("hidden");return}
- const a=await db.ref("admins/"+u.uid).once("value");
- if(a.val()!==true){$("#adminLoginStatus").textContent="Not an authorized admin.";return}
- adminUser=u;$("#adminLoginCard").classList.add("hidden");$("#adminDashboard").classList.remove("hidden");startDashboard();
+
+auth.onAuthStateChanged(async user=>{
+  if(!user){
+    adminUser=null;
+    $("#adminLoginCard").classList.remove("hidden");
+    $("#adminDashboard").classList.add("hidden");
+    return;
+  }
+
+  const adminSnap=await db.ref("admins/"+user.uid).once("value");
+  if(adminSnap.val()!==true){
+    $("#adminLoginStatus").textContent="This account is not authorized as an admin.";
+    await auth.signOut();
+    return;
+  }
+
+  adminUser=user;
+  $("#adminLoginCard").classList.add("hidden");
+  $("#adminDashboard").classList.remove("hidden");
+  startDashboard();
 });
+
 $("#adminLogout").onclick=()=>auth.signOut();
 
 function startDashboard(){
@@ -82,8 +107,18 @@ function renderAdminChat(snap){
 }
 $("#adminChatForm").onsubmit=async e=>{
  e.preventDefault();if(!adminUser)return;const text=$("#adminChatInput").value.trim();if(!text)return;
- const userSnap=await db.ref("users/"+adminUser.uid).once("value");const name=userSnap.val()?.displayName||adminUser.displayName||"Admin";
- await db.ref("chat").push().set({uid:adminUser.uid,name,photoURL:userSnap.val()?.photoURL||adminUser.photoURL||"",text,isAdmin:true,createdAt:firebase.database.ServerValue.TIMESTAMP});$("#adminChatInput").value="";
+ const userSnap=await db.ref("users/"+adminUser.uid).once("value");
+ const userData=userSnap.val()||{};
+ const name=userData.displayName||adminUser.displayName||"Infinity Admin";
+ const photoURL=userData.photoURL||adminUser.photoURL||"";
+ await db.ref("chat").push().set({
+   uid:adminUser.uid,
+   name,
+   photoURL,
+   text,
+   isAdmin:true,
+   createdAt:firebase.database.ServerValue.TIMESTAMP
+ });$("#adminChatInput").value="";
 }
 function messageHtml(m){
  const avatar=m.photoURL||`https://ui-avatars.com/api/?name=${encodeURIComponent(m.name||"User")}&background=111827&color=ffffff`;

@@ -105,3 +105,38 @@ Google users automatically use their Google display name and profile photo when 
 - Restore/use their Google profile photo if available
 
 Live chat messages display each user's profile photo and display name.
+
+
+## Latest UI changes
+- Whitelist application moved to `whitelist.html`.
+- Main website now has a floating Live Chat button.
+- Admin panel has an extra username/password gate before Firebase admin login.
+
+Default admin gate:
+Username: infinityadmin
+Password: Infinity@11999
+
+IMPORTANT: This extra username/password check is client-side and is only an additional UI gate.
+Real admin security still depends on Firebase Authentication + `/admins/{uid}: true` database rules.
+
+## Admin login update
+The Admin Panel now shows only the custom Infinity admin login:
+- Username: infinityadmin
+- Password: Infinity@11999
+
+The second Firebase email/password login screen has been removed.
+
+Security note: because this is a static HTML/JS site, a hard-coded admin password is not strong production security. For truly secure custom username/password admin login, use a backend/serverless function.
+
+
+## Firebase Admin Login Restored
+Admin Panel now uses Firebase Authentication again.
+
+To make an admin:
+1. Create/register the account in Firebase Authentication.
+2. Copy its UID.
+3. In Realtime Database add:
+   admins
+     YOUR_UID: true
+
+Only accounts with `/admins/{uid}: true` can open the Admin Dashboard.

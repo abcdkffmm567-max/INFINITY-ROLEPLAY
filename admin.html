@@ -17,11 +17,16 @@
 
 <main class="section admin-main">
   <section id="adminLoginCard" class="card narrow">
-    <span class="eyebrow">SECURE ACCESS</span><h2>Admin Login</h2>
-    <p>Login with a Firebase account whose UID is listed under <code>admins/{uid}: true</code>.</p>
+    <span class="eyebrow">SECURE ACCESS</span>
+    <h2>Admin Login</h2>
+    <p>Login with the Firebase admin account.</p>
     <form id="adminLoginForm" class="auth-form">
-      <label>Email<input required type="email" name="email"></label>
-      <label>Password<input required type="password" name="password"></label>
+      <label>Email
+        <input required type="email" name="email" autocomplete="email">
+      </label>
+      <label>Password
+        <input required type="password" name="password" autocomplete="current-password">
+      </label>
       <button class="btn primary" type="submit">Login</button>
     </form>
     <p id="adminLoginStatus"></p>

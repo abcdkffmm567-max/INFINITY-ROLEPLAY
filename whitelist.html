@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whitelist Apply | Infinity Role Play</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <header class="nav">
+    <a class="brand" href="index.html"><span class="logo-mark">∞</span><span>INFINITY <b>ROLE PLAY</b></span></a>
+    <a class="btn small ghost" href="index.html">← Home</a>
+  </header>
+
+  <main class="section">
+    <div class="section-head">
+      <div><span class="eyebrow">JOIN THE CITY</span><h2>Whitelist Application</h2></div>
+      <p>Login is required before submitting your whitelist application.</p>
+    </div>
+
+    <form id="whitelistForm" class="card form-grid">
+      <label>Real Name<input required name="realName" placeholder="Your name"></label>
+      <label>Age<input required type="number" min="13" max="80" name="age" placeholder="18"></label>
+      <label>Discord Name<input required name="discord" placeholder="name#0000"></label>
+      <label>SA-MP / RP Name<input required name="rpName" placeholder="Firstname_Lastname"></label>
+      <label class="full">Why do you want to join Infinity Role Play?<textarea required minlength="30" name="reason" rows="4"></textarea></label>
+      <label class="full">What is Roleplay? Explain in your own words.<textarea required minlength="30" name="rpExplain" rows="4"></textarea></label>
+      <label class="full">Give one example of RDM / VDM / MG.<textarea required minlength="20" name="scenario" rows="4"></textarea></label>
+      <label class="checkbox full"><input required type="checkbox"> I have read and agree to follow the server rules.</label>
+      <div class="full form-actions"><button class="btn primary" type="submit">Submit Whitelist</button><span id="wlStatus"></span></div>
+    </form>
+
+    <div class="card application-status">
+      <h3>My Whitelist Status</h3>
+      <div id="myApplication">Login to view your latest application.</div>
+    </div>
+  </main>
+
+  <script src="firebase-config.js"></script>
+  <script src="whitelist.js"></script>
+</body>
+</html>

@@ -4,6 +4,8 @@ let currentUser=null, currentProfile=null;
 
 $("#year").textContent = new Date().getFullYear();
 $("#navToggle").onclick=()=>$("#navMenu").classList.toggle("open");
+$("#chatToggleBtn").onclick=()=>$("#floatingChat").classList.remove("hidden");
+$("#chatCloseBtn").onclick=()=>$("#floatingChat").classList.add("hidden");
 $("#copyIpBtn").onclick=async()=>{await navigator.clipboard.writeText(serverIpEl.textContent.trim()); $("#copyIpBtn").textContent="Copied!"; setTimeout(()=>$("#copyIpBtn").textContent="Copy Server IP",1200)};
 
 db.ref("settings").on("value", snap=>{
@@ -51,7 +53,7 @@ auth.onAuthStateChanged(async user=>{
     if(profileBtn) profileBtn.classList.remove("hidden");
     if(logoutBtn){ logoutBtn.classList.remove("hidden"); logoutBtn.textContent="Logout"; logoutBtn.onclick=()=>auth.signOut(); }
     $("#chatInput").placeholder="Type a message...";
-    loadMyApplication();
+
   }else{
     currentProfile=null;
     const loginBtn=$("#loginNavBtn"), registerBtn=$("#registerNavBtn"), profileBtn=$("#profileNavBtn"), logoutBtn=$("#logoutNavBtn");
@@ -59,36 +61,10 @@ auth.onAuthStateChanged(async user=>{
     if(registerBtn) registerBtn.classList.remove("hidden");
     if(profileBtn) profileBtn.classList.add("hidden");
     if(logoutBtn) logoutBtn.classList.add("hidden");
-    $("#chatInput").placeholder="Login to send a message...";$("#myApplication").textContent="Login to view your latest application.";
+    $("#chatInput").placeholder="Login to send a message...";
   }
 });
 
-$("#whitelistForm").onsubmit=async e=>{
-  e.preventDefault();
-  if(!currentUser){$("#wlStatus").innerHTML='Please <a href="login.html">login</a> first.';return}
-  const f=new FormData(e.target);
-  const data={
-    uid:currentUser.uid,email:currentUser.email,displayName:currentProfile?.displayName||currentUser.displayName||"User",
-    realName:f.get("realName"),age:Number(f.get("age")),discord:f.get("discord"),rpName:f.get("rpName"),
-    reason:f.get("reason"),rpExplain:f.get("rpExplain"),scenario:f.get("scenario"),
-    status:"pending",createdAt:firebase.database.ServerValue.TIMESTAMP
-  };
-  try{
-    const key=db.ref("whitelist").push().key;
-    await db.ref("whitelist/"+key).set(data);
-    await db.ref("userApplications/"+currentUser.uid+"/"+key).set(true);
-    $("#wlStatus").textContent="Submitted successfully.";e.target.reset();loadMyApplication();
-  }catch(err){$("#wlStatus").textContent=err.message}
-};
-async function loadMyApplication(){
-  if(!currentUser)return;
-  const linkSnap=await db.ref("userApplications/"+currentUser.uid).once("value");
-  const ids=Object.keys(linkSnap.val()||{});
-  if(!ids.length){$("#myApplication").textContent="No application submitted yet.";return}
-  const apps=await Promise.all(ids.map(id=>db.ref("whitelist/"+id).once("value").then(s=>({id,...s.val()}))));
-  apps.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));const a=apps[0];
-  $("#myApplication").innerHTML=`<p><b>${esc(a.rpName||"Application")}</b></p><span class="status-badge status-${a.status}">${String(a.status).toUpperCase()}</span>${a.adminNote?`<p>Admin note: ${esc(a.adminNote)}</p>`:""}`;
-}
 
 db.ref("chat").limitToLast(100).on("value",snap=>{
   const box=$("#chatMessages");box.innerHTML="";
