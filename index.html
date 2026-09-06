@@ -22,7 +22,13 @@
     <nav id="navMenu">
       <a href="#home">Home</a><a href="#rules">Rules</a><a href="whitelist.html">Whitelist</a>
       <a href="#downloads">Downloads</a>
-      <a class="btn small ghost" id="loginNavBtn" href="login.html">Login</a><a class="btn small primary" id="registerNavBtn" href="Register.html">Register</a><a class="btn small ghost hidden" id="profileNavBtn" href="profile.html">Profile</a><button class="btn small ghost hidden" id="logoutNavBtn">Logout</button>
+      <a class="btn small ghost" id="loginNavBtn" href="login.html">Login</a><a class="btn small primary" id="registerNavBtn" href="Register.html">Register</a>
+      <a id="profileIconBtn" class="profile-icon-btn hidden" href="profile.html" title="My Profile" aria-label="My Profile">
+        <img id="profileIconImg" alt="Profile">
+        <span id="profileIconFallback">👤</span>
+      </a>
+
+      <button class="btn small ghost hidden" id="logoutNavBtn">Logout</button>
       <a class="btn small admin-link" href="admin.html">Admin</a>
     </nav>
   </header>

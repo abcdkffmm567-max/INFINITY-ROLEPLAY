@@ -133,3 +133,50 @@ function fmt(t){return t?new Date(t).toLocaleString():"now"}
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
 function escAttr(v){return esc(v)}
+
+
+// Logged-in profile icon in mobile/desktop navigation
+auth.onAuthStateChanged(async user=>{
+  const iconBtn=document.getElementById("profileIconBtn");
+  const iconImg=document.getElementById("profileIconImg");
+  const fallback=document.getElementById("profileIconFallback");
+  const loginBtn=document.getElementById("loginNavBtn");
+  const registerBtn=document.getElementById("registerNavBtn");
+  const logoutBtn=document.getElementById("logoutNavBtn");
+
+  if(user){
+    if(loginBtn) loginBtn.classList.add("hidden");
+    if(registerBtn) registerBtn.classList.add("hidden");
+    if(iconBtn) iconBtn.classList.remove("hidden");
+    if(logoutBtn){
+      logoutBtn.classList.remove("hidden");
+      logoutBtn.onclick=()=>auth.signOut();
+    }
+
+    let photo=user.photoURL||"";
+    try{
+      const snap=await db.ref("users/"+user.uid).once("value");
+      const data=snap.val()||{};
+      if(data.photoURL) photo=data.photoURL;
+    }catch(err){
+      console.warn("Could not load profile image from DB:",err);
+    }
+
+    if(iconImg){
+      if(photo){
+        iconImg.src=photo;
+        iconImg.classList.remove("hidden");
+        if(fallback) fallback.classList.add("hidden");
+      }else{
+        iconImg.removeAttribute("src");
+        iconImg.classList.add("hidden");
+        if(fallback) fallback.classList.remove("hidden");
+      }
+    }
+  }else{
+    if(iconBtn) iconBtn.classList.add("hidden");
+    if(loginBtn) loginBtn.classList.remove("hidden");
+    if(registerBtn) registerBtn.classList.remove("hidden");
+    if(logoutBtn) logoutBtn.classList.add("hidden");
+  }
+});

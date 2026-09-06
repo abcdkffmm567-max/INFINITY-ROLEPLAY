@@ -286,3 +286,11 @@ After a successful login:
 - Logout remains available
 
 If the Realtime Database profile read temporarily fails, the Profile button still appears using Firebase Auth data.
+
+## Profile icon menu fix
+After a successful Firebase login, the navigation now shows a circular profile icon.
+
+- If the user has a profile photo, that photo is shown.
+- If no photo exists, a user icon fallback is shown.
+- Login/Register buttons are hidden while logged in.
+- Tapping the circular icon opens `profile.html`.
