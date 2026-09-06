@@ -272,3 +272,37 @@ code{color:#9be7ff}
     margin-top:8px;
   }
 }
+
+/* Server IP visible card fix */
+.server-ip-card{
+  width:min(1100px,calc(100% - 52px));
+  margin:28px auto 38px;
+  padding:22px 28px;
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  align-items:center;
+  gap:18px;
+  border:1px solid rgba(93,130,210,.20);
+  border-radius:22px;
+  background:linear-gradient(180deg,rgba(13,20,42,.92),rgba(9,13,30,.96));
+  box-shadow:0 16px 40px rgba(0,0,0,.22)
+}
+.server-ip-info{display:flex;flex-direction:column;gap:7px}
+.server-ip-label{font-size:12px;color:var(--muted);letter-spacing:1.2px}
+#serverIpText{font-size:26px;color:#f4f7ff;overflow-wrap:anywhere}
+.server-copy-btn{
+  min-width:104px;padding:12px 16px;border-radius:13px;
+  border:1px solid var(--line);background:#ffffff08;color:#fff;
+  font-weight:800;cursor:pointer
+}
+.server-online{display:flex;align-items:center;gap:10px;color:#e7ecf7}
+.online-dot{width:13px;height:13px;border-radius:50%;background:#38dda0;box-shadow:0 0 14px #38dda066}
+@media(max-width:700px){
+  .server-ip-card{
+    width:calc(100% - 52px);
+    grid-template-columns:1fr auto;
+    padding:20px;
+  }
+  .server-online{grid-column:1/-1}
+  #serverIpText{font-size:22px}
+}

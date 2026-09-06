@@ -279,3 +279,57 @@ auth.onAuthStateChanged(async user=>{
     if(logoutBtn) logoutBtn.classList.add("hidden");
   }
 });
+
+
+// Server IP display
+(function(){
+  const ipEl=document.getElementById("serverIpText");
+  const copyBtn=document.getElementById("serverIpCopyBtn");
+  if(!ipEl)return;
+
+  const DEFAULT_IP="51.68.107.75:11999";
+  ipEl.textContent=DEFAULT_IP;
+
+  if(typeof db!=="undefined"){
+    db.ref("settings/serverIp").on("value",snap=>{
+      const value=String(snap.val()||"").trim();
+      ipEl.textContent=value||DEFAULT_IP;
+    },err=>{
+      console.warn("Could not load server IP from Firebase:",err);
+      ipEl.textContent=DEFAULT_IP;
+    });
+  }
+
+  if(copyBtn){
+    copyBtn.onclick=async()=>{
+      const ip=ipEl.textContent.trim();
+      try{
+        await navigator.clipboard.writeText(ip);
+        if(typeof showNotice==="function"){
+          showNotice(ip+" copied to clipboard.","Server IP Copied","success");
+        }else{
+          copyBtn.textContent="Copied!";
+          setTimeout(()=>copyBtn.textContent="Copy IP",1200);
+        }
+      }catch(err){
+        const ta=document.createElement("textarea");
+        ta.value=ip; document.body.appendChild(ta); ta.select();
+        document.execCommand("copy"); ta.remove();
+        copyBtn.textContent="Copied!";
+        setTimeout(()=>copyBtn.textContent="Copy IP",1200);
+      }
+    };
+  }
+})();
+
+
+const heroCopyBtn=document.getElementById("copyIpBtn");
+if(heroCopyBtn){
+  heroCopyBtn.onclick=async()=>{
+    const ip=(document.getElementById("serverIpText")?.textContent||"51.68.107.75:11999").trim();
+    try{
+      await navigator.clipboard.writeText(ip);
+      if(typeof showNotice==="function") showNotice(ip+" copied to clipboard.","Server IP Copied","success");
+    }catch(e){}
+  };
+}
