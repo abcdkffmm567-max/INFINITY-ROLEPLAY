@@ -217,3 +217,7 @@ code{color:#9be7ff}
 }
 .profile-verified{position:relative;top:-4px}
 .admin-user-actions{flex-wrap:wrap}
+
+/* Google button with official-style G mark */
+.google-btn{display:flex!important;align-items:center;justify-content:center;gap:12px;background:#fff!important;color:#1f1f1f!important;border:1px solid #dadce0!important;font-weight:700}
+.google-btn:hover{background:#f8fafd!important}.google-logo{width:21px;height:21px;flex:0 0 21px}

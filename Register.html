@@ -41,7 +41,7 @@
         </label>
         <button class="btn primary full-width" type="submit">Create Account</button>
         <div class="auth-divider"><span>OR</span></div>
-        <button class="btn google-btn full-width" type="button" id="googleRegisterBtn">Register with Google</button>
+        <button class="btn google-btn full-width" type="button" id="googleRegisterBtn"><svg class="google-logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.54h3.24c1.9-1.75 2.98-4.33 2.98-7.41z"/><path fill="#34A853" d="M12 22c2.7 0 4.98-.9 6.64-2.36l-3.24-2.54c-.9.6-2.05.96-3.4.96-2.61 0-4.82-1.76-5.61-4.13H3.04v2.62A10 10 0 0 0 12 22z"/><path fill="#FBBC05" d="M6.39 13.93A6.02 6.02 0 0 1 6.07 12c0-.67.12-1.32.32-1.93V7.45H3.04A10 10 0 0 0 2 12c0 1.61.39 3.14 1.04 4.55l3.35-2.62z"/><path fill="#EA4335" d="M12 5.94c1.47 0 2.78.5 3.82 1.49l2.87-2.87C16.97 2.96 14.7 2 12 2a10 10 0 0 0-8.96 5.45l3.35 2.62C7.18 7.7 9.39 5.94 12 5.94z"/></svg><span>Continue with Google</span></button>
       </form>
 
       <p id="pageAuthStatus" class="center auth-message"></p>
@@ -76,39 +76,42 @@
     });
 
     const googleProvider=new firebase.auth.GoogleAuthProvider();
+    googleProvider.setCustomParameters({prompt:"select_account"});
+
+    async function finishGoogle(user){
+      const profile=await ensureInfinityUser(user,{
+        displayName:user.displayName||"Player", email:user.email||"",
+        photoURL:user.photoURL||"", provider:"google"
+      });
+      if(profile.banned===true){
+        const reason=profile.banReason||"";
+        await auth.signOut();
+        showNotice("Your Infinity Role Play account is banned."+(reason?" Reason: "+reason:""),"Account Banned","danger");
+        return;
+      }
+      await db.ref("users/"+user.uid+"/lastLoginAt").set(firebase.database.ServerValue.TIMESTAMP);
+      status.textContent="Google registration successful.";
+      setTimeout(()=>location.href="index.html",500);
+    }
+
     document.getElementById("googleRegisterBtn").addEventListener("click",async()=>{
       status.textContent="Opening Google...";
       try{
         const result=await auth.signInWithPopup(googleProvider);
-        const user=result.user;
-        await ensureInfinityUser(user,{
-          displayName:user.displayName||"Player",
-          email:user.email||"",
-          photoURL:user.photoURL||"",
-          provider:"google"
-        });
-        status.textContent="Google account connected.";
-        setTimeout(()=>location.href="index.html",500);
+        if(result?.user) await finishGoogle(result.user);
       }catch(err){
-        try{
-          await auth.signInWithRedirect(googleProvider);
-        }catch(e){ status.textContent=err.message; }
+        console.error(err);
+        let msg=err.message||"Google sign-in failed.";
+        if(err.code==="auth/unauthorized-domain") msg="This website domain is not authorized in Firebase. Add your github.io domain to Firebase Authentication > Settings > Authorized domains.";
+        else if(err.code==="auth/operation-not-allowed") msg="Google Sign-In is not enabled in Firebase Authentication.";
+        else if(err.code==="auth/popup-blocked") msg="Google popup was blocked. Allow popups for this website and try again.";
+        else if(err.code==="auth/popup-closed-by-user") msg="Google sign-in was cancelled.";
+        status.textContent=msg;
+        if(typeof showNotice==="function") showNotice(msg,"Google Sign-In","danger");
       }
     });
 
-    auth.getRedirectResult().then(async result=>{
-      if(result && result.user){
-        const user=result.user;
-        await ensureInfinityUser(user,{
-          displayName:user.displayName||"Player",
-          email:user.email||"",
-          photoURL:user.photoURL||"",
-          provider:"google"
-        });
-        location.href="index.html";
-      }
-    }).catch(err=>status.textContent=err.message);
-  </script>
+    </script>
 <script src="notifications.js"></script>
 </body>
 </html>

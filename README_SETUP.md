@@ -256,3 +256,11 @@ Admin Panel > User Management now includes:
 Verified users display a blue check badge beside their username in Live Chat and on their Profile page.
 
 Important: your current Admin Panel login is still a local/static username/password. If Firebase rules require an authenticated Firebase admin, Verified/Ban/Unban writes can be denied. A backend or Firebase-authenticated admin session is the secure production solution.
+
+## Google Sign-In setup
+1. Firebase Authentication > Sign-in method > Google > Enable.
+2. Firebase Authentication > Settings > Authorized domains.
+3. Add your GitHub Pages host, for example `abcdkffmm567-max.github.io`.
+4. Save, then upload/redeploy this updated website.
+
+The code now shows a clear error when Google is disabled, the domain is unauthorized, or the popup is blocked.
