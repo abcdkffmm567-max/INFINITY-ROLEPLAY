@@ -3,6 +3,7 @@ let adminUser=null;
 let allApps={};
 let allUsers={};
 let dashboardStarted=false;
+let allServerAdmins={};
 
 // The Admin Panel still shows only Username + Password.
 // Internally, the username is mapped to a Firebase Authentication email.
@@ -124,6 +125,14 @@ function startDashboard(){
    const box=$("#usersManagementList");
    if(box) box.innerHTML="<p>Could not load users: "+esc(err.message||"Permission denied")+"</p>";
  });
+ db.ref("serverAdmins").on("value",s=>{
+   allServerAdmins=s.val()||{};
+   renderServerAdminsAdmin();
+ },err=>{
+   console.error("Server admins read failed:",err);
+   const box=$("#serverAdminsAdminList");
+   if(box) box.innerHTML="<p>Could not load server admins: "+esc(err.message||"Permission denied")+"</p>";
+ });
  db.ref("chat").limitToLast(100).on("value",renderAdminChat);
 }
 function renderRules(snap){
@@ -236,6 +245,121 @@ window.unbanUser=async uid=>{
    });
  }catch(err){alert("Unban failed: "+err.message)}
 };
+
+
+function resetServerAdminForm(){
+  if(!$("#serverAdminForm")) return;
+  $("#serverAdminForm").reset();
+  $("#serverAdminEditId").value="";
+  $("#serverAdminOrder").value="0";
+  $("#saveServerAdminBtn").textContent="Add Server Admin";
+  $("#cancelServerAdminEdit").classList.add("hidden");
+  $("#serverAdminStatus").textContent="";
+}
+
+function renderServerAdminsAdmin(){
+  const box=$("#serverAdminsAdminList");
+  if(!box)return;
+  const items=Object.entries(allServerAdmins)
+    .map(([id,v])=>({id,...v}))
+    .sort((a,b)=>(Number(a.order)||9999)-(Number(b.order)||9999));
+
+  if(!items.length){
+    box.innerHTML="<p>No server admins added yet.</p>";
+    return;
+  }
+
+  box.innerHTML=items.map(a=>{
+    const avatar=a.photoURL||`https://ui-avatars.com/api/?name=${encodeURIComponent(a.realName||a.serverName||"Admin")}&background=111827&color=ffffff`;
+    return `<article class="admin-user-card server-admin-manage-card">
+      <img class="admin-user-avatar" src="${escAttr(avatar)}" alt="">
+      <div class="admin-user-info">
+        <div class="admin-user-name">${esc(a.serverName||"Unknown")}</div>
+        <small>${esc(a.realName||"")}</small>
+        <small>${esc(a.rank||"Server Admin")}</small>
+        <small>${esc(a.phone||"")}</small>
+      </div>
+      <div class="admin-user-actions">
+        <button class="btn ghost small" onclick="editServerAdmin('${a.id}')">Edit</button>
+        <button class="btn danger small" onclick="deleteServerAdmin('${a.id}')">Delete</button>
+      </div>
+    </article>`;
+  }).join("");
+}
+
+if($("#serverAdminForm")) $("#serverAdminForm").onsubmit=async e=>{
+  e.preventDefault();
+  if(!adminUser)return;
+
+  const id=$("#serverAdminEditId").value.trim();
+  const serverName=$("#serverAdminServerName").value.trim();
+  const realName=$("#serverAdminRealName").value.trim();
+  const phone=$("#serverAdminPhone").value.trim();
+  const rank=$("#serverAdminRank").value.trim()||"Server Admin";
+  const order=Number($("#serverAdminOrder").value||0);
+  const file=$("#serverAdminPhoto").files[0];
+
+  if(!serverName||!realName){
+    $("#serverAdminStatus").textContent="Server Username and Real Name are required.";
+    return;
+  }
+  if(file && file.size>5*1024*1024){
+    $("#serverAdminStatus").textContent="Photo must be smaller than 5 MB.";
+    return;
+  }
+
+  const targetId=id||db.ref("serverAdmins").push().key;
+  $("#serverAdminStatus").textContent=file?"Uploading photo...":"Saving...";
+
+  try{
+    let photoURL=(allServerAdmins[targetId]||{}).photoURL||"";
+    if(file){
+      const safeName=String(file.name||"admin.jpg").replace(/[^a-zA-Z0-9._-]/g,"_");
+      const ref=storage.ref(`serverAdminPhotos/${targetId}/${Date.now()}_${safeName}`);
+      await ref.put(file);
+      photoURL=await ref.getDownloadURL();
+    }
+    await db.ref("serverAdmins/"+targetId).set({
+      serverName,realName,phone,rank,order,photoURL,
+      updatedAt:firebase.database.ServerValue.TIMESTAMP,
+      updatedBy:adminUser.uid
+    });
+    $("#serverAdminStatus").textContent=id?"Admin updated successfully.":"Server admin added successfully.";
+    setTimeout(resetServerAdminForm,900);
+  }catch(err){
+    console.error("Server admin save failed:",err);
+    $("#serverAdminStatus").textContent="Save failed: "+(err.message||err);
+  }
+};
+
+window.editServerAdmin=id=>{
+  const a=allServerAdmins[id];
+  if(!a)return;
+  $("#serverAdminEditId").value=id;
+  $("#serverAdminServerName").value=a.serverName||"";
+  $("#serverAdminRealName").value=a.realName||"";
+  $("#serverAdminPhone").value=a.phone||"";
+  $("#serverAdminRank").value=a.rank||"Server Admin";
+  $("#serverAdminOrder").value=Number(a.order||0);
+  $("#saveServerAdminBtn").textContent="Save Changes";
+  $("#cancelServerAdminEdit").classList.remove("hidden");
+  $("#serverAdminStatus").textContent="Editing "+(a.serverName||"server admin");
+  $("#serverAdminServerName").scrollIntoView({behavior:"smooth",block:"center"});
+};
+
+window.deleteServerAdmin=async id=>{
+  const a=allServerAdmins[id]||{};
+  if(!confirm(`Delete ${a.serverName||"this server admin"} from the Server Admins page?`))return;
+  try{
+    await db.ref("serverAdmins/"+id).remove();
+    if($("#serverAdminEditId").value===id) resetServerAdminForm();
+  }catch(err){
+    showNotice("Delete failed: "+err.message,"Error","danger");
+  }
+};
+
+if($("#cancelServerAdminEdit")) $("#cancelServerAdminEdit").onclick=resetServerAdminForm;
+
 
 $("#filterApps").onchange=renderApps;
 function renderApps(){

@@ -104,6 +104,47 @@
       <div id="usersManagementList" class="users-management-list"></div>
     </section>
 
+
+    <section class="card admin-section">
+      <div class="section-row">
+        <div>
+          <h2>Server Admin Team</h2>
+          <p>Add or edit the admins shown on the public Server Admins page.</p>
+        </div>
+        <a class="btn small ghost" href="admins.html" target="_blank">View Page</a>
+      </div>
+
+      <form id="serverAdminForm" class="form-grid server-admin-form">
+        <input type="hidden" id="serverAdminEditId">
+        <label>Server Username
+          <input id="serverAdminServerName" required placeholder="e.g. Infinity_Kavishka">
+        </label>
+        <label>Real Name
+          <input id="serverAdminRealName" required placeholder="e.g. Kavishka Gimhan">
+        </label>
+        <label>Phone Number
+          <input id="serverAdminPhone" type="tel" placeholder="e.g. 0771234567">
+        </label>
+        <label>Rank / Role
+          <input id="serverAdminRank" placeholder="e.g. Head Admin">
+        </label>
+        <label class="full">Admin Photo
+          <input id="serverAdminPhoto" type="file" accept="image/jpeg,image/png,image/webp">
+          <small>JPG, PNG or WEBP. Maximum 5 MB.</small>
+        </label>
+        <label>Display Order
+          <input id="serverAdminOrder" type="number" min="0" value="0">
+        </label>
+        <div class="full server-admin-form-actions">
+          <button id="saveServerAdminBtn" class="btn primary" type="submit">Add Server Admin</button>
+          <button id="cancelServerAdminEdit" class="btn ghost hidden" type="button">Cancel Edit</button>
+          <span id="serverAdminStatus"></span>
+        </div>
+      </form>
+
+      <div id="serverAdminsAdminList" class="server-admins-admin-list"></div>
+    </section>
+
     <section class="card admin-section">
       <div class="section-row"><h2>Whitelist Applications</h2><select id="filterApps"><option value="all">All</option><option value="pending">Pending</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option></select></div>
       <div id="applicationsList" class="applications-list"></div>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Infinity RP | Server Admins</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+</head>
+<body>
+<div class="bg-grid"></div>
+<header class="nav">
+  <a class="brand" href="index.html"><span class="logo-mark">∞</span>INFINITY <b>ROLE PLAY</b></a>
+  <nav class="desktop-nav">
+    <a href="index.html">Home</a>
+    <a href="whitelist.html">Whitelist</a>
+    <a class="active" href="admins.html">Server Admins</a>
+  </nav>
+  <a class="btn small ghost" href="index.html">← Home</a>
+</header>
+
+<main class="section">
+  <section class="admins-hero">
+    <span class="eyebrow">INFINITY ROLE PLAY STAFF</span>
+    <h1>Server Admin Team</h1>
+    <p>Meet the Infinity Role Play server administration team.</p>
+  </section>
+
+  <section id="serverAdminsGrid" class="server-admins-grid">
+    <div class="card server-admin-loading">Loading server admins...</div>
+  </section>
+</main>
+
+<script src="firebase-config.js"></script>
+<script>
+const grid=document.getElementById("serverAdminsGrid");
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function escAttr(v){return esc(v)}
+function phoneHref(v){return String(v||"").replace(/[^+\d]/g,"")}
+db.ref("serverAdmins").on("value",snap=>{
+  const rows=Object.entries(snap.val()||{}).map(([id,v])=>({id,...v}))
+    .sort((a,b)=>(Number(a.order)||9999)-(Number(b.order)||9999));
+  if(!rows.length){
+    grid.innerHTML='<div class="card server-admin-loading">No server admins have been added yet.</div>';
+    return;
+  }
+  grid.innerHTML=rows.map(a=>{
+    const photo=a.photoURL||`https://ui-avatars.com/api/?name=${encodeURIComponent(a.realName||a.serverName||"Admin")}&background=111827&color=ffffff&size=256`;
+    const phone=String(a.phone||"").trim();
+    return `<article class="card server-admin-card">
+      <div class="server-admin-photo-wrap">
+        <img class="server-admin-photo" src="${escAttr(photo)}" alt="${escAttr(a.serverName||"Server Admin")}">
+        <span class="server-admin-rank">${esc(a.rank||"Server Admin")}</span>
+      </div>
+      <div class="server-admin-info">
+        <h2>${esc(a.serverName||"Unknown")}</h2>
+        <div class="admin-detail"><span>Real Name</span><strong>${esc(a.realName||"-")}</strong></div>
+        <div class="admin-detail"><span>Server Username</span><strong>${esc(a.serverName||"-")}</strong></div>
+        ${phone?`<a class="btn primary server-admin-phone" href="tel:${escAttr(phoneHref(phone))}">📞 ${esc(phone)}</a>`:""}
+      </div>
+    </article>`;
+  }).join("");
+},err=>{
+  console.error(err);
+  grid.innerHTML='<div class="card server-admin-loading">Could not load server admins.</div>';
+});
+</script>
+</body>
+</html>
