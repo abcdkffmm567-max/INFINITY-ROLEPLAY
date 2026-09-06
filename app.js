@@ -112,17 +112,79 @@ auth.onAuthStateChanged(async user=>{
 
 
 db.ref("chat").limitToLast(100).on("value",snap=>{
-  const box=$("#chatMessages");box.innerHTML="";
+  const box=$("#chatMessages");
+  if(!box)return;
+  box.innerHTML="";
   Object.entries(snap.val()||{}).forEach(([id,m])=>box.insertAdjacentHTML("beforeend",messageHtml(m)));
   box.scrollTop=box.scrollHeight;
+},err=>{
+  console.error("Live chat read failed:",err);
 });
 $("#chatForm").onsubmit=async e=>{
   e.preventDefault();
-  if(!currentUser){location.href="login.html";return}
-  const text=$("#chatInput").value.trim();if(!text)return;
-  const isAdmin=(await db.ref("admins/"+currentUser.uid).once("value")).val()===true;
-  await db.ref("chat").push().set({uid:currentUser.uid,name:currentProfile?.displayName||currentUser.displayName||"User",photoURL:currentProfile?.photoURL||currentUser.photoURL||"",infinityId:currentProfile?.infinityId||makeInfinityId(currentUser.uid),verified:currentProfile?.verified===true,text,isAdmin,createdAt:firebase.database.ServerValue.TIMESTAMP});
-  $("#chatInput").value="";
+
+  if(!auth.currentUser){
+    if(typeof showNotice==="function"){
+      showNotice("Please login before sending a message.","Login Required","info");
+    }
+    location.href="login.html";
+    return;
+  }
+
+  currentUser=auth.currentUser;
+  const input=$("#chatInput");
+  const text=(input?.value||"").trim();
+  if(!text)return;
+
+  input.disabled=true;
+  try{
+    // Make sure the user's profile exists before chat permission is checked.
+    currentProfile=await ensureInfinityUser(currentUser);
+
+    if(currentProfile?.banned===true){
+      const reason=currentProfile.banReason||"";
+      if(typeof showNotice==="function"){
+        showNotice("Your account is banned and cannot use Live Chat."+(reason ? " Reason: "+reason : ""),"Chat Disabled","danger");
+      }
+      return;
+    }
+
+    // Admin lookup is optional for normal users. A permission error here
+    // must never block a normal user's chat message.
+    let isAdmin=false;
+    try{
+      const a=await db.ref("admins/"+currentUser.uid).once("value");
+      isAdmin=a.val()===true;
+    }catch(err){
+      console.warn("Admin status lookup skipped:",err);
+    }
+
+    const message={
+      uid:currentUser.uid,
+      name:currentProfile?.displayName||currentUser.displayName||"User",
+      photoURL:currentProfile?.photoURL||currentUser.photoURL||"",
+      infinityId:currentProfile?.infinityId||makeInfinityId(currentUser.uid),
+      verified:currentProfile?.verified===true,
+      isAdmin,
+      text,
+      createdAt:firebase.database.ServerValue.TIMESTAMP
+    };
+
+    await db.ref("chat").push().set(message);
+    input.value="";
+  }catch(err){
+    console.error("Live chat send failed:",err);
+    let msg=err.message||"Message could not be sent.";
+    if(String(err.code||"").includes("PERMISSION_DENIED") || /permission/i.test(msg)){
+      msg="Firebase is blocking Live Chat. Publish the included database.rules.json in Firebase Realtime Database > Rules.";
+    }
+    if(typeof showNotice==="function"){
+      showNotice(msg,"Live Chat Error","danger");
+    }
+  }finally{
+    input.disabled=false;
+    input.focus();
+  }
 };
 function messageHtml(m){
  const mine=currentUser&&m.uid===currentUser.uid?" mine":"";

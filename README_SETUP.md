@@ -294,3 +294,20 @@ After a successful Firebase login, the navigation now shows a circular profile i
 - If no photo exists, a user icon fallback is shown.
 - Login/Register buttons are hidden while logged in.
 - Tapping the circular icon opens `profile.html`.
+
+## Live Chat login fix
+This version fixes the chat send flow after login.
+
+Changes:
+- Uses `auth.currentUser` directly.
+- Ensures the user's Firebase profile exists before sending.
+- A failed admin-status lookup no longer blocks normal users.
+- Shows a styled error if Firebase denies the chat write.
+- Updated chat rules prevent users from spoofing Admin/Verified badges.
+
+IMPORTANT:
+After uploading the website files to GitHub, also open:
+Firebase Console > Realtime Database > Rules
+
+Paste the contents of `database.rules.json` and press **Publish**.
+GitHub upload does not automatically publish Firebase Database rules.
