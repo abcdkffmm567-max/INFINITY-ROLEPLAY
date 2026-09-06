@@ -128,9 +128,13 @@
         <label>Rank / Role
           <input id="serverAdminRank" placeholder="e.g. Head Admin">
         </label>
-        <label class="full">Admin Photo
+        <label class="full">Admin Photo Link
+          <input id="serverAdminPhotoURL" type="url" placeholder="https://example.com/admin-photo.jpg">
+          <small>Paste a direct image link here.</small>
+        </label>
+        <label class="full">Or Upload Admin Photo
           <input id="serverAdminPhoto" type="file" accept="image/jpeg,image/png,image/webp">
-          <small>JPG, PNG or WEBP. Maximum 5 MB.</small>
+          <small>Optional. JPG, PNG or WEBP. Maximum 5 MB.</small>
         </label>
         <label>Display Order
           <input id="serverAdminOrder" type="number" min="0" value="0">

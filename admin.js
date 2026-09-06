@@ -297,6 +297,7 @@ if($("#serverAdminForm")) $("#serverAdminForm").onsubmit=async e=>{
   const phone=$("#serverAdminPhone").value.trim();
   const rank=$("#serverAdminRank").value.trim()||"Server Admin";
   const order=Number($("#serverAdminOrder").value||0);
+  const photoURLInput=$("#serverAdminPhotoURL").value.trim();
   const file=$("#serverAdminPhoto").files[0];
 
   if(!serverName||!realName){
@@ -312,7 +313,7 @@ if($("#serverAdminForm")) $("#serverAdminForm").onsubmit=async e=>{
   $("#serverAdminStatus").textContent=file?"Uploading photo...":"Saving...";
 
   try{
-    let photoURL=(allServerAdmins[targetId]||{}).photoURL||"";
+    let photoURL=photoURLInput || (allServerAdmins[targetId]||{}).photoURL || "";
     if(file){
       const safeName=String(file.name||"admin.jpg").replace(/[^a-zA-Z0-9._-]/g,"_");
       const ref=storage.ref(`serverAdminPhotos/${targetId}/${Date.now()}_${safeName}`);
@@ -340,6 +341,7 @@ window.editServerAdmin=id=>{
   $("#serverAdminRealName").value=a.realName||"";
   $("#serverAdminPhone").value=a.phone||"";
   $("#serverAdminRank").value=a.rank||"Server Admin";
+  $("#serverAdminPhotoURL").value=a.photoURL||"";
   $("#serverAdminOrder").value=Number(a.order||0);
   $("#saveServerAdminBtn").textContent="Save Changes";
   $("#cancelServerAdminEdit").classList.remove("hidden");
