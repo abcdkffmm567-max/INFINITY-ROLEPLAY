@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Infinity RP | Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+</head>
+<body>
+<div class="bg-grid"></div>
+<header class="nav"><a class="brand" href="index.html"><span class="logo-mark">∞</span>INFINITY <b>ADMIN</b></a><a class="btn small ghost" href="index.html">← Website</a></header>
+
+<main class="section admin-main">
+  <section id="adminLoginCard" class="card narrow">
+    <span class="eyebrow">SECURE ACCESS</span><h2>Admin Login</h2>
+    <p>Login with a Firebase account whose UID is listed under <code>admins/{uid}: true</code>.</p>
+    <form id="adminLoginForm" class="auth-form">
+      <label>Email<input required type="email" name="email"></label>
+      <label>Password<input required type="password" name="password"></label>
+      <button class="btn primary" type="submit">Login</button>
+    </form>
+    <p id="adminLoginStatus"></p>
+  </section>
+
+  <div id="adminDashboard" class="hidden">
+    <div class="admin-top">
+      <div><span class="eyebrow">CONTROL CENTER</span><h1>Infinity RP Admin</h1></div>
+      <button id="adminLogout" class="btn ghost">Logout</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="card stat"><small>Pending</small><strong id="pendingCount">0</strong></div>
+      <div class="card stat"><small>Accepted</small><strong id="acceptedCount">0</strong></div>
+      <div class="card stat"><small>Rejected</small><strong id="rejectedCount">0</strong></div>
+      <div class="card stat"><small>Users</small><strong id="userCount">0</strong></div>
+    </div>
+
+    <section class="card admin-section">
+      <h2>Server & Download Settings</h2>
+      <p>Paste direct/external download links here. Users will open these links from the website download buttons.</p>
+      <form id="serverSettingsForm" class="form-grid">
+        <label class="full">Server IP
+          <input id="adminServerIp" required placeholder="51.68.107.75:11999">
+        </label>
+        <label>SAMP APK Download Link
+          <input id="sampUrl" type="url" placeholder="https://example.com/samp.apk">
+        </label>
+        <label>Infinity Data File Download Link
+          <input id="dataUrl" type="url" placeholder="https://example.com/infinity-data.zip">
+        </label>
+        <div class="full">
+          <button class="btn primary">Save Server & Download Links</button>
+          <span id="settingsStatus"></span>
+        </div>
+      </form>
+    </section>
+
+    <section class="card admin-section">
+      <div class="section-row"><h2>Server Rules</h2><button id="addRuleBtn" class="btn small primary" type="button">+ Add Rule</button></div>
+      <div id="rulesAdmin"></div>
+    </section>
+
+    <section class="card admin-section">
+      <div class="section-row"><h2>Whitelist Applications</h2><select id="filterApps"><option value="all">All</option><option value="pending">Pending</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option></select></div>
+      <div id="applicationsList" class="applications-list"></div>
+    </section>
+
+    <section class="card admin-section">
+      <h2>Live Chat Moderation</h2>
+      <p>Messages from this admin account will automatically display a verified blue badge on the public chat.</p>
+      <div id="adminChatMessages" class="chat-messages admin-chat"></div>
+      <form id="adminChatForm" class="chat-form"><input id="adminChatInput" maxlength="300" placeholder="Reply as verified admin..."><button class="btn primary">Send</button></form>
+    </section>
+  </div>
+</main>
+
+<script src="firebase-config.js"></script><script src="admin.js"></script>
+</body>
+</html>

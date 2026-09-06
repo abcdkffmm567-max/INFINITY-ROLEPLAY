@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile | Infinity Role Play</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <header class="nav">
+    <a class="brand" href="index.html"><span class="logo-mark">∞</span><span>INFINITY <b>ROLE PLAY</b></span></a>
+    <a class="btn small ghost" href="index.html">← Home</a>
+  </header>
+
+  <main class="section profile-page">
+    <section class="card profile-card">
+      <div class="profile-hero">
+        <img id="profileAvatar" class="profile-avatar xl" src="https://ui-avatars.com/api/?name=User&background=111827&color=ffffff" alt="Profile">
+        <div>
+          <span class="eyebrow">PLAYER PROFILE</span>
+          <h1 id="profileName">Loading...</h1>
+          <p id="profileEmail"></p>
+        </div>
+      </div>
+
+      <form id="profileForm" class="form-grid">
+        <label class="full">Display Name
+          <input id="displayNameInput" maxlength="32" required>
+        </label>
+
+        <label class="full">Profile Photo URL
+          <input id="photoUrlInput" type="url" placeholder="https://example.com/photo.jpg">
+        </label>
+
+        <div class="full profile-actions">
+          <button class="btn primary" type="submit">Save Profile</button>
+          <button class="btn ghost" type="button" id="resetGooglePhotoBtn">Use Google Photo</button>
+        </div>
+      </form>
+
+      <div class="profile-note">
+        <b>Tip:</b> You can paste any public image URL as your profile photo. If you logged in with Google, your Google profile photo is used automatically.
+      </div>
+    </section>
+  </main>
+
+  <script src="firebase-config.js"></script>
+  <script src="profile.js"></script>
+</body>
+</html>

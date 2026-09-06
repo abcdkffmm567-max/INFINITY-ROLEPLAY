@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Infinity Role Play</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+</head>
+<body class="auth-page">
+  <div class="bg-grid"></div>
+  <header class="nav">
+    <a class="brand" href="index.html"><span class="logo-mark">∞</span><span>INFINITY <b>ROLE PLAY</b></span></a>
+    <a class="btn small ghost" href="index.html">← Home</a>
+  </header>
+
+  <main class="auth-page-main">
+    <section class="card standalone-auth">
+      <div class="auth-logo">∞</div>
+      <span class="eyebrow">WELCOME BACK</span>
+      <h1>Login</h1>
+      <p>Login to access whitelist applications and live chat.</p>
+
+      <form id="pageLoginForm" class="auth-form">
+        <label>Email
+          <input required type="email" name="email" autocomplete="email" placeholder="you@example.com">
+        </label>
+        <label>Password
+          <input required type="password" minlength="6" name="password" autocomplete="current-password" placeholder="••••••••">
+        </label>
+        <button class="btn primary full-width" type="submit">Login</button>
+        <div class="auth-divider"><span>OR</span></div>
+        <button class="btn google-btn full-width" type="button" id="googleLoginBtn">Continue with Google</button>
+      </form>
+
+      <p id="pageAuthStatus" class="center auth-message"></p>
+      <p class="center auth-switch">Don't have an account? <a href="Register.html">Create Account</a></p>
+    </section>
+  </main>
+
+  <script src="firebase-config.js"></script>
+  <script>
+    const form=document.getElementById("pageLoginForm");
+    const status=document.getElementById("pageAuthStatus");
+    form.addEventListener("submit",async(e)=>{
+      e.preventDefault();
+      const f=new FormData(form);
+      status.textContent="Logging in...";
+      try{
+        await auth.signInWithEmailAndPassword(f.get("email"),f.get("password"));
+        status.textContent="Login successful. Redirecting...";
+        setTimeout(()=>location.href="index.html",600);
+      }catch(err){ status.textContent=err.message; }
+    });
+    const googleProvider=new firebase.auth.GoogleAuthProvider();
+    document.getElementById("googleLoginBtn").addEventListener("click",async()=>{
+      status.textContent="Opening Google...";
+      try{
+        const result=await auth.signInWithPopup(googleProvider);
+        const user=result.user;
+        await db.ref("users/"+user.uid).update({
+          displayName:user.displayName||"Player",
+          email:user.email||"",
+          photoURL:user.photoURL||"",
+          provider:"google",
+          lastLoginAt:firebase.database.ServerValue.TIMESTAMP
+        });
+        status.textContent="Google login successful.";
+        setTimeout(()=>location.href="index.html",500);
+      }catch(err){
+        try{
+          const result=await auth.signInWithRedirect(googleProvider);
+        }catch(e){ status.textContent=err.message; }
+      }
+    });
+
+    auth.getRedirectResult().then(async result=>{
+      if(result && result.user){
+        const user=result.user;
+        await db.ref("users/"+user.uid).update({
+          displayName:user.displayName||"Player",
+          email:user.email||"",
+          photoURL:user.photoURL||"",
+          provider:"google",
+          lastLoginAt:firebase.database.ServerValue.TIMESTAMP
+        });
+        location.href="index.html";
+      }
+    }).catch(err=>status.textContent=err.message);
+
+    auth.onAuthStateChanged(user=>{
+      if(user && !status.textContent) status.textContent="You are already logged in.";
+    });
+  </script>
+</body>
+</html>
