@@ -119,6 +119,10 @@ function startDashboard(){
    allUsers=s.val()||{};
    $("#userCount").textContent=s.numChildren();
    renderUsersManagement();
+ },err=>{
+   console.error("User Management read failed:",err);
+   const box=$("#usersManagementList");
+   if(box) box.innerHTML="<p>Could not load users: "+esc(err.message||"Permission denied")+"</p>";
  });
  db.ref("chat").limitToLast(100).on("value",renderAdminChat);
 }

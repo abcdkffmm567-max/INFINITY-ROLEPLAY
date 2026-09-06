@@ -15,7 +15,18 @@
 <button class="btn primary">Enable Admin</button></form>
 <p id="status"></p><a class="btn ghost" href="admin.html">Open Admin Panel</a>
 </section></main>
-<script src="firebase-config.js"></script><script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBNRNmZJyxQiAj_AjNHLf43knOEmQ9e-FU",
+  authDomain: "l2k-top-up-store.firebaseapp.com",
+  databaseURL: "https://l2k-top-up-store-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "l2k-top-up-store",
+  storageBucket: "l2k-top-up-store.firebasestorage.app"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+</script><script>
 const UID="ewXACA93B8PTVeE09DVEqXfv5Mp1", EMAIL="infinityadmin@infinityrp.com";
 const st=document.getElementById("status");
 document.getElementById("f").onsubmit=async e=>{
