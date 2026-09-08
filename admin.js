@@ -558,3 +558,27 @@ function renderUsersManagement(){
   try{return renderUsersManagementOriginal();}
   finally{allUsers=saved;}
 }
+
+
+window.deleteWebsiteUser=async(uid,name)=>{
+  if(!adminUser)return;
+  const label=name||uid;
+  if(!confirm(`Delete ${label} from the website User Management?
+
+This removes the user's website profile/data from Firebase Realtime Database.
+It does NOT delete the Firebase Authentication account itself.`)) return;
+
+  try{
+    const updates={};
+    updates["users/"+uid]=null;
+    updates["publicUsers/"+uid]=null;
+    updates["userApplications/"+uid]=null;
+    updates["adminApplications/"+uid]=null;
+
+    await db.ref().update(updates);
+    showNotice("User removed from website User Management.","User Management");
+  }catch(err){
+    console.error("Delete user failed:",err);
+    showNotice("Delete failed: "+(err.message||err),"Error","danger");
+  }
+};

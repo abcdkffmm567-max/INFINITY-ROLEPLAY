@@ -18,7 +18,7 @@
     "publicUsers": {
       ".read": true,
       "$uid": {
-        ".write": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && (auth.uid == $uid || root.child('admins').child(auth.uid).val() == true)",
         ".validate": "newData.hasChildren(['displayName','infinityId'])"
       }
     },
