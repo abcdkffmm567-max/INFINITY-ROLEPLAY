@@ -97,6 +97,7 @@
         else if(err.code==="auth/operation-not-allowed") msg="Google Sign-In is not enabled in Firebase Authentication.";
         else if(err.code==="auth/popup-blocked") msg="Google popup was blocked. Allow popups for this website and try again.";
         else if(err.code==="auth/popup-closed-by-user") msg="Google sign-in was cancelled.";
+        else if(err.code==="PERMISSION_DENIED" || /permission_denied|permission denied/i.test(msg)) msg="Google account signed in, but Firebase Database permission blocked the profile sync. Publish the updated database.rules.json from this ZIP.";
         status.textContent=msg;
         if(typeof showNotice==="function") showNotice(msg,"Google Sign-In","danger");
       }

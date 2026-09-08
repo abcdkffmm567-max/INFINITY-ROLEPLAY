@@ -1,24 +1,63 @@
 const $=s=>document.querySelector(s);
 let currentUser=null,currentProfile=null;
+let whitelistOpen=true;
+
+function setWhitelistLock(locked,title,text,showAuthActions=false){
+  const overlay=$("#whitelistLock");
+  const form=$("#whitelistForm");
+  if(overlay) overlay.classList.toggle("hidden",!locked);
+  if($("#whitelistLockTitle")) $("#whitelistLockTitle").textContent=title||"Whitelist Application Locked";
+  if($("#whitelistLockText")) $("#whitelistLockText").textContent=text||"";
+  if($("#whitelistLockActions")) $("#whitelistLockActions").classList.toggle("hidden",!showAuthActions);
+  if(form) form.querySelectorAll("input,textarea,button").forEach(el=>el.disabled=locked);
+}
+
+function refreshWhitelistLock(){
+  if(!whitelistOpen){
+    setWhitelistLock(true,"Whitelist Applications Closed","Whitelist applications are currently closed by the server administration.",false);
+    return;
+  }
+  if(!currentUser){
+    setWhitelistLock(true,"Whitelist Application Locked","Register or Login to unlock the whitelist application form.",true);
+    return;
+  }
+  if(currentProfile?.banned===true){
+    setWhitelistLock(true,"Application Locked","Your account is banned. Whitelist applications are disabled.",false);
+    return;
+  }
+  setWhitelistLock(false);
+}
+
+db.ref("siteSettings/whitelistApplicationsOpen").on("value",snap=>{
+  whitelistOpen = snap.val() !== false;
+  refreshWhitelistLock();
+});
 
 auth.onAuthStateChanged(async user=>{
-  currentUser=user;
+  currentUser=user||null;
+  currentProfile=null;
   if(!user){
     $("#wlStatus").innerHTML='Please <a href="login.html">login</a> first.';
     $("#myApplication").textContent="Login to view your latest application.";
+    refreshWhitelistLock();
     return;
   }
-  currentProfile=await ensureInfinityUser(user);
-  if(currentProfile.banned===true){
-    $("#wlStatus").textContent="Your account is banned. Whitelist applications are disabled.";
-    $("#whitelistForm").querySelectorAll("input,textarea,button").forEach(el=>el.disabled=true);
+  try{
+    currentProfile=await ensureInfinityUser(user);
+  }catch(err){
+    console.error("Profile sync failed:",err);
+    $("#wlStatus").textContent=err.message||"Could not load account.";
+    refreshWhitelistLock();
     return;
   }
+  refreshWhitelistLock();
+  if(currentProfile.banned===true) return;
   loadMyApplication();
 });
 
 $("#whitelistForm").onsubmit=async e=>{
   e.preventDefault();
+  if(!whitelistOpen){ $("#wlStatus").textContent="Whitelist applications are currently closed."; return; }
   if(!currentUser){ location.href="login.html"; return; }
   const f=new FormData(e.target);
   const data={

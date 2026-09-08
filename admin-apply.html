@@ -11,7 +11,18 @@
 <main class="section admin-apply-page"><section class="admins-hero">
 <span class="eyebrow">JOIN OUR STAFF TEAM</span><h1>Admin Application</h1>
 <p>Apply to join the Infinity Role Play administration team.</p></section>
-<section class="card admin-apply-card">
+<section class="card admin-apply-card form-lock-container">
+<div id="adminApplyLock" class="form-lock-overlay">
+  <div class="form-lock-box">
+    <div class="form-lock-icon">🔒</div>
+    <h2>Admin Application Locked</h2>
+    <p>You must Register or Login before applying for the Infinity Role Play Admin Team.</p>
+    <div class="form-lock-actions">
+      <a class="btn primary" href="Register.html">Register</a>
+      <a class="btn ghost" href="login.html">Login</a>
+    </div>
+  </div>
+</div>
 <div id="loginNotice" class="apply-login-notice hidden">You must be logged in first. <a class="btn small primary" href="login.html">Login</a></div>
 <form id="adminApplyForm" class="form-grid">
 <label>Server Username<input id="serverName" required placeholder="e.g. Lorenzo_Malfoy"></label>
@@ -28,11 +39,17 @@
 </form>
 <div class="application-status-card"><h3>My Application Status</h3><div id="myStatus">Login to view status.</div></div>
 </section></main>
-<script src="firebase-config.js"></script><script>
+<script src="firebase-config.js"></script>
+<script src="site-brand.js"></script><script>
 const f=document.getElementById("adminApplyForm"),st=document.getElementById("status"),ms=document.getElementById("myStatus"),ln=document.getElementById("loginNotice");
-let cu=null;
+let cu=null; const applyLock=document.getElementById("adminApplyLock");
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-auth.onAuthStateChanged(u=>{cu=u||null;if(!u){ln.classList.remove("hidden");f.querySelectorAll("input,textarea,button").forEach(x=>x.disabled=true);return}
+auth.onAuthStateChanged(u=>{cu=u||null;if(!u){
+if(applyLock) applyLock.classList.remove("hidden");
+ln.classList.remove("hidden");
+f.querySelectorAll("input,textarea,button").forEach(x=>x.disabled=true);
+return}
+if(applyLock) applyLock.classList.add("hidden");
 ln.classList.add("hidden");db.ref("adminApplications/"+u.uid).on("value",s=>{const a=s.val();if(!a){ms.innerHTML='<span class="status-pill pending">No application yet</span>';return}
 const x=a.status||"Pending";ms.innerHTML=`<span class="status-pill ${esc(x.toLowerCase())}">${esc(x)}</span>${a.adminNote?`<p><b>Admin Note:</b> ${esc(a.adminNote)}</p>`:""}`})});
 f.onsubmit=async e=>{e.preventDefault();if(!cu)return;const d={uid:cu.uid,accountEmail:cu.email||"",serverName:serverName.value.trim(),realName:realName.value.trim(),age:+age.value,phone:phone.value.trim(),discord:discord.value.trim(),playTime:playTime.value.trim(),experience:experience.value.trim(),reason:reason.value.trim(),availability:availability.value.trim(),status:"Pending",submittedAt:firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP};

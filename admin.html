@@ -173,6 +173,23 @@
       <div id="serverAdminsAdminList" class="server-admins-admin-list"></div>
     </section>
 
+
+    <section class="card admin-section">
+      <div class="section-row">
+        <div>
+          <h2>Whitelist Form Access</h2>
+          <p>Lock or unlock the public Whitelist Application form.</p>
+        </div>
+        <span id="whitelistAccessBadge" class="status-pill">Loading</span>
+      </div>
+      <label class="full apply-checkbox">
+        <input id="whitelistApplicationsOpen" type="checkbox">
+        <span>Whitelist applications are OPEN</span>
+      </label>
+      <button id="saveWhitelistAccessBtn" class="btn primary" type="button">Save Whitelist Access</button>
+      <span id="whitelistAccessStatus"></span>
+    </section>
+
 <section class="card admin-section"><div class="section-row"><div><h2>Admin Applications</h2><p>Review player applications for the server admin team.</p></div>
 <select id="filterAdminApps"><option>All</option><option>Pending</option><option>Accepted</option><option>Rejected</option></select></div>
 <div id="adminApplicationsList" class="applications-list"></div></section>

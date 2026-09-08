@@ -25,7 +25,19 @@
       <p>Login is required before submitting your whitelist application.</p>
     </div>
 
-    <form id="whitelistForm" class="card form-grid">
+    <div class="form-lock-container">
+      <div id="whitelistLock" class="form-lock-overlay">
+        <div class="form-lock-box">
+          <div class="form-lock-icon">🔒</div>
+          <h2 id="whitelistLockTitle">Whitelist Application Locked</h2>
+          <p id="whitelistLockText">Login or Register to continue.</p>
+          <div id="whitelistLockActions" class="form-lock-actions">
+            <a class="btn primary" href="Register.html">Register</a>
+            <a class="btn ghost" href="login.html">Login</a>
+          </div>
+        </div>
+      </div>
+      <form id="whitelistForm" class="card form-grid">
       <label>Real Name<input required name="realName" placeholder="Your name"></label>
       <label>Age<input required type="number" min="13" max="80" name="age" placeholder="18"></label>
       <label>Discord Name<input required name="discord" placeholder="name#0000"></label>
@@ -35,7 +47,8 @@
       <label class="full">Give one example of RDM / VDM / MG.<textarea required minlength="20" name="scenario" rows="4"></textarea></label>
       <label class="checkbox full"><input required type="checkbox"> I have read and agree to follow the server rules.</label>
       <div class="full form-actions"><button class="btn primary" type="submit">Submit Whitelist</button><span id="wlStatus"></span></div>
-    </form>
+      </form>
+    </div>
 
     <div class="card application-status">
       <h3>My Whitelist Status</h3>

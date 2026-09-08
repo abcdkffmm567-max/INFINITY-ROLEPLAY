@@ -135,6 +135,16 @@ function startDashboard(){
    if(box) box.innerHTML="<p>Could not load server admins: "+esc(err.message||"Permission denied")+"</p>";
  });
  db.ref("adminApplications").on("value",x=>{allAdminApplications=x.val()||{};renderAdminApplications();},err=>{const b=$("#adminApplicationsList");if(b)b.innerHTML="<p>"+esc(err.message)+"</p>";});
+ db.ref("siteSettings/whitelistApplicationsOpen").on("value",s=>{
+   const open=s.val()!==false;
+   const cb=$("#whitelistApplicationsOpen");
+   const badge=$("#whitelistAccessBadge");
+   if(cb) cb.checked=open;
+   if(badge){
+     badge.textContent=open?"OPEN":"LOCKED";
+     badge.className="status-pill "+(open?"accepted":"rejected");
+   }
+ });
  db.ref("siteSettings/releaseCountdown").on("value",s=>{
    const v=s.val()||{};
    const input=$("#releaseDateTime");
@@ -429,6 +439,21 @@ if($("#clearAllChatBtn")) $("#clearAllChatBtn").onclick=async()=>{
   }finally{
     $("#clearAllChatBtn").disabled=false;
     $("#clearAllChatBtn").textContent="Clear Live Chat";
+  }
+};
+
+
+
+if($("#saveWhitelistAccessBtn")) $("#saveWhitelistAccessBtn").onclick=async()=>{
+  if(!adminUser)return;
+  const open=$("#whitelistApplicationsOpen").checked;
+  const st=$("#whitelistAccessStatus");
+  try{
+    st.textContent="Saving...";
+    await db.ref("siteSettings/whitelistApplicationsOpen").set(open);
+    st.textContent=open?"Whitelist form unlocked.":"Whitelist form locked.";
+  }catch(err){
+    st.textContent="Save failed: "+(err.message||err);
   }
 };
 

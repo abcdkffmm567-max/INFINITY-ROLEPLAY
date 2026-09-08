@@ -347,3 +347,48 @@ code{color:#9be7ff}
 @media(max-width:650px){
   .release-countdown-grid{grid-template-columns:repeat(2,1fr)}
 }
+
+
+/* ===== Dynamic server logo on every page ===== */
+.logo-mark img.dynamic-server-logo{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:inherit;
+  display:block;
+}
+
+/* ===== Locked application forms ===== */
+.form-lock-container{position:relative}
+.form-lock-overlay{
+  position:absolute;
+  inset:0;
+  z-index:8;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+  border-radius:inherit;
+  background:rgba(5,8,18,.82);
+  backdrop-filter:blur(8px);
+}
+.form-lock-overlay.hidden{display:none}
+.form-lock-box{
+  width:min(440px,100%);
+  padding:26px;
+  text-align:center;
+  border:1px solid rgba(73,217,255,.28);
+  border-radius:20px;
+  background:rgba(12,16,32,.96);
+  box-shadow:0 18px 55px rgba(0,0,0,.45);
+}
+.form-lock-icon{font-size:42px;margin-bottom:8px}
+.form-lock-box h2{margin:8px 0 10px;font-family:Orbitron,sans-serif;font-size:1.2rem}
+.form-lock-box p{color:var(--muted,#98a2b9);line-height:1.6}
+.form-lock-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.form-lock-actions.hidden{display:none}
+
+@media(max-width:650px){
+  .form-lock-overlay{padding:14px}
+  .form-lock-box{padding:20px}
+}
