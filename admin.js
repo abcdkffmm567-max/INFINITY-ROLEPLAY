@@ -121,6 +121,7 @@ function startDashboard(){
    allUsers=s.val()||{};
    $("#userCount").textContent=s.numChildren();
    renderUsersManagement();
+   renderChatMuteUsers();
  },err=>{
    console.error("User Management read failed:",err);
    const box=$("#usersManagementList");
@@ -135,6 +136,7 @@ function startDashboard(){
    if(box) box.innerHTML="<p>Could not load server admins: "+esc(err.message||"Permission denied")+"</p>";
  });
  db.ref("adminApplications").on("value",x=>{allAdminApplications=x.val()||{};renderAdminApplications();},err=>{const b=$("#adminApplicationsList");if(b)b.innerHTML="<p>"+esc(err.message)+"</p>";});
+ db.ref("siteSettings/adminApplyBackgroundURL").on("value",s=>{const i=$("#adminApplyBackgroundURL");if(i)i.value=s.val()||"";});
  db.ref("siteSettings/whitelistApplicationsOpen").on("value",s=>{
    const open=s.val()!==false;
    const cb=$("#whitelistApplicationsOpen");
@@ -458,6 +460,11 @@ if($("#saveWhitelistAccessBtn")) $("#saveWhitelistAccessBtn").onclick=async()=>{
 };
 
 
+
+function renderChatMuteUsers(){const b=$("#chatMuteUsersList");if(!b)return;const a=Object.entries(allUsers||{}).map(([uid,v])=>({uid,...v}));if(!a.length){b.innerHTML="<p>No registered users found.</p>";return}b.innerHTML=a.map(u=>{const m=u.chatMuted===true,n=u.displayName||u.name||u.email||"User",av=u.photoURL||`https://ui-avatars.com/api/?name=${encodeURIComponent(n)}&background=111827&color=ffffff`;return `<article class="admin-user-card"><img class="admin-user-avatar" src="${escAttr(av)}"><div class="admin-user-info"><div class="admin-user-name">${esc(n)}</div><small>${m?"Muted from Live Chat":"Can use Live Chat"}</small></div><div class="admin-user-actions"><button class="btn ${m?"ghost":"danger"} small" onclick="setChatMute('${u.uid}',${m?'false':'true'})">${m?"Unmute":"Mute"}</button></div></article>`}).join("")}
+window.setChatMute=async(uid,muted)=>{try{await db.ref("users/"+uid+"/chatMuted").set(muted===true);showNotice(muted?"User muted from Live Chat.":"User unmuted.","Live Chat")}catch(e){showNotice("Mute update failed: "+e.message,"Error","danger")}};
+if($("#saveAdminApplyBackgroundBtn"))$("#saveAdminApplyBackgroundBtn").onclick=async()=>{const u=$("#adminApplyBackgroundURL").value.trim(),st=$("#adminApplyBackgroundStatus");try{st.textContent="Saving...";await db.ref("siteSettings/adminApplyBackgroundURL").set(u);st.textContent=u?"Background saved.":"Background removed."}catch(e){st.textContent="Save failed: "+e.message}};
+
 $("#filterApps").onchange=renderApps;
 function renderApps(){
  const filter=$("#filterApps").value,box=$("#applicationsList");box.innerHTML="";
@@ -499,3 +506,29 @@ function messageHtml(m){
 function fmt(t){return t?new Date(t).toLocaleString():"now"}
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function escAttr(v){return esc(v)}
+
+db.ref("siteSettings").on("value",s=>{
+  const v=s.val()||{};
+  const a=$("#sampDownloadUrl");
+  const d=$("#dataDownloadUrl");
+  if(a && !a.matches(":focus")) a.value=v.sampDownloadUrl||v.sampApkUrl||v.sampUrl||"";
+  if(d && !d.matches(":focus")) d.value=v.dataDownloadUrl||v.dataFileUrl||v.dataUrl||"";
+});
+
+if($("#saveDownloadLinksBtn")) $("#saveDownloadLinksBtn").onclick=async()=>{
+  if(!adminUser)return;
+  const samp=$("#sampDownloadUrl").value.trim();
+  const data=$("#dataDownloadUrl").value.trim();
+  const st=$("#downloadLinksStatus");
+  try{
+    st.textContent="Saving...";
+    await db.ref("siteSettings").update({
+      sampDownloadUrl:samp,
+      dataDownloadUrl:data
+    });
+    st.textContent="Download links saved.";
+  }catch(err){
+    console.error(err);
+    st.textContent="Save failed: "+(err.message||err);
+  }
+};

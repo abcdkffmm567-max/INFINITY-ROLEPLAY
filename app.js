@@ -178,7 +178,8 @@ $("#chatForm").onsubmit=async e=>{
     // Make sure the user's profile exists before chat permission is checked.
     currentProfile=await window.ensureInfinityUser(currentUser);
 
-    if(currentProfile?.banned===true){
+    if(currentProfile?.chatMuted===true){ showNotice("You are muted from Live Chat.","Live Chat","danger"); return; }
+  if(currentProfile?.banned===true){
       const reason=currentProfile.banReason||"";
       if(typeof showNotice==="function"){
         showNotice("Your account is banned and cannot use Live Chat."+(reason ? " Reason: "+reason : ""),"Chat Disabled","danger");
@@ -378,3 +379,42 @@ db.ref("siteSettings/releaseCountdown").on("value",snap=>{
   startReleaseCountdown(snap.val()||null);
 });
 
+
+
+function normalizeExternalDownloadUrl(raw){
+  let url=String(raw||"").trim();
+  if(!url)return "";
+  if(!/^https?:\/\//i.test(url)) url="https://"+url;
+  return url;
+}
+
+function configureDownloadButton(id,url,label){
+  const btn=document.getElementById(id);
+  if(!btn)return;
+  const normalized=normalizeExternalDownloadUrl(url);
+  if(!normalized){
+    btn.href="#";
+    btn.classList.add("disabled");
+    btn.setAttribute("aria-disabled","true");
+    btn.onclick=(e)=>{e.preventDefault();showNotice(label+" download link is not configured yet.","Downloads","danger");};
+    return;
+  }
+  btn.classList.remove("disabled");
+  btn.removeAttribute("aria-disabled");
+  btn.href=normalized;
+  btn.target="_blank";
+  btn.rel="noopener noreferrer";
+  btn.onclick=(e)=>{
+    e.preventDefault();
+    // Use direct navigation so Android browsers/download hosts can handle APK/ZIP links.
+    window.location.href=normalized;
+  };
+}
+
+db.ref("siteSettings").on("value",snap=>{
+  const v=snap.val()||{};
+  const samp=v.sampDownloadUrl || v.sampApkUrl || v.sampUrl || "";
+  const data=v.dataDownloadUrl || v.dataFileUrl || v.dataUrl || "";
+  configureDownloadButton("sampDownloadBtn",samp,"SAMP App");
+  configureDownloadButton("dataDownloadBtn",data,"Data File");
+});

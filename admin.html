@@ -23,7 +23,7 @@
 
     <form id="adminLoginForm" class="auth-form">
       <label>Username
-        <input required type="text" name="username" autocomplete="username" placeholder="infinityadmin">
+        <input required type="text" name="username" autocomplete="username" placeholder="Admin">
       </label>
 
       <label>Password
@@ -190,7 +190,7 @@
       <span id="whitelistAccessStatus"></span>
     </section>
 
-<section class="card admin-section"><div class="section-row"><div><h2>Admin Applications</h2><p>Review player applications for the server admin team.</p></div>
+<section class="card admin-section"><div class="section-row"><div><h2>Admin Application Background</h2><p>Set the background image on the Admin Application page.</p></div></div><label class="full">Background Image Link<input id="adminApplyBackgroundURL" type="url" placeholder="https://example.com/background.jpg"></label><div class="full"><button id="saveAdminApplyBackgroundBtn" class="btn primary" type="button">Save Background</button><span id="adminApplyBackgroundStatus"></span></div></section><section class="card admin-section"><div class="section-row"><div><h2>Admin Applications</h2><p>Review player applications for the server admin team.</p></div>
 <select id="filterAdminApps"><option>All</option><option>Pending</option><option>Accepted</option><option>Rejected</option></select></div>
 <div id="adminApplicationsList" class="applications-list"></div></section>
     <section class="card admin-section">
@@ -199,12 +199,34 @@
     </section>
 
     <section class="card admin-section">
-      <div class="section-row"><h2>Live Chat Moderation</h2><button id="clearAllChatBtn" class="btn danger small" type="button">Clear Live Chat</button></div>
+      <div class="section-row"><section class="card admin-section"><div class="section-row"><div><h2>Live Chat User Mute</h2><p>Mute or unmute registered users from Live Chat.</p></div></div><div id="chatMuteUsersList" class="server-admins-admin-list"></div></section><h2>Live Chat Moderation</h2><button id="clearAllChatBtn" class="btn danger small" type="button">Clear Live Chat</button></div>
       <p>Messages from this admin account will automatically display a verified blue badge on the public chat.</p>
       <div id="adminChatMessages" class="chat-messages admin-chat"></div>
       <form id="adminChatForm" class="chat-form"><input id="adminChatInput" maxlength="300" placeholder="Reply as verified admin..."><button class="btn primary">Send</button></form>
     </section>
   </div>
+
+<section class="card admin-section">
+  <div class="section-row">
+    <div>
+      <h2>Download Links</h2>
+      <p>Set direct external download links for the SAMP app and Infinity data file.</p>
+    </div>
+  </div>
+  <div class="form-grid">
+    <label class="full">SAMP App Download Link
+      <input id="sampDownloadUrl" type="url" placeholder="https://example.com/samp.apk">
+    </label>
+    <label class="full">Data File Download Link
+      <input id="dataDownloadUrl" type="url" placeholder="https://example.com/data.zip">
+    </label>
+    <div class="full">
+      <button id="saveDownloadLinksBtn" class="btn primary" type="button">Save Download Links</button>
+      <span id="downloadLinksStatus"></span>
+    </div>
+  </div>
+</section>
+
 </main>
 
 <script src="firebase-config.js"></script>

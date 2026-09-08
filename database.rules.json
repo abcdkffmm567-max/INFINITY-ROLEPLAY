@@ -11,7 +11,7 @@
     "users": {
       "$uid": {
         ".read": "auth != null && (auth.uid == $uid || root.child('admins').child(auth.uid).val() == true)",
-        ".write": "auth != null && (root.child('admins').child(auth.uid).val() == true || (auth.uid == $uid && data.child('banned').val() != true && newData.child('banned').val() != true && ((!data.child('verified').exists() && newData.child('verified').val() == false) || (data.child('verified').exists() && newData.child('verified').val() == data.child('verified').val()))))"
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() == true || (auth.uid == $uid && data.child('banned').val() != true && newData.child('banned').val() != true && ((!data.child('verified').exists() && newData.child('verified').val() == false) || (data.child('verified').exists() && newData.child('verified').val() == data.child('verified').val())) && ((!data.child('chatMuted').exists() && newData.child('chatMuted').val() != true) || (data.child('chatMuted').exists() && newData.child('chatMuted').val() == data.child('chatMuted').val()))))"
       },
       ".read": "auth != null && root.child('admins').child(auth.uid).val() == true"
     },
@@ -45,7 +45,7 @@
       ".read": "auth != null",
       ".write": "auth != null && root.child('admins').child(auth.uid).val() == true",
       "$id": {
-        ".write": "auth != null && (root.child('admins').child(auth.uid).val() == true || (!data.exists() && newData.child('uid').val() == auth.uid && root.child('users').child(auth.uid).child('banned').val() != true && newData.child('verified').val() == (root.child('users').child(auth.uid).child('verified').val() == true) && newData.child('isAdmin').val() == (root.child('admins').child(auth.uid).val() == true)))"
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() == true || (!data.exists() && newData.child('uid').val() == auth.uid && root.child('users').child(auth.uid).child('banned').val() != true && root.child('users').child(auth.uid).child('chatMuted').val() != true && newData.child('verified').val() == (root.child('users').child(auth.uid).child('verified').val() == true) && newData.child('isAdmin').val() == (root.child('admins').child(auth.uid).val() == true)))"
       }
     },
     "serverAdmins": {

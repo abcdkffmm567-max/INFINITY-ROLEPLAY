@@ -392,3 +392,7 @@ code{color:#9be7ff}
   .form-lock-overlay{padding:14px}
   .form-lock-box{padding:20px}
 }
+.admin-username,.admin-account,#adminUsername,#adminUserName{display:none!important}body.admin-apply-has-bg{background-image:linear-gradient(rgba(3,7,18,.78),rgba(3,7,18,.88)),var(--admin-apply-bg);background-size:cover;background-position:center;background-attachment:fixed}#releaseCountdownSection{padding-top:18px;padding-bottom:22px}
+.downloads-card{max-width:900px;margin:0 auto;text-align:center;padding:26px}
+.download-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+a.btn.disabled{opacity:.5;pointer-events:auto;cursor:not-allowed}
