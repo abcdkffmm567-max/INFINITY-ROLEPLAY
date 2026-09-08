@@ -332,3 +332,49 @@ if(heroCopyBtn){
     }catch(e){}
   };
 }
+
+
+let releaseCountdownTimer=null;
+function startReleaseCountdown(cfg){
+  const section=document.getElementById("releaseCountdownSection");
+  if(!section)return;
+  if(releaseCountdownTimer){clearInterval(releaseCountdownTimer);releaseCountdownTimer=null;}
+  if(!cfg || cfg.enabled===false || !cfg.timestamp){
+    section.classList.add("hidden");
+    return;
+  }
+  const target=Number(cfg.timestamp);
+  if(!Number.isFinite(target)){section.classList.add("hidden");return;}
+  section.classList.remove("hidden");
+
+  const dateEl=document.getElementById("releaseCountdownDate");
+  if(dateEl) dateEl.textContent="Release: "+new Date(target).toLocaleString();
+
+  const tick=()=>{
+    let diff=target-Date.now();
+    if(diff<=0){
+      document.getElementById("cdDays").textContent="00";
+      document.getElementById("cdHours").textContent="00";
+      document.getElementById("cdMinutes").textContent="00";
+      document.getElementById("cdSeconds").textContent="00";
+      if(dateEl) dateEl.textContent="SERVER RELEASED!";
+      return;
+    }
+    const d=Math.floor(diff/86400000); diff%=86400000;
+    const h=Math.floor(diff/3600000); diff%=3600000;
+    const m=Math.floor(diff/60000); diff%=60000;
+    const s=Math.floor(diff/1000);
+    const pad=n=>String(n).padStart(2,"0");
+    document.getElementById("cdDays").textContent=pad(d);
+    document.getElementById("cdHours").textContent=pad(h);
+    document.getElementById("cdMinutes").textContent=pad(m);
+    document.getElementById("cdSeconds").textContent=pad(s);
+  };
+  tick();
+  releaseCountdownTimer=setInterval(tick,1000);
+}
+
+db.ref("siteSettings/releaseCountdown").on("value",snap=>{
+  startReleaseCountdown(snap.val()||null);
+});
+

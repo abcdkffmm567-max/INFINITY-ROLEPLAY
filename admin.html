@@ -105,6 +105,30 @@
     </section>
 
 
+
+    <section class="card admin-section">
+      <div class="section-row">
+        <div>
+          <h2>Server Release Countdown</h2>
+          <p>Set the server release date and time shown on the Home page.</p>
+        </div>
+      </div>
+
+      <form id="releaseCountdownForm" class="form-grid">
+        <label class="full">Release Date & Time
+          <input id="releaseDateTime" type="datetime-local" required>
+        </label>
+        <label class="full apply-checkbox">
+          <input id="releaseCountdownEnabled" type="checkbox" checked>
+          <span>Show countdown on Home page</span>
+        </label>
+        <div class="full">
+          <button class="btn primary" type="submit">Save Countdown</button>
+          <span id="releaseCountdownStatus"></span>
+        </div>
+      </form>
+    </section>
+
     <section class="card admin-section">
       <div class="section-row">
         <div>
@@ -149,13 +173,16 @@
       <div id="serverAdminsAdminList" class="server-admins-admin-list"></div>
     </section>
 
+<section class="card admin-section"><div class="section-row"><div><h2>Admin Applications</h2><p>Review player applications for the server admin team.</p></div>
+<select id="filterAdminApps"><option>All</option><option>Pending</option><option>Accepted</option><option>Rejected</option></select></div>
+<div id="adminApplicationsList" class="applications-list"></div></section>
     <section class="card admin-section">
       <div class="section-row"><h2>Whitelist Applications</h2><select id="filterApps"><option value="all">All</option><option value="pending">Pending</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option></select></div>
       <div id="applicationsList" class="applications-list"></div>
     </section>
 
     <section class="card admin-section">
-      <h2>Live Chat Moderation</h2>
+      <div class="section-row"><h2>Live Chat Moderation</h2><button id="clearAllChatBtn" class="btn danger small" type="button">Clear Live Chat</button></div>
       <p>Messages from this admin account will automatically display a verified blue badge on the public chat.</p>
       <div id="adminChatMessages" class="chat-messages admin-chat"></div>
       <form id="adminChatForm" class="chat-form"><input id="adminChatInput" maxlength="300" placeholder="Reply as verified admin..."><button class="btn primary">Send</button></form>

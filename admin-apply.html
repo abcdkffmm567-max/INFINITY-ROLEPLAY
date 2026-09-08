@@ -1,0 +1,40 @@
+<!doctype html><html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Infinity RP | Admin Apply</title><link rel="stylesheet" href="styles.css">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+</head><body><div class="bg-grid"></div>
+<header class="nav"><a class="brand" href="index.html"><span class="logo-mark">∞</span>INFINITY <b>ROLE PLAY</b></a>
+<a class="btn small ghost" href="index.html">← Home</a></header>
+<main class="section admin-apply-page"><section class="admins-hero">
+<span class="eyebrow">JOIN OUR STAFF TEAM</span><h1>Admin Application</h1>
+<p>Apply to join the Infinity Role Play administration team.</p></section>
+<section class="card admin-apply-card">
+<div id="loginNotice" class="apply-login-notice hidden">You must be logged in first. <a class="btn small primary" href="login.html">Login</a></div>
+<form id="adminApplyForm" class="form-grid">
+<label>Server Username<input id="serverName" required placeholder="e.g. Lorenzo_Malfoy"></label>
+<label>Real Name<input id="realName" required placeholder="Your real name"></label>
+<label>Age<input id="age" type="number" min="13" max="99" required></label>
+<label>Phone / WhatsApp<input id="phone" type="tel" required placeholder="07XXXXXXXX"></label>
+<label>Discord Username<input id="discord" placeholder="Optional"></label>
+<label>How long have you played?<input id="playTime" required placeholder="e.g. 3 months"></label>
+<label class="full">Previous Admin Experience<textarea id="experience" rows="4" required></textarea></label>
+<label class="full">Why do you want to become an Admin?<textarea id="reason" rows="5" required></textarea></label>
+<label class="full">Daily Availability<input id="availability" required placeholder="e.g. 3-5 hours"></label>
+<label class="full apply-checkbox"><input id="agree" type="checkbox" required><span>I confirm this information is correct.</span></label>
+<div class="full"><button class="btn primary" type="submit">Submit Application</button><p id="status"></p></div>
+</form>
+<div class="application-status-card"><h3>My Application Status</h3><div id="myStatus">Login to view status.</div></div>
+</section></main>
+<script src="firebase-config.js"></script><script>
+const f=document.getElementById("adminApplyForm"),st=document.getElementById("status"),ms=document.getElementById("myStatus"),ln=document.getElementById("loginNotice");
+let cu=null;
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+auth.onAuthStateChanged(u=>{cu=u||null;if(!u){ln.classList.remove("hidden");f.querySelectorAll("input,textarea,button").forEach(x=>x.disabled=true);return}
+ln.classList.add("hidden");db.ref("adminApplications/"+u.uid).on("value",s=>{const a=s.val();if(!a){ms.innerHTML='<span class="status-pill pending">No application yet</span>';return}
+const x=a.status||"Pending";ms.innerHTML=`<span class="status-pill ${esc(x.toLowerCase())}">${esc(x)}</span>${a.adminNote?`<p><b>Admin Note:</b> ${esc(a.adminNote)}</p>`:""}`})});
+f.onsubmit=async e=>{e.preventDefault();if(!cu)return;const d={uid:cu.uid,accountEmail:cu.email||"",serverName:serverName.value.trim(),realName:realName.value.trim(),age:+age.value,phone:phone.value.trim(),discord:discord.value.trim(),playTime:playTime.value.trim(),experience:experience.value.trim(),reason:reason.value.trim(),availability:availability.value.trim(),status:"Pending",submittedAt:firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP};
+try{st.textContent="Submitting...";await db.ref("adminApplications/"+cu.uid).set(d);st.textContent="Application submitted successfully!"}catch(e){st.textContent="Submit failed: "+e.message}}
+</script></body></html>

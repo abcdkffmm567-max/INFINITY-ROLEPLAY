@@ -332,3 +332,18 @@ code{color:#9be7ff}
   .server-admins-grid{grid-template-columns:1fr}
   .desktop-nav{display:none}
 }
+.admin-apply-page{max-width:1000px;margin:auto}.admin-apply-card{max-width:850px;margin:0 auto 60px;padding:26px}.admin-apply-card textarea{width:100%;resize:vertical}.apply-login-notice{display:flex;justify-content:space-between;gap:12px;padding:14px;margin-bottom:18px;border-radius:14px;background:rgba(54,211,255,.06)}.apply-checkbox{display:flex!important;gap:10px}.apply-checkbox input{width:auto!important}.application-status-card{margin-top:24px;padding-top:22px;border-top:1px solid rgba(255,255,255,.08)}.status-pill{display:inline-flex;padding:6px 10px;border-radius:999px;font-size:.75rem;font-weight:800;text-transform:uppercase}.admin-application-card{padding:18px;border:1px solid rgba(255,255,255,.08);border-radius:18px;margin-top:14px}.admin-application-head{display:flex;justify-content:space-between;gap:12px}.admin-application-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}.admin-application-grid>div{padding:12px;border-radius:12px;background:rgba(255,255,255,.025)}.admin-application-grid span{display:block;color:#9ca3af;font-size:.76rem}.admin-application-grid .full{grid-column:1/-1}@media(max-width:700px){.admin-application-grid{grid-template-columns:1fr}.admin-application-grid .full{grid-column:auto}}
+
+/* ===== Release Countdown ===== */
+.release-countdown-section{padding:28px 20px 55px}
+.release-countdown-card{max-width:900px;margin:0 auto;padding:28px;text-align:center}
+.release-countdown-card h2{font-family:Orbitron,sans-serif;margin:.5rem 0 1.4rem}
+.release-countdown-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.release-countdown-grid>div{padding:22px 10px;border:1px solid rgba(54,211,255,.18);border-radius:18px;background:rgba(255,255,255,.025)}
+.release-countdown-grid strong{display:block;font-family:Orbitron,sans-serif;font-size:clamp(1.8rem,6vw,3.5rem);line-height:1}
+.release-countdown-grid span{display:block;margin-top:9px;color:var(--muted,#9ca3af);text-transform:uppercase;font-size:.72rem;letter-spacing:.1em}
+.release-countdown-date{margin:18px 0 0;color:var(--muted,#9ca3af)}
+
+@media(max-width:650px){
+  .release-countdown-grid{grid-template-columns:repeat(2,1fr)}
+}

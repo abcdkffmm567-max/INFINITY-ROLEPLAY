@@ -4,6 +4,7 @@ let allApps={};
 let allUsers={};
 let dashboardStarted=false;
 let allServerAdmins={};
+let allAdminApplications={};
 
 // The Admin Panel still shows only Username + Password.
 // Internally, the username is mapped to a Firebase Authentication email.
@@ -132,6 +133,18 @@ function startDashboard(){
    console.error("Server admins read failed:",err);
    const box=$("#serverAdminsAdminList");
    if(box) box.innerHTML="<p>Could not load server admins: "+esc(err.message||"Permission denied")+"</p>";
+ });
+ db.ref("adminApplications").on("value",x=>{allAdminApplications=x.val()||{};renderAdminApplications();},err=>{const b=$("#adminApplicationsList");if(b)b.innerHTML="<p>"+esc(err.message)+"</p>";});
+ db.ref("siteSettings/releaseCountdown").on("value",s=>{
+   const v=s.val()||{};
+   const input=$("#releaseDateTime");
+   const enabled=$("#releaseCountdownEnabled");
+   if(input && v.timestamp){
+     const d=new Date(Number(v.timestamp));
+     const pad=n=>String(n).padStart(2,"0");
+     input.value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+   }
+   if(enabled) enabled.checked=v.enabled!==false;
  });
  db.ref("chat").limitToLast(100).on("value",renderAdminChat);
 }
@@ -361,6 +374,63 @@ window.deleteServerAdmin=async id=>{
 };
 
 if($("#cancelServerAdminEdit")) $("#cancelServerAdminEdit").onclick=resetServerAdminForm;
+
+
+
+function renderAdminApplications(){
+ const b=$("#adminApplicationsList"); if(!b)return;
+ const f=$("#filterAdminApps")?.value||"All";
+ const a=Object.entries(allAdminApplications).map(([uid,v])=>({uid,...v})).filter(x=>f==="All"||(x.status||"Pending")===f).sort((x,y)=>(y.submittedAt||0)-(x.submittedAt||0));
+ if(!a.length){b.innerHTML="<p>No admin applications found.</p>";return}
+ b.innerHTML=a.map(x=>`<article class="admin-application-card"><div class="admin-application-head"><div><h3>${esc(x.serverName||"Unknown")}</h3><small>${esc(x.realName||"")} • Age ${esc(x.age||"-")}</small></div><span class="status-pill ${esc((x.status||"Pending").toLowerCase())}">${esc(x.status||"Pending")}</span></div>
+ <div class="admin-application-grid"><div><span>Phone</span><strong>${esc(x.phone||"-")}</strong></div><div><span>Discord</span><strong>${esc(x.discord||"-")}</strong></div><div><span>Play Time</span><strong>${esc(x.playTime||"-")}</strong></div><div><span>Availability</span><strong>${esc(x.availability||"-")}</strong></div><div class="full"><span>Experience</span><p>${esc(x.experience||"-")}</p></div><div class="full"><span>Why Admin?</span><p>${esc(x.reason||"-")}</p></div></div>
+ <label class="full">Admin Note<textarea id="adminNote_${x.uid}" rows="2">${esc(x.adminNote||"")}</textarea></label>
+ <div class="admin-user-actions"><button class="btn primary small" onclick="setAdminApplicationStatus('${x.uid}','Accepted')">Accept</button><button class="btn ghost small" onclick="setAdminApplicationStatus('${x.uid}','Rejected')">Reject</button><button class="btn ghost small" onclick="setAdminApplicationStatus('${x.uid}','Pending')">Pending</button><button class="btn danger small" onclick="deleteAdminApplication('${x.uid}')">Delete</button></div></article>`).join("")
+}
+window.setAdminApplicationStatus=async(uid,status)=>{const note=$("#adminNote_"+uid)?.value.trim()||"";try{await db.ref("adminApplications/"+uid).update({status,adminNote:note,reviewedAt:firebase.database.ServerValue.TIMESTAMP,reviewedBy:adminUser.uid});showNotice("Application marked "+status+".","Admin Application")}catch(e){showNotice("Update failed: "+e.message,"Error","danger")}};
+window.deleteAdminApplication=async uid=>{if(!confirm("Delete this admin application?"))return;try{await db.ref("adminApplications/"+uid).remove()}catch(e){showNotice("Delete failed: "+e.message,"Error","danger")}};
+if($("#filterAdminApps"))$("#filterAdminApps").onchange=renderAdminApplications;
+
+
+if($("#releaseCountdownForm")) $("#releaseCountdownForm").onsubmit=async e=>{
+  e.preventDefault();
+  if(!adminUser)return;
+  const raw=$("#releaseDateTime").value;
+  const enabled=$("#releaseCountdownEnabled").checked;
+  const st=$("#releaseCountdownStatus");
+  if(!raw){st.textContent="Select a release date and time.";return;}
+  const timestamp=new Date(raw).getTime();
+  if(!Number.isFinite(timestamp)){st.textContent="Invalid date/time.";return;}
+  try{
+    st.textContent="Saving...";
+    await db.ref("siteSettings/releaseCountdown").set({
+      timestamp,
+      enabled,
+      updatedAt:firebase.database.ServerValue.TIMESTAMP,
+      updatedBy:adminUser.uid
+    });
+    st.textContent="Countdown saved.";
+  }catch(err){
+    console.error(err);
+    st.textContent="Save failed: "+(err.message||err);
+  }
+};
+
+if($("#clearAllChatBtn")) $("#clearAllChatBtn").onclick=async()=>{
+  if(!adminUser)return;
+  if(!confirm("Clear ALL live chat messages? This cannot be undone."))return;
+  try{
+    $("#clearAllChatBtn").disabled=true;
+    $("#clearAllChatBtn").textContent="Clearing...";
+    await db.ref("chat").remove();
+    showNotice("Live Chat cleared successfully.","Live Chat");
+  }catch(err){
+    showNotice("Could not clear chat: "+err.message,"Error","danger");
+  }finally{
+    $("#clearAllChatBtn").disabled=false;
+    $("#clearAllChatBtn").textContent="Clear Live Chat";
+  }
+};
 
 
 $("#filterApps").onchange=renderApps;

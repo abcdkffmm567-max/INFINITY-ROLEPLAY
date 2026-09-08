@@ -43,11 +43,23 @@
     },
     "chat": {
       ".read": "auth != null",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() == true",
       "$id": {
-        ".write": "auth != null && !data.exists() && newData.child('uid').val() == auth.uid && root.child('users').child(auth.uid).child('banned').val() != true && newData.child('verified').val() == (root.child('users').child(auth.uid).child('verified').val() == true) && newData.child('isAdmin').val() == (root.child('admins').child(auth.uid).val() == true)"
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() == true || (!data.exists() && newData.child('uid').val() == auth.uid && root.child('users').child(auth.uid).child('banned').val() != true && newData.child('verified').val() == (root.child('users').child(auth.uid).child('verified').val() == true) && newData.child('isAdmin').val() == (root.child('admins').child(auth.uid).val() == true)))"
       }
     },
     "serverAdmins": {
+      ".read": true,
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() == true"
+    },
+    "adminApplications": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() == true",
+      "$uid": {
+        ".read": "auth != null && (auth.uid == $uid || root.child('admins').child(auth.uid).val() == true)",
+        ".write": "auth != null && ((auth.uid == $uid && ((!data.exists() && newData.child('uid').val() == auth.uid && newData.child('status').val() == 'Pending') || (data.exists() && newData.child('uid').val() == auth.uid && newData.child('status').val() == data.child('status').val()))) || root.child('admins').child(auth.uid).val() == true)"
+      }
+    },
+    "siteSettings": {
       ".read": true,
       ".write": "auth != null && root.child('admins').child(auth.uid).val() == true"
     }
