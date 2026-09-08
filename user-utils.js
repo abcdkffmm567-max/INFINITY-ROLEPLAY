@@ -47,3 +47,22 @@ async function getBanState(user){
     data
   };
 }
+
+window.syncUniqueInfinityUser=async function(user){
+  if(!user||!user.uid) throw new Error("Login required");
+  const uid=user.uid, ref=db.ref("users/"+uid);
+  const snap=await ref.once("value"), old=snap.val()||{};
+  const infinityId=old.infinityId||(window.makeInfinityId?window.makeInfinityId(uid):"INF"+uid.slice(0,8).toUpperCase());
+  const profile={
+    displayName:user.displayName||old.displayName||"Player",
+    email:user.email||old.email||"",
+    photoURL:user.photoURL||old.photoURL||"",
+    infinityId:infinityId,
+    banned:old.banned===true,
+    verified:old.verified===true,
+    chatMuted:old.chatMuted===true
+  };
+  await ref.update(profile);
+  await db.ref("publicUsers/"+uid).update({displayName:profile.displayName,photoURL:profile.photoURL,infinityId:profile.infinityId});
+  return {...old,...profile};
+};

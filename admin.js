@@ -2,6 +2,7 @@ const $=s=>document.querySelector(s);
 let adminUser=null;
 let allApps={};
 let allUsers={};
+let allPublicUsers={};
 let dashboardStarted=false;
 let allServerAdmins={};
 let allAdminApplications={};
@@ -179,7 +180,7 @@ async function seedRules(){const defs=[
 window.deleteRule=id=>{if(confirm("Delete this rule?"))db.ref("rules/"+id).remove()};
 
 
-function renderUsersManagement(){
+function renderUsersManagementOriginal(){
  const box=$("#usersManagementList");
  if(!box)return;
  const q=($("#userSearch")?.value||"").trim().toLowerCase();
@@ -532,3 +533,28 @@ if($("#saveDownloadLinksBtn")) $("#saveDownloadLinksBtn").onclick=async()=>{
     st.textContent="Save failed: "+(err.message||err);
   }
 };
+
+
+function renderUsersManagement(){
+  const originalUsers=allUsers||{};
+  const unique={};
+
+  // One visible account per Firebase Authentication UID.
+  Object.entries(originalUsers).forEach(([uid,user])=>{
+    if(!uid || !user || typeof user!=="object") return;
+    unique[uid]={...(unique[uid]||{}),...user};
+  });
+
+  // publicUsers is only a public mirror. Merge it into the matching UID,
+  // never render it as another account.
+  if(typeof allPublicUsers!=="undefined"){
+    Object.entries(allPublicUsers||{}).forEach(([uid,pub])=>{
+      if(unique[uid]) unique[uid]={...pub,...unique[uid]};
+    });
+  }
+
+  const saved=allUsers;
+  allUsers=unique;
+  try{return renderUsersManagementOriginal();}
+  finally{allUsers=saved;}
+}
