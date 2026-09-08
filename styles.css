@@ -396,3 +396,7 @@ code{color:#9be7ff}
 .downloads-card{max-width:900px;margin:0 auto;text-align:center;padding:26px}
 .download-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px}
 a.btn.disabled{opacity:.5;pointer-events:auto;cursor:not-allowed}
+
+.admin-user-actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.delete-user-btn{display:inline-flex!important;visibility:visible!important}
+@media(max-width:700px){.admin-user-actions{justify-content:flex-start;margin-top:12px}}

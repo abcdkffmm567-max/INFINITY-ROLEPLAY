@@ -209,6 +209,7 @@ function renderUsersManagementOriginal(){
        ${banned
          ? `<button class="btn success small" onclick="unbanUser('${u.uid}')">Unban</button>`
          : `<button class="btn danger small" onclick="banUser('${u.uid}')">Ban</button>`}
+       <button class="btn danger small delete-user-btn" onclick="deleteWebsiteUser('${u.uid}')">Delete</button>
      </div>
    </article>`;
  }).join("");
@@ -560,13 +561,13 @@ function renderUsersManagement(){
 }
 
 
-window.deleteWebsiteUser=async(uid,name)=>{
-  if(!adminUser)return;
-  const label=name||uid;
-  if(!confirm(`Delete ${label} from the website User Management?
+window.deleteWebsiteUser=async uid=>{
+  const user=allUsers[uid]||{};
+  const name=user.displayName||user.infinityId||"this user";
+  if(!confirm(`Delete ${name} from User Management?
 
-This removes the user's website profile/data from Firebase Realtime Database.
-It does NOT delete the Firebase Authentication account itself.`)) return;
+This will remove the user's website profile and application records.
+This action cannot be undone.`)) return;
 
   try{
     const updates={};
@@ -574,11 +575,9 @@ It does NOT delete the Firebase Authentication account itself.`)) return;
     updates["publicUsers/"+uid]=null;
     updates["userApplications/"+uid]=null;
     updates["adminApplications/"+uid]=null;
-
     await db.ref().update(updates);
-    showNotice("User removed from website User Management.","User Management");
+    showNotice("User deleted from website User Management.","Deleted","success");
   }catch(err){
-    console.error("Delete user failed:",err);
-    showNotice("Delete failed: "+(err.message||err),"Error","danger");
+    showNotice("Delete failed: "+err.message,"Error","danger");
   }
 };
