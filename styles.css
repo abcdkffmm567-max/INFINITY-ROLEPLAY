@@ -456,3 +456,14 @@ a.btn.disabled{opacity:.5;pointer-events:auto;cursor:not-allowed}
     position: static;
   }
 }
+
+#releaseCountdownSection{
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+/* Live Player Count moved to the middle of Home page */
+#liveServerStatus{
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
