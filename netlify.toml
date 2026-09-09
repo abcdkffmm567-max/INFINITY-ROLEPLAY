@@ -1,7 +1,12 @@
+[build]
+  command = "mkdir -p netlify/functions && cp samp-status.js netlify/functions/samp-status.js"
+  publish = "."
+
 [functions]
-  directory = "."
+  directory = "netlify/functions"
 
 [[redirects]]
   from = "/api/samp-status"
   to = "/.netlify/functions/samp-status"
   status = 200
+  force = true
