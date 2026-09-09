@@ -585,3 +585,30 @@ This action cannot be undone.`)) return;
 db.ref("siteSettings/serverGallery").on("value",x=>{const v=x.val()||{};for(let i=1;i<=5;i++){const e=$("#galleryImage"+i);if(e)e.value=v["image"+i]||""}});
 db.ref("siteSettings/trailerPhotoUrl").on("value",x=>{const e=$("#trailerPhotoUrl");if(e)e.value=x.val()||""});
 if($("#saveGalleryTrailerBtn"))$("#saveGalleryTrailerBtn").onclick=async()=>{const g={};for(let i=1;i<=5;i++)g["image"+i]=($("#galleryImage"+i)?.value||"").trim();const t=($("#trailerPhotoUrl")?.value||"").trim(),st=$("#galleryTrailerStatus");try{st.textContent="Saving...";await db.ref("siteSettings/serverGallery").set(g);await db.ref("siteSettings/trailerPhotoUrl").set(t);st.textContent="Saved."}catch(e){st.textContent="Save failed: "+e.message}};
+
+
+db.ref("siteSettings/livePlayerCountEnabled").on("value",snap=>{
+  const enabled = snap.val() !== false;
+  const cb = $("#livePlayerCountEnabled");
+  const badge = $("#liveCountToggleBadge");
+  if(cb) cb.checked = enabled;
+  if(badge){
+    badge.textContent = enabled ? "ON" : "OFF";
+    badge.className = "status-pill " + (enabled ? "accepted" : "rejected");
+  }
+});
+
+
+if($("#saveLivePlayerCountToggle")) $("#saveLivePlayerCountToggle").onclick=async()=>{
+  if(!adminUser)return;
+  const enabled = $("#livePlayerCountEnabled").checked;
+  const st = $("#livePlayerCountToggleStatus");
+  try{
+    st.textContent = "Saving...";
+    await db.ref("siteSettings/livePlayerCountEnabled").set(enabled);
+    st.textContent = enabled ? "Live Player Count turned ON." : "Live Player Count turned OFF.";
+  }catch(err){
+    console.error(err);
+    st.textContent = "Save failed: " + (err.message || err);
+  }
+};

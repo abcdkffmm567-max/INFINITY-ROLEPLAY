@@ -106,7 +106,28 @@
 
 
 
-    <section class="card admin-section">
+    
+<section class="card admin-section">
+  <div class="section-row">
+    <div>
+      <h2>Live Player Count</h2>
+      <p>Show or hide the Live Server Status / Player Count card on the Home page.</p>
+    </div>
+    <span id="liveCountToggleBadge" class="status-pill">Loading</span>
+  </div>
+
+  <label class="full apply-checkbox">
+    <input id="livePlayerCountEnabled" type="checkbox" checked>
+    <span>Live Player Count is ON</span>
+  </label>
+
+  <div class="full">
+    <button id="saveLivePlayerCountToggle" class="btn primary" type="button">Save Live Count</button>
+    <span id="livePlayerCountToggleStatus"></span>
+  </div>
+</section>
+
+<section class="card admin-section">
       <div class="section-row">
         <div>
           <h2>Server Release Countdown</h2>

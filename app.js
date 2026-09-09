@@ -427,6 +427,7 @@ db.ref("siteSettings/serverGallery").on("value",x=>{const v=x.val()||{};serverGa
 db.ref("siteSettings/trailerPhotoUrl").on("value",x=>{const u=String(x.val()||"").trim(),c=document.getElementById("trailerPhotoCard"),i=document.getElementById("trailerPhoto");if(!c||!i)return;if(u){i.src=u;c.classList.remove("hidden")}else c.classList.add("hidden")});
 
 async function refreshLiveServerStatus(){
+  if(typeof livePlayerCountEnabled!=="undefined" && !livePlayerCountEnabled)return;
   const b=document.getElementById("serverOnlineBadge"),p=document.getElementById("livePlayerCount"),m=document.getElementById("liveMaxPlayers"),g=document.getElementById("liveGameMode"),t=document.getElementById("liveServerStatusText");
   if(!b)return;
   try{
@@ -436,3 +437,21 @@ async function refreshLiveServerStatus(){
   }catch(e){b.textContent="UNAVAILABLE";b.className="server-status-badge offline";t.textContent="Could not load live player count";}
 }
 refreshLiveServerStatus();setInterval(refreshLiveServerStatus,15000);
+
+
+/* ===== Live Player Count ON/OFF ===== */
+let livePlayerCountEnabled = true;
+
+function applyLivePlayerCountVisibility(){
+  const section = document.getElementById("liveServerStatus");
+  if(!section) return;
+  section.classList.toggle("hidden", !livePlayerCountEnabled);
+}
+
+db.ref("siteSettings/livePlayerCountEnabled").on("value", snap=>{
+  livePlayerCountEnabled = snap.val() !== false;
+  applyLivePlayerCountVisibility();
+  if(livePlayerCountEnabled && typeof refreshLiveServerStatus === "function"){
+    refreshLiveServerStatus();
+  }
+});
