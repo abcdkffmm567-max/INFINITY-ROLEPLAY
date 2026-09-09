@@ -467,3 +467,31 @@ a.btn.disabled{opacity:.5;pointer-events:auto;cursor:not-allowed}
   margin-top: 40px;
   margin-bottom: 40px;
 }
+
+/* ===== True middle placement for Live Count + Release Countdown ===== */
+.middle-status-area{
+  width:100%;
+  max-width:1180px;
+  margin:56px auto;
+  padding:0 18px;
+  box-sizing:border-box;
+}
+
+.middle-status-area #liveServerStatus,
+.middle-status-area #releaseCountdownSection{
+  margin:32px auto !important;
+  width:100%;
+}
+
+.middle-status-area .live-server-status-card,
+.middle-status-area #releaseCountdownSection > .card{
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+
+@media(max-width:700px){
+  .middle-status-area{
+    margin:38px auto;
+    padding:0 10px;
+  }
+}
