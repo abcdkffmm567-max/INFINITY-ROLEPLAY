@@ -25,7 +25,7 @@
     "admins": {
       "$uid": {
         ".read": "auth != null",
-        ".write": "auth != null && auth.uid == $uid && $uid == 'ewXACA93B8PTVeE09DVEqXfv5Mp1' && !data.exists() && newData.val() == true"
+        ".write": "auth != null && auth.uid == $uid && $uid == 'jHQNdsOoEwhf28gEErmoLVsZAlz1' && !data.exists() && newData.val() == true"
       }
     },
     "whitelist": {
