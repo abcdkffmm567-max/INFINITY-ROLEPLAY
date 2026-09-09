@@ -418,3 +418,10 @@ db.ref("siteSettings").on("value",snap=>{
   configureDownloadButton("sampDownloadBtn",samp,"SAMP App");
   configureDownloadButton("dataDownloadBtn",data,"Data File");
 });
+
+let serverGalleryImages=[],serverGalleryIndex=0,serverGalleryTimer=null;
+function renderServerGallery(){const t=document.getElementById("serverGalleryTrack"),d=document.getElementById("serverGalleryDots");if(!t||!d)return;const a=serverGalleryImages.filter(Boolean).slice(0,5);if(!a.length){t.innerHTML='<div class="server-gallery-placeholder">Gallery images will appear here.</div>';d.innerHTML="";return}t.innerHTML=a.map((u,i)=>`<div class="server-gallery-slide ${i===serverGalleryIndex?"active":""}"><img src="${escAttr(u)}" alt="Gallery ${i+1}"></div>`).join("");d.innerHTML=a.map((_,i)=>`<button class="${i===serverGalleryIndex?"active":""}" onclick="goServerGallery(${i})"></button>`).join("")}
+window.goServerGallery=i=>{const c=serverGalleryImages.length;if(!c)return;serverGalleryIndex=(i+c)%c;renderServerGallery()};
+document.addEventListener("click",e=>{if(e.target?.id==="galleryPrevBtn")goServerGallery(serverGalleryIndex-1);if(e.target?.id==="galleryNextBtn")goServerGallery(serverGalleryIndex+1)});
+db.ref("siteSettings/serverGallery").on("value",x=>{const v=x.val()||{};serverGalleryImages=[v.image1,v.image2,v.image3,v.image4,v.image5].filter(Boolean);serverGalleryIndex=0;renderServerGallery();if(serverGalleryTimer)clearInterval(serverGalleryTimer);serverGalleryTimer=setInterval(()=>{if(serverGalleryImages.length>1)goServerGallery(serverGalleryIndex+1)},4000)});
+db.ref("siteSettings/trailerPhotoUrl").on("value",x=>{const u=String(x.val()||"").trim(),c=document.getElementById("trailerPhotoCard"),i=document.getElementById("trailerPhoto");if(!c||!i)return;if(u){i.src=u;c.classList.remove("hidden")}else c.classList.add("hidden")});
