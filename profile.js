@@ -10,7 +10,6 @@ function applyVerifiedVipStyle(profile){
           document.querySelector(".profile-photo img");
   if(a){
     a.classList.toggle("verified-vip-avatar",v);
-    if(a.parentElement) a.parentElement.classList.toggle("verified-vip-frame",v);
   }
 }
 const $=s=>document.querySelector(s);

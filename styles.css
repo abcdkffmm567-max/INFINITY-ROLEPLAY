@@ -526,3 +526,121 @@ body.verified-vip-profile .card{border-color:rgba(255,215,90,.26)}
   background:linear-gradient(135deg,#ffd75e,#fff0a4 40%,#48c9ff 72%,#315dff)!important;
   box-shadow:0 0 14px rgba(255,210,65,.32),0 0 18px rgba(54,190,255,.24)!important;
 }
+
+
+/* ===== Verified VIP UI Fix ===== */
+.verified-vip-frame{
+  display:contents!important;
+  padding:0!important;
+  background:none!important;
+  box-shadow:none!important;
+  border-radius:0!important;
+}
+
+body.verified-vip-profile{
+  background:
+    radial-gradient(circle at 10% 12%,rgba(255,203,70,.08),transparent 28%),
+    radial-gradient(circle at 88% 16%,rgba(43,174,255,.10),transparent 30%),
+    linear-gradient(180deg,#050912 0%,#071121 58%,#050910 100%)!important;
+}
+
+body.verified-vip-profile .profile-card{
+  position:relative;
+  overflow:hidden;
+  border:1px solid transparent!important;
+  background:
+    linear-gradient(#0b1120,#0b1120) padding-box,
+    linear-gradient(135deg,#f7c94d,#7edcff 58%,#355cff) border-box!important;
+  box-shadow:
+    0 0 28px rgba(255,199,65,.10),
+    0 0 34px rgba(58,178,255,.10)!important;
+}
+
+body.verified-vip-profile .profile-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(120deg,rgba(255,214,90,.05),transparent 28%),
+    linear-gradient(300deg,rgba(74,196,255,.06),transparent 30%);
+}
+
+body.verified-vip-profile .profile-hero{
+  position:relative;
+  z-index:1;
+  padding:18px;
+  border-radius:20px;
+  background:linear-gradient(135deg,rgba(255,204,72,.06),rgba(57,178,255,.06));
+  border:1px solid rgba(255,255,255,.06);
+}
+
+body.verified-vip-profile .profile-hero h1{
+  background:linear-gradient(90deg,#ffe081,#ffffff 48%,#74d7ff);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+body.verified-vip-profile .eyebrow{
+  color:#77dfff;
+}
+
+body.verified-vip-profile .infinity-id-badge{
+  border-color:rgba(255,215,86,.35)!important;
+  background:linear-gradient(90deg,rgba(255,211,80,.09),rgba(70,190,255,.09))!important;
+}
+
+body.verified-vip-profile input,
+body.verified-vip-profile .profile-upload-box{
+  border-color:rgba(255,220,110,.16)!important;
+  background:rgba(4,10,20,.72)!important;
+}
+
+body.verified-vip-profile input:focus{
+  border-color:#68d4ff!important;
+  box-shadow:0 0 0 3px rgba(77,193,255,.10)!important;
+}
+
+body.verified-vip-profile .btn.primary{
+  background:linear-gradient(135deg,#f6cf59,#5bcaff,#5d62ff)!important;
+  color:#07101c!important;
+  border:none!important;
+}
+
+.vip-badge{
+  margin:8px 0 10px!important;
+  padding:6px 12px!important;
+  background:linear-gradient(135deg,#f6cf59,#82ddff)!important;
+  color:#08111d!important;
+  border:1px solid rgba(255,230,130,.55)!important;
+  box-shadow:0 0 16px rgba(255,205,70,.16),0 0 16px rgba(66,186,255,.13)!important;
+}
+
+/* Only the photo itself gets the VIP frame */
+.verified-vip-avatar{
+  box-sizing:border-box!important;
+  border:4px solid transparent!important;
+  background:
+    linear-gradient(#101827,#101827) padding-box,
+    linear-gradient(135deg,#f8cf58 0%,#fff0a0 35%,#61d1ff 68%,#465fff 100%) border-box!important;
+  border-radius:50%!important;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.04),
+    0 0 16px rgba(255,206,72,.22),
+    0 0 20px rgba(72,190,255,.18)!important;
+}
+
+/* Same VIP frame in Live Chat */
+.verified-chat-avatar{
+  box-sizing:border-box!important;
+  border:3px solid transparent!important;
+  padding:0!important;
+  background:
+    linear-gradient(#101827,#101827) padding-box,
+    linear-gradient(135deg,#f7cf58,#fff0a0 35%,#5ed0ff 68%,#465fff) border-box!important;
+  border-radius:50%!important;
+  box-shadow:
+    0 0 10px rgba(255,206,72,.20),
+    0 0 14px rgba(72,190,255,.18)!important;
+}
