@@ -425,3 +425,14 @@ window.goServerGallery=i=>{const c=serverGalleryImages.length;if(!c)return;serve
 document.addEventListener("click",e=>{if(e.target?.id==="galleryPrevBtn")goServerGallery(serverGalleryIndex-1);if(e.target?.id==="galleryNextBtn")goServerGallery(serverGalleryIndex+1)});
 db.ref("siteSettings/serverGallery").on("value",x=>{const v=x.val()||{};serverGalleryImages=[v.image1,v.image2,v.image3,v.image4,v.image5].filter(Boolean);serverGalleryIndex=0;renderServerGallery();if(serverGalleryTimer)clearInterval(serverGalleryTimer);serverGalleryTimer=setInterval(()=>{if(serverGalleryImages.length>1)goServerGallery(serverGalleryIndex+1)},4000)});
 db.ref("siteSettings/trailerPhotoUrl").on("value",x=>{const u=String(x.val()||"").trim(),c=document.getElementById("trailerPhotoCard"),i=document.getElementById("trailerPhoto");if(!c||!i)return;if(u){i.src=u;c.classList.remove("hidden")}else c.classList.add("hidden")});
+
+async function refreshLiveServerStatus(){
+  const b=document.getElementById("serverOnlineBadge"),p=document.getElementById("livePlayerCount"),m=document.getElementById("liveMaxPlayers"),g=document.getElementById("liveGameMode"),t=document.getElementById("liveServerStatusText");
+  if(!b)return;
+  try{
+    const r=await fetch("/api/samp-status?x="+Date.now(),{cache:"no-store"}),d=await r.json();
+    if(d.online){b.textContent="ONLINE";b.className="server-status-badge online";p.textContent=d.players;m.textContent=d.maxPlayers;g.textContent=d.gamemode||"Infinity Role Play";t.textContent=`${d.players} players online`;}
+    else{b.textContent="OFFLINE";b.className="server-status-badge offline";p.textContent="0";m.textContent=d.maxPlayers||"--";g.textContent="Unavailable";t.textContent="Server offline or query unavailable";}
+  }catch(e){b.textContent="UNAVAILABLE";b.className="server-status-badge offline";t.textContent="Could not load live player count";}
+}
+refreshLiveServerStatus();setInterval(refreshLiveServerStatus,15000);

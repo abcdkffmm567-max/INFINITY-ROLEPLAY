@@ -1,0 +1,7 @@
+[functions]
+  directory = "."
+
+[[redirects]]
+  from = "/api/samp-status"
+  to = "/.netlify/functions/samp-status"
+  status = 200
