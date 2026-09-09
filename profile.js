@@ -1,3 +1,18 @@
+
+function applyVerifiedVipStyle(profile){
+  const v=profile?.verified===true;
+  document.body.classList.toggle("verified-vip-profile",v);
+  const b=document.getElementById("vipBadge");
+  if(b) b.classList.toggle("hidden",!v);
+  const a=document.getElementById("profilePhoto")||
+          document.getElementById("profileAvatar")||
+          document.querySelector(".profile-avatar img")||
+          document.querySelector(".profile-photo img");
+  if(a){
+    a.classList.toggle("verified-vip-avatar",v);
+    if(a.parentElement) a.parentElement.classList.toggle("verified-vip-frame",v);
+  }
+}
 const $=s=>document.querySelector(s);
 let currentUser=null,currentProfile=null,googlePhoto="";
 
@@ -21,6 +36,7 @@ auth.onAuthStateChanged(async user=>{
   }
 
   currentProfile=await ensureInfinityUser(user);
+  applyVerifiedVipStyle(currentProfile);
   googlePhoto=user.providerData?.find(p=>p.providerId==="google.com")?.photoURL || "";
 
   const displayName=currentProfile.displayName||user.displayName||"Player";

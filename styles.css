@@ -495,3 +495,34 @@ a.btn.disabled{opacity:.5;pointer-events:auto;cursor:not-allowed}
     padding:0 10px;
   }
 }
+
+/* ===== Verified VIP Profile Theme ===== */
+.vip-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:7px 14px;border-radius:999px;font-family:Orbitron,sans-serif;
+  font-size:.76rem;font-weight:900;letter-spacing:.12em;color:#07111f;
+  background:linear-gradient(135deg,#ffd76a,#fff0a6 42%,#4cc9ff);
+  border:1px solid rgba(255,224,112,.9);
+  box-shadow:0 0 22px rgba(255,211,72,.28),0 0 28px rgba(76,201,255,.18);
+  margin:8px 0 12px;
+}
+.vip-badge.hidden{display:none!important}
+body.verified-vip-profile{
+  background:
+    radial-gradient(circle at 15% 10%,rgba(255,205,64,.10),transparent 30%),
+    radial-gradient(circle at 85% 15%,rgba(54,190,255,.12),transparent 32%),
+    linear-gradient(180deg,#040813 0%,#071022 55%,#050811 100%);
+}
+body.verified-vip-profile .profile-card,
+body.verified-vip-profile .card{border-color:rgba(255,215,90,.26)}
+.verified-vip-frame{
+  display:inline-flex;border-radius:50%;padding:4px;
+  background:linear-gradient(135deg,#ffd76a,#fff2aa 38%,#42c8ff 72%,#2458ff);
+  box-shadow:0 0 0 2px rgba(255,255,255,.08),0 0 22px rgba(255,211,76,.35),0 0 30px rgba(54,190,255,.25);
+}
+.verified-vip-avatar{border-radius:50%!important;border:2px solid rgba(5,10,20,.92)!important}
+.verified-chat-avatar{
+  border-radius:50%!important;padding:3px!important;
+  background:linear-gradient(135deg,#ffd75e,#fff0a4 40%,#48c9ff 72%,#315dff)!important;
+  box-shadow:0 0 14px rgba(255,210,65,.32),0 0 18px rgba(54,190,255,.24)!important;
+}
