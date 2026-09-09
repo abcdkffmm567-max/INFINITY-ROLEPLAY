@@ -436,11 +436,11 @@ async function refreshLiveServerStatus(){
     else{b.textContent="OFFLINE";b.className="server-status-badge offline";p.textContent="0";m.textContent=d.maxPlayers||"--";g.textContent="Unavailable";t.textContent="Server offline or query unavailable";}
   }catch(e){b.textContent="UNAVAILABLE";b.className="server-status-badge offline";t.textContent="Could not load live player count";}
 }
-refreshLiveServerStatus();setInterval(refreshLiveServerStatus,15000);
+setInterval(refreshLiveServerStatus,15000);
 
 
 /* ===== Live Player Count ON/OFF ===== */
-let livePlayerCountEnabled = true;
+let livePlayerCountEnabled = false;
 
 function applyLivePlayerCountVisibility(){
   const section = document.getElementById("liveServerStatus");
@@ -449,7 +449,7 @@ function applyLivePlayerCountVisibility(){
 }
 
 db.ref("siteSettings/livePlayerCountEnabled").on("value", snap=>{
-  livePlayerCountEnabled = snap.val() !== false;
+  livePlayerCountEnabled = snap.val() === true;
   applyLivePlayerCountVisibility();
   if(livePlayerCountEnabled && typeof refreshLiveServerStatus === "function"){
     refreshLiveServerStatus();
