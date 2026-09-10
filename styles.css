@@ -1571,3 +1571,18 @@ input::placeholder,textarea::placeholder{
 #adminDashboard:not(.hidden) .admin-section{
   display:block;
 }
+
+
+/* ===== FINAL Admin dashboard visibility lock ===== */
+#adminDashboard.hidden{
+  display:none!important;
+}
+#adminDashboard.hidden *{
+  visibility:hidden!important;
+}
+#adminDashboard:not(.hidden){
+  display:block!important;
+}
+#adminLoginCard:not(.hidden) ~ #adminDashboard{
+  display:none!important;
+}
