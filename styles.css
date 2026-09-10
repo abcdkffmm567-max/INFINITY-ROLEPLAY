@@ -716,3 +716,51 @@ body.verified-vip-profile .btn.primary{
   display:grid;
   gap:14px;
 }
+
+
+/* ===== Hero Banner display final fix ===== */
+#homeHero{
+  position:relative!important;
+  overflow:hidden!important;
+  isolation:isolate;
+  background-image:none!important;
+}
+
+#homeHero .hero-banner-slider{
+  position:absolute!important;
+  inset:0!important;
+  z-index:0!important;
+  display:block;
+  overflow:hidden;
+}
+
+#homeHero .hero-banner-slide{
+  position:absolute!important;
+  inset:-2%!important;
+  opacity:0;
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  transition:opacity 1.1s ease-in-out, transform 6s ease-out;
+  transform:scale(1.06);
+}
+
+#homeHero .hero-banner-slide.active{
+  opacity:1!important;
+  transform:scale(1)!important;
+}
+
+#homeHero .hero-banner-overlay{
+  position:absolute!important;
+  inset:0!important;
+  z-index:1!important;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(2,7,18,.58),rgba(2,7,18,.20),rgba(2,7,18,.52)),
+    linear-gradient(180deg,rgba(3,7,18,.08),rgba(3,7,18,.42));
+}
+
+#homeHero > *:not(.hero-banner-slider):not(.hero-banner-overlay){
+  position:relative!important;
+  z-index:3!important;
+}

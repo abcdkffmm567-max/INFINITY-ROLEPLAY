@@ -643,3 +643,49 @@ document.addEventListener("click",e=>{
     saveHeroBannerCompatibility().catch(err=>console.error("Hero banner save failed",err));
   }
 });
+
+/* ===== HERO BANNER SAVE FINAL FIX ===== */
+async function saveHeroBannerLinksFinal(){
+  const b1 = ($("#serverLogoUrl")?.value || "").trim();
+  const b2 = ($("#heroBanner2")?.value || "").trim();
+  const b3 = ($("#heroBanner3")?.value || "").trim();
+
+  await db.ref("siteSettings").update({
+    serverLogoUrl: b1,
+    heroBannerUrl: b1,
+    heroBanner2: b2,
+    heroBanner3: b3,
+    heroBanners: {
+      image1: b1,
+      image2: b2,
+      image3: b3
+    }
+  });
+}
+
+document.addEventListener("click", e=>{
+  const btn = e.target.closest("button");
+  if(!btn) return;
+
+  const hero1 = document.getElementById("serverLogoUrl");
+  if(!hero1) return;
+
+  const card = hero1.closest(".card, section, form, .admin-section");
+  if(card && card.contains(btn)){
+    setTimeout(()=>{
+      saveHeroBannerLinksFinal().catch(err=>console.error("Hero banner save failed:", err));
+    }, 0);
+  }
+});
+
+db.ref("siteSettings").on("value", snap=>{
+  const v = snap.val() || {};
+  const hb = v.heroBanners || {};
+  const b1 = $("#serverLogoUrl");
+  const b2 = $("#heroBanner2");
+  const b3 = $("#heroBanner3");
+
+  if(b1 && !b1.matches(":focus")) b1.value = hb.image1 || v.serverLogoUrl || v.heroBannerUrl || "";
+  if(b2 && !b2.matches(":focus")) b2.value = hb.image2 || v.heroBanner2 || "";
+  if(b3 && !b3.matches(":focus")) b3.value = hb.image3 || v.heroBanner3 || "";
+});
