@@ -612,3 +612,7 @@ if($("#saveLivePlayerCountToggle")) $("#saveLivePlayerCountToggle").onclick=asyn
     st.textContent = "Save failed: " + (err.message || err);
   }
 };
+
+/* Hero Banner Slider Admin */
+db.ref("siteSettings/heroBanners").on("value",x=>{const v=x.val()||{};for(let i=1;i<=3;i++){const e=$("#heroBanner"+i);if(e&&!e.matches(":focus"))e.value=v["image"+i]||""}});
+if($("#saveHeroBannersBtn"))$("#saveHeroBannersBtn").onclick=async()=>{const st=$("#heroBannersSaveStatus"),v={image1:($("#heroBanner1")?.value||"").trim(),image2:($("#heroBanner2")?.value||"").trim(),image3:($("#heroBanner3")?.value||"").trim()};try{st.textContent="Saving...";await db.ref("siteSettings/heroBanners").set(v);st.textContent="Hero banners saved."}catch(e){st.textContent="Save failed: "+e.message}};

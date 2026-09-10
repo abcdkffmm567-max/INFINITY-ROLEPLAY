@@ -455,3 +455,9 @@ db.ref("siteSettings/livePlayerCountEnabled").on("value", snap=>{
     refreshLiveServerStatus();
   }
 });
+
+/* Animated Hero Banner Slider */
+let heroBannerImages=[],heroBannerIndex=0,heroBannerTimer=null;
+function renderHeroBanners(){const sl=[...document.querySelectorAll("#heroBannerSlider .hero-banner-slide")];if(!sl.length)return;if(!heroBannerImages.length){document.getElementById("heroBannerSlider")?.classList.add("no-custom-banners");return}document.getElementById("heroBannerSlider")?.classList.remove("no-custom-banners");sl.forEach((el,i)=>{el.style.backgroundImage=`url("${(heroBannerImages[i]||heroBannerImages[0]).replace(/"/g,'\\"')}")`;el.classList.toggle("active",i===heroBannerIndex)})}
+function showHeroBanner(i){if(!heroBannerImages.length)return;heroBannerIndex=(i+heroBannerImages.length)%heroBannerImages.length;document.querySelectorAll("#heroBannerSlider .hero-banner-slide").forEach((el,n)=>el.classList.toggle("active",n===heroBannerIndex))}
+db.ref("siteSettings/heroBanners").on("value",x=>{const v=x.val()||{};heroBannerImages=[v.image1,v.image2,v.image3].map(x=>String(x||"").trim()).filter(x=>/^https?:\/\//i.test(x));heroBannerIndex=0;renderHeroBanners();if(heroBannerTimer)clearInterval(heroBannerTimer);if(heroBannerImages.length>1)heroBannerTimer=setInterval(()=>showHeroBanner(heroBannerIndex+1),5000)});

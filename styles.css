@@ -644,3 +644,14 @@ body.verified-vip-profile .btn.primary{
     0 0 10px rgba(255,206,72,.20),
     0 0 14px rgba(72,190,255,.18)!important;
 }
+
+/* 3-image animated Hero Banner Slider */
+.hero{position:relative!important;overflow:hidden!important;isolation:isolate}
+.hero>*:not(.hero-banner-slider):not(.hero-banner-overlay){position:relative;z-index:3}
+.hero-banner-slider,.hero-banner-overlay{position:absolute;inset:0}
+.hero-banner-slider{z-index:0;overflow:hidden}
+.hero-banner-slide{position:absolute;inset:-3%;opacity:0;transform:scale(1.08);background-size:cover;background-position:center;background-repeat:no-repeat;transition:opacity 1.1s ease-in-out,transform 6s ease-out}
+.hero-banner-slide.active{opacity:1;transform:scale(1);animation:heroBannerDrift 6s ease-in-out both}
+.hero-banner-overlay{z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(2,7,18,.72),rgba(2,7,18,.4),rgba(2,7,18,.65)),linear-gradient(180deg,rgba(3,7,18,.15),rgba(3,7,18,.5))}
+.hero-banner-slider.no-custom-banners{display:none}
+@keyframes heroBannerDrift{0%{transform:scale(1.07)}50%{transform:scale(1.035) translateX(-.6%)}100%{transform:scale(1)}}
