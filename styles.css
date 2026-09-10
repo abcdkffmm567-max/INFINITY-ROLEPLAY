@@ -1538,3 +1538,36 @@ input::placeholder,textarea::placeholder{
     border-bottom-color:rgba(62,184,255,.2)!important;
   }
 }
+
+
+/* ===== Admin Login Settings ===== */
+.admin-account-settings{
+  border-color:rgba(61,201,255,.28)!important;
+  background:
+    linear-gradient(180deg,rgba(8,35,58,.96),rgba(5,23,39,.96))!important;
+}
+.admin-account-settings #adminAccountUsername,
+.admin-account-settings #adminAccountPassword{
+  width:100%;
+}
+.admin-account-settings small{
+  display:block;
+  margin-top:7px;
+  color:#83a3b9;
+  font-size:.78rem;
+  line-height:1.45;
+}
+
+
+/* ===== Admin login page cleanup ===== */
+/* Any admin sections inside the hidden dashboard must remain invisible before login. */
+#adminDashboard.hidden,
+#adminDashboard.hidden .admin-section,
+#adminDashboard.hidden section{
+  display:none!important;
+}
+
+/* Keep dashboard sections visible normally after authenticated login. */
+#adminDashboard:not(.hidden) .admin-section{
+  display:block;
+}

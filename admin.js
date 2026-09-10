@@ -18,6 +18,7 @@ async function openAdminDashboard(user){
   $("#adminLoginCard").classList.add("hidden");
   $("#adminDashboard").classList.remove("hidden");
   startDashboard();
+  if(typeof loadAdminAccountSettings==="function") loadAdminAccountSettings();
 }
 
 $("#adminLoginForm").onsubmit=async e=>{
@@ -634,3 +635,76 @@ if($("#saveLivePlayerCountToggle")) $("#saveLivePlayerCountToggle").onclick=asyn
 
 
 
+
+
+/* ===== Admin Login Settings ===== */
+function getCurrentAdminUsername(){
+  const email=String(auth.currentUser?.email||"");
+  return email.endsWith("@infinityrp.com")
+    ? email.slice(0,-"@infinityrp.com".length)
+    : email.split("@")[0]||"infinityadmin";
+}
+
+function loadAdminAccountSettings(){
+  const input=$("#adminAccountUsername");
+  if(input) input.value=getCurrentAdminUsername();
+}
+
+if($("#adminAccountForm")) $("#adminAccountForm").onsubmit=async e=>{
+  e.preventDefault();
+  if(!auth.currentUser){
+    $("#adminAccountStatus").textContent="Admin session not found.";
+    return;
+  }
+
+  const username=String($("#adminAccountUsername")?.value||"")
+    .trim().toLowerCase().replace(/[^a-z0-9._-]/g,"");
+  const newPassword=String($("#adminAccountPassword")?.value||"");
+  const status=$("#adminAccountStatus");
+
+  if(!username){
+    status.textContent="Enter a valid admin username.";
+    return;
+  }
+
+  if(newPassword && newPassword.length<6){
+    status.textContent="Password must be at least 6 characters.";
+    return;
+  }
+
+  const newEmail=`${username}@infinityrp.com`;
+
+  try{
+    status.textContent="Saving...";
+
+    if(auth.currentUser.email!==newEmail){
+      await auth.currentUser.updateEmail(newEmail);
+    }
+
+    if(newPassword){
+      await auth.currentUser.updatePassword(newPassword);
+      $("#adminAccountPassword").value="";
+    }
+
+    status.textContent="Admin login updated successfully.";
+    if(typeof showNotice==="function"){
+      showNotice("Admin username/password updated.","Admin Login","success");
+    }
+  }catch(err){
+    console.error("Admin account update failed:",err);
+
+    let msg=err.message||"Could not update admin login.";
+    if(err.code==="auth/requires-recent-login"){
+      msg="For security, logout and login again, then retry this change.";
+    }else if(err.code==="auth/email-already-in-use"){
+      msg="That admin username is already in use.";
+    }else if(err.code==="auth/invalid-email"){
+      msg="Invalid admin username.";
+    }else if(err.code==="auth/weak-password"){
+      msg="New password is too weak.";
+    }
+
+    status.textContent=msg;
+    if(typeof showNotice==="function") showNotice(msg,"Admin Login","danger");
+  }
+};

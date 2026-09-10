@@ -37,19 +37,8 @@
   </section>
 
   <div id="adminDashboard" class="hidden">
-    <div class="admin-top">
-      <div><span class="eyebrow">CONTROL CENTER</span><h1>Infinity RP Admin</h1></div>
-      <button id="adminLogout" class="btn ghost">Logout</button>
-    </div>
 
-    <div class="stats-grid">
-      <div class="card stat"><small>Pending</small><strong id="pendingCount">0</strong></div>
-      <div class="card stat"><small>Accepted</small><strong id="acceptedCount">0</strong></div>
-      <div class="card stat"><small>Rejected</small><strong id="rejectedCount">0</strong></div>
-      <div class="card stat"><small>Users</small><strong id="userCount">0</strong></div>
-    </div>
-
-    <section class="card admin-section">
+<section class="card admin-section">
       <h2>Server & Download Settings</h2>
       <p>Paste direct/external download links here. Users will open these links from the website download buttons.</p>
       <form id="serverSettingsForm" class="form-grid">
@@ -102,6 +91,51 @@
         </div>
       </form>
     </section>
+
+<section class="card admin-section"><div class="section-row"><div><h2>Server Gallery & Trailer</h2><p>Add 5 server photo links and one trailer photo.</p></div></div><div class="form-grid"><label class="full">Gallery Photo 1<input id="galleryImage1" type="url" placeholder="https://example.com/photo1.jpg"></label><label class="full">Gallery Photo 2<input id="galleryImage2" type="url" placeholder="https://example.com/photo2.jpg"></label><label class="full">Gallery Photo 3<input id="galleryImage3" type="url" placeholder="https://example.com/photo3.jpg"></label><label class="full">Gallery Photo 4<input id="galleryImage4" type="url" placeholder="https://example.com/photo4.jpg"></label><label class="full">Gallery Photo 5<input id="galleryImage5" type="url" placeholder="https://example.com/photo5.jpg"></label><label class="full">Trailer Photo Link<input id="trailerPhotoUrl" type="url" placeholder="https://example.com/trailer.jpg"></label><div class="full"><button id="saveGalleryTrailerBtn" class="btn primary" type="button">Save Gallery & Trailer</button><span id="galleryTrailerStatus"></span></div></div></section>
+
+    <div class="admin-top">
+      <div><span class="eyebrow">CONTROL CENTER</span><h1>Infinity RP Admin</h1></div>
+      <button id="adminLogout" class="btn ghost">Logout</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="card stat"><small>Pending</small><strong id="pendingCount">0</strong></div>
+      <div class="card stat"><small>Accepted</small><strong id="acceptedCount">0</strong></div>
+      <div class="card stat"><small>Rejected</small><strong id="rejectedCount">0</strong></div>
+      <div class="card stat"><small>Users</small><strong id="userCount">0</strong></div>
+    </div>
+
+
+    <section class="card admin-section admin-account-settings">
+      <div class="section-row">
+        <div>
+          <h2>Admin Login Settings</h2>
+          <p>Change the username and password used to login to this Admin Panel.</p>
+        </div>
+        <span id="adminAccountBadge" class="status-pill accepted">SECURE</span>
+      </div>
+
+      <form id="adminAccountForm" class="form-grid">
+        <label class="full">Admin Username
+          <input id="adminAccountUsername" type="text" autocomplete="username" placeholder="infinityadmin" required>
+          <small>This login username maps internally to @infinityrp.com.</small>
+        </label>
+
+        <label class="full">New Admin Password
+          <input id="adminAccountPassword" type="password" autocomplete="new-password" placeholder="Leave blank to keep current password">
+          <small>Leave this empty if you only want to change the username.</small>
+        </label>
+
+        <div class="full">
+          <button class="btn primary" type="submit">Save Admin Login</button>
+          <span id="adminAccountStatus"></span>
+        </div>
+      </form>
+    </section>
+
+
+    
 
     <section class="card admin-section">
       <div class="section-row"><h2>Server Rules</h2><button id="addRuleBtn" class="btn small primary" type="button">+ Add Rule</button></div>
@@ -264,7 +298,7 @@
   </div>
 </section>
 
-<section class="card admin-section"><div class="section-row"><div><h2>Server Gallery & Trailer</h2><p>Add 5 server photo links and one trailer photo.</p></div></div><div class="form-grid"><label class="full">Gallery Photo 1<input id="galleryImage1" type="url" placeholder="https://example.com/photo1.jpg"></label><label class="full">Gallery Photo 2<input id="galleryImage2" type="url" placeholder="https://example.com/photo2.jpg"></label><label class="full">Gallery Photo 3<input id="galleryImage3" type="url" placeholder="https://example.com/photo3.jpg"></label><label class="full">Gallery Photo 4<input id="galleryImage4" type="url" placeholder="https://example.com/photo4.jpg"></label><label class="full">Gallery Photo 5<input id="galleryImage5" type="url" placeholder="https://example.com/photo5.jpg"></label><label class="full">Trailer Photo Link<input id="trailerPhotoUrl" type="url" placeholder="https://example.com/trailer.jpg"></label><div class="full"><button id="saveGalleryTrailerBtn" class="btn primary" type="button">Save Gallery & Trailer</button><span id="galleryTrailerStatus"></span></div></div></section></main>
+</main>
 
 <script src="firebase-config.js"></script>
 <script src="site-brand.js"></script><script src="admin.js"></script>
