@@ -459,57 +459,63 @@ db.ref("siteSettings/livePlayerCountEnabled").on("value", snap=>{
 
 
 
-/* ===== HERO BANNER SLIDER FINAL FIX ===== */
-let _heroImages = [];
-let _heroIndex = 0;
-let _heroTimer = null;
 
-function _validHeroUrl(v){
-  const u = String(v || "").trim();
+
+/* ===== HERO BANNER SLIDER ROOT FIX ===== */
+let heroImages = [];
+let heroIndex = 0;
+let heroTimer = null;
+
+function isDirectHeroUrl(value){
+  const u = String(value || "").trim();
   return /^https?:\/\//i.test(u) ? u : "";
 }
 
-function _renderHero(){
+function renderHeroSlider(){
   const slider = document.getElementById("heroBannerSlider");
   if(!slider) return;
 
   const slides = [...slider.querySelectorAll(".hero-banner-slide")];
-  if(!_heroImages.length){
+
+  if(!heroImages.length){
     slider.style.display = "none";
     return;
   }
 
   slider.style.display = "block";
+
   slides.forEach((slide, i)=>{
-    const url = _heroImages[i] || _heroImages[0];
+    const url = heroImages[i] || heroImages[0];
     slide.style.backgroundImage = `url("${url.replace(/"/g,'\\"')}")`;
-    slide.classList.toggle("active", i === _heroIndex);
+    slide.classList.toggle("active", i === heroIndex);
   });
 }
 
-function _nextHero(){
-  if(_heroImages.length < 2) return;
-  _heroIndex = (_heroIndex + 1) % _heroImages.length;
-  document.querySelectorAll("#heroBannerSlider .hero-banner-slide").forEach((slide,i)=>{
-    slide.classList.toggle("active", i === _heroIndex);
+function showNextHero(){
+  if(heroImages.length < 2) return;
+  heroIndex = (heroIndex + 1) % heroImages.length;
+
+  document.querySelectorAll("#heroBannerSlider .hero-banner-slide").forEach((slide, i)=>{
+    slide.classList.toggle("active", i === heroIndex);
   });
 }
 
-db.ref("siteSettings").on("value", snap=>{
+/* IMPORTANT: Admin Panel saves these under /settings, not /siteSettings */
+db.ref("settings").on("value", snap=>{
   const v = snap.val() || {};
   const hb = v.heroBanners || {};
 
-  _heroImages = [
-    _validHeroUrl(hb.image1 || v.serverLogoUrl || v.heroBannerUrl || v.heroImageUrl),
-    _validHeroUrl(hb.image2 || v.heroBanner2),
-    _validHeroUrl(hb.image3 || v.heroBanner3)
+  heroImages = [
+    isDirectHeroUrl(hb.image1 || v.heroBannerUrl),
+    isDirectHeroUrl(hb.image2),
+    isDirectHeroUrl(hb.image3)
   ].filter(Boolean);
 
-  _heroIndex = 0;
-  _renderHero();
+  heroIndex = 0;
+  renderHeroSlider();
 
-  if(_heroTimer) clearInterval(_heroTimer);
-  if(_heroImages.length > 1){
-    _heroTimer = setInterval(_nextHero, 5000);
+  if(heroTimer) clearInterval(heroTimer);
+  if(heroImages.length > 1){
+    heroTimer = setInterval(showNextHero, 5000);
   }
 });

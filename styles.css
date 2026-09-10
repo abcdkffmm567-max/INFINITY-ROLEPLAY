@@ -764,3 +764,57 @@ body.verified-vip-profile .btn.primary{
   position:relative!important;
   z-index:3!important;
 }
+
+
+/* ===== HERO BANNER ROOT FIX ===== */
+#homeHero{
+  position:relative!important;
+  overflow:hidden!important;
+  isolation:isolate!important;
+  background-image:none!important;
+}
+
+#homeHero #heroBannerSlider{
+  position:absolute!important;
+  inset:0!important;
+  z-index:0!important;
+  overflow:hidden!important;
+}
+
+#homeHero .hero-banner-slide{
+  position:absolute!important;
+  inset:-2%!important;
+  opacity:0!important;
+  background-size:cover!important;
+  background-position:center center!important;
+  background-repeat:no-repeat!important;
+  transform:scale(1.07);
+  transition:opacity 1s ease-in-out,transform 6s ease-out!important;
+}
+
+#homeHero .hero-banner-slide.active{
+  opacity:1!important;
+  transform:scale(1)!important;
+}
+
+#homeHero .hero-banner-overlay{
+  position:absolute!important;
+  inset:0!important;
+  z-index:1!important;
+  pointer-events:none!important;
+  background:
+    linear-gradient(90deg,rgba(2,7,18,.58),rgba(2,7,18,.18),rgba(2,7,18,.55)),
+    linear-gradient(180deg,rgba(3,7,18,.08),rgba(3,7,18,.42))!important;
+}
+
+#homeHero > *:not(#heroBannerSlider):not(.hero-banner-overlay){
+  position:relative!important;
+  z-index:3!important;
+}
+
+.hero-banner-admin-fields{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  margin-top:8px;
+}

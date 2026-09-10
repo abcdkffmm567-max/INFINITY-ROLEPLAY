@@ -95,7 +95,10 @@ function startDashboard(){
    $("#sampUrl").value=v.sampUrl||"";
    $("#dataUrl").value=v.dataUrl||"";
    if($("#serverLogoUrl")) $("#serverLogoUrl").value=v.serverLogoUrl||"";
-   if($("#heroBannerUrl")) $("#heroBannerUrl").value=v.heroBannerUrl||"";
+   const hb=v.heroBanners||{};
+   if($("#heroBanner1")) $("#heroBanner1").value=hb.image1||v.heroBannerUrl||"";
+   if($("#heroBanner2")) $("#heroBanner2").value=hb.image2||"";
+   if($("#heroBanner3")) $("#heroBanner3").value=hb.image3||"";
    if($("#communityBannerUrl")) $("#communityBannerUrl").value=v.communityBannerUrl||"";
    if($("#communityBannerClickUrl")) $("#communityBannerClickUrl").value=v.communityBannerClickUrl||"";
  });
@@ -105,11 +108,26 @@ function startDashboard(){
    const sampUrl=$("#sampUrl").value.trim();
    const dataUrl=$("#dataUrl").value.trim();
    const serverLogoUrl=$("#serverLogoUrl") ? $("#serverLogoUrl").value.trim() : "";
-   const heroBannerUrl=$("#heroBannerUrl") ? $("#heroBannerUrl").value.trim() : "";
+   const heroBanner1=$("#heroBanner1") ? $("#heroBanner1").value.trim() : "";
+   const heroBanner2=$("#heroBanner2") ? $("#heroBanner2").value.trim() : "";
+   const heroBanner3=$("#heroBanner3") ? $("#heroBanner3").value.trim() : "";
    const communityBannerUrl=$("#communityBannerUrl") ? $("#communityBannerUrl").value.trim() : "";
    const communityBannerClickUrl=$("#communityBannerClickUrl") ? $("#communityBannerClickUrl").value.trim() : "";
    try{
-     await db.ref("settings").update({serverIp,sampUrl,dataUrl,serverLogoUrl,heroBannerUrl,communityBannerUrl,communityBannerClickUrl});
+     await db.ref("settings").update({
+       serverIp,
+       sampUrl,
+       dataUrl,
+       serverLogoUrl,
+       heroBannerUrl:heroBanner1,
+       heroBanners:{
+         image1:heroBanner1,
+         image2:heroBanner2,
+         image3:heroBanner3
+       },
+       communityBannerUrl,
+       communityBannerClickUrl
+     });
      $("#settingsStatus").textContent="Saved successfully.";
      setTimeout(()=>$("#settingsStatus").textContent="",2000);
    }catch(err){
@@ -615,77 +633,4 @@ if($("#saveLivePlayerCountToggle")) $("#saveLivePlayerCountToggle").onclick=asyn
 
 
 
-/* Existing Hero Banner field upgraded to 3-image slider */
-db.ref("siteSettings").on("value",snap=>{
-  const v=snap.val()||{};
-  const b2=$("#heroBanner2");
-  const b3=$("#heroBanner3");
-  if(b2 && !b2.matches(":focus")) b2.value=(v.heroBanners&&v.heroBanners.image2)||"";
-  if(b3 && !b3.matches(":focus")) b3.value=(v.heroBanners&&v.heroBanners.image3)||"";
-});
 
-
-async function saveHeroBannerCompatibility(){
-  const b1=($("#serverLogoUrl")?.value||"").trim();
-  const b2=($("#heroBanner2")?.value||"").trim();
-  const b3=($("#heroBanner3")?.value||"").trim();
-  await db.ref("siteSettings").update({
-    serverLogoUrl:b1,
-    heroBanners:{image1:b1,image2:b2,image3:b3}
-  });
-}
-
-document.addEventListener("click",e=>{
-  const btn=e.target.closest("button");
-  if(!btn)return;
-  const section=document.getElementById("serverLogoUrl")?.closest(".card,section,form");
-  if(section && section.contains(btn)){
-    saveHeroBannerCompatibility().catch(err=>console.error("Hero banner save failed",err));
-  }
-});
-
-/* ===== HERO BANNER SAVE FINAL FIX ===== */
-async function saveHeroBannerLinksFinal(){
-  const b1 = ($("#serverLogoUrl")?.value || "").trim();
-  const b2 = ($("#heroBanner2")?.value || "").trim();
-  const b3 = ($("#heroBanner3")?.value || "").trim();
-
-  await db.ref("siteSettings").update({
-    serverLogoUrl: b1,
-    heroBannerUrl: b1,
-    heroBanner2: b2,
-    heroBanner3: b3,
-    heroBanners: {
-      image1: b1,
-      image2: b2,
-      image3: b3
-    }
-  });
-}
-
-document.addEventListener("click", e=>{
-  const btn = e.target.closest("button");
-  if(!btn) return;
-
-  const hero1 = document.getElementById("serverLogoUrl");
-  if(!hero1) return;
-
-  const card = hero1.closest(".card, section, form, .admin-section");
-  if(card && card.contains(btn)){
-    setTimeout(()=>{
-      saveHeroBannerLinksFinal().catch(err=>console.error("Hero banner save failed:", err));
-    }, 0);
-  }
-});
-
-db.ref("siteSettings").on("value", snap=>{
-  const v = snap.val() || {};
-  const hb = v.heroBanners || {};
-  const b1 = $("#serverLogoUrl");
-  const b2 = $("#heroBanner2");
-  const b3 = $("#heroBanner3");
-
-  if(b1 && !b1.matches(":focus")) b1.value = hb.image1 || v.serverLogoUrl || v.heroBannerUrl || "";
-  if(b2 && !b2.matches(":focus")) b2.value = hb.image2 || v.heroBanner2 || "";
-  if(b3 && !b3.matches(":focus")) b3.value = hb.image3 || v.heroBanner3 || "";
-});
