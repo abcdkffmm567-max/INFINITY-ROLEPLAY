@@ -613,6 +613,33 @@ if($("#saveLivePlayerCountToggle")) $("#saveLivePlayerCountToggle").onclick=asyn
   }
 };
 
-/* Hero Banner Slider Admin */
-db.ref("siteSettings/heroBanners").on("value",x=>{const v=x.val()||{};for(let i=1;i<=3;i++){const e=$("#heroBanner"+i);if(e&&!e.matches(":focus"))e.value=v["image"+i]||""}});
-if($("#saveHeroBannersBtn"))$("#saveHeroBannersBtn").onclick=async()=>{const st=$("#heroBannersSaveStatus"),v={image1:($("#heroBanner1")?.value||"").trim(),image2:($("#heroBanner2")?.value||"").trim(),image3:($("#heroBanner3")?.value||"").trim()};try{st.textContent="Saving...";await db.ref("siteSettings/heroBanners").set(v);st.textContent="Hero banners saved."}catch(e){st.textContent="Save failed: "+e.message}};
+
+
+/* Existing Hero Banner field upgraded to 3-image slider */
+db.ref("siteSettings").on("value",snap=>{
+  const v=snap.val()||{};
+  const b2=$("#heroBanner2");
+  const b3=$("#heroBanner3");
+  if(b2 && !b2.matches(":focus")) b2.value=(v.heroBanners&&v.heroBanners.image2)||"";
+  if(b3 && !b3.matches(":focus")) b3.value=(v.heroBanners&&v.heroBanners.image3)||"";
+});
+
+
+async function saveHeroBannerCompatibility(){
+  const b1=($("#serverLogoUrl")?.value||"").trim();
+  const b2=($("#heroBanner2")?.value||"").trim();
+  const b3=($("#heroBanner3")?.value||"").trim();
+  await db.ref("siteSettings").update({
+    serverLogoUrl:b1,
+    heroBanners:{image1:b1,image2:b2,image3:b3}
+  });
+}
+
+document.addEventListener("click",e=>{
+  const btn=e.target.closest("button");
+  if(!btn)return;
+  const section=document.getElementById("serverLogoUrl")?.closest(".card,section,form");
+  if(section && section.contains(btn)){
+    saveHeroBannerCompatibility().catch(err=>console.error("Hero banner save failed",err));
+  }
+});

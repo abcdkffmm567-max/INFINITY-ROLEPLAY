@@ -61,11 +61,25 @@
       <input id="serverLogoUrl" type="url" placeholder="https://example.com/server-logo.png">
       <small>This changes the Infinity logo shown in the website header/navigation.</small>
     </label>
-    <label class="full">Hero Banner / Server Logo Image Link
-      <input id="heroBannerUrl" type="url" placeholder="https://example.com/infinity-server-logo.jpg">
-      <small>Paste your server logo/banner image URL. This image will appear as the background of the Home hero section.</small>
-    </label>
-    <label class="full">Home Middle Banner Image Link
+    
+<div class="hero-banner-admin-fields">
+  <h3>Hero Banner / Server Logo Image Links</h3>
+
+  <label>Hero Banner 1
+    <input id="serverLogoUrl" type="url" placeholder="https://example.com/hero-1.jpg">
+  </label>
+
+  <label>Hero Banner 2
+    <input id="heroBanner2" type="url" placeholder="https://example.com/hero-2.jpg">
+  </label>
+
+  <label>Hero Banner 3
+    <input id="heroBanner3" type="url" placeholder="https://example.com/hero-3.jpg">
+  </label>
+
+  <p>Paste up to 3 direct image URLs. They will auto-slide behind the Home hero section with a smooth animation.</p>
+</div>
+<label class="full">Home Middle Banner Image Link
       <input id="communityBannerUrl" type="url" placeholder="https://example.com/infinity-banner.jpg">
       <small>This replaces the INFINITY RP card shown above Server Rules.</small>
     </label>
@@ -248,7 +262,7 @@
   </div>
 </section>
 
-<section class="card admin-section"><div class="section-row"><div><h2>Server Gallery & Trailer</h2><p>Add 5 server photo links and one trailer photo.</p></div></div><div class="form-grid"><label class="full">Gallery Photo 1<input id="galleryImage1" type="url" placeholder="https://example.com/photo1.jpg"></label><label class="full">Gallery Photo 2<input id="galleryImage2" type="url" placeholder="https://example.com/photo2.jpg"></label><label class="full">Gallery Photo 3<input id="galleryImage3" type="url" placeholder="https://example.com/photo3.jpg"></label><label class="full">Gallery Photo 4<input id="galleryImage4" type="url" placeholder="https://example.com/photo4.jpg"></label><label class="full">Gallery Photo 5<input id="galleryImage5" type="url" placeholder="https://example.com/photo5.jpg"></label><label class="full">Trailer Photo Link<input id="trailerPhotoUrl" type="url" placeholder="https://example.com/trailer.jpg"></label><div class="full"><button id="saveGalleryTrailerBtn" class="btn primary" type="button">Save Gallery & Trailer</button><span id="galleryTrailerStatus"></span></div></div></section><section class="card admin-section"><div class="section-row"><div><h2>Hero Banner Slider</h2><p>Add 3 image links for the background behind WELCOME TO INFINITY ROLE PLAY.</p></div></div><div class="form-grid"><label class="full">Hero Banner 1<input id="heroBanner1" type="url" placeholder="https://example.com/hero1.jpg"></label><label class="full">Hero Banner 2<input id="heroBanner2" type="url" placeholder="https://example.com/hero2.jpg"></label><label class="full">Hero Banner 3<input id="heroBanner3" type="url" placeholder="https://example.com/hero3.jpg"></label><div class="full"><button id="saveHeroBannersBtn" class="btn primary" type="button">Save Hero Banners</button><span id="heroBannersSaveStatus"></span></div></div></section></main>
+<section class="card admin-section"><div class="section-row"><div><h2>Server Gallery & Trailer</h2><p>Add 5 server photo links and one trailer photo.</p></div></div><div class="form-grid"><label class="full">Gallery Photo 1<input id="galleryImage1" type="url" placeholder="https://example.com/photo1.jpg"></label><label class="full">Gallery Photo 2<input id="galleryImage2" type="url" placeholder="https://example.com/photo2.jpg"></label><label class="full">Gallery Photo 3<input id="galleryImage3" type="url" placeholder="https://example.com/photo3.jpg"></label><label class="full">Gallery Photo 4<input id="galleryImage4" type="url" placeholder="https://example.com/photo4.jpg"></label><label class="full">Gallery Photo 5<input id="galleryImage5" type="url" placeholder="https://example.com/photo5.jpg"></label><label class="full">Trailer Photo Link<input id="trailerPhotoUrl" type="url" placeholder="https://example.com/trailer.jpg"></label><div class="full"><button id="saveGalleryTrailerBtn" class="btn primary" type="button">Save Gallery & Trailer</button><span id="galleryTrailerStatus"></span></div></div></section></main>
 
 <script src="firebase-config.js"></script>
 <script src="site-brand.js"></script><script src="admin.js"></script>
