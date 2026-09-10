@@ -1,198 +1,307 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Infinity Role Play | SA-MP</title>
-  <meta name="theme-color" content="#090b13" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#05070b">
+  <title>Infinity Role Play | Sri Lankan SA-MP</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 </head>
-<body>
-  <div class="bg-grid"></div>
+<body class="nexora-blue-home">
   <header class="nav">
-    <a href="#home" class="brand"><span class="logo-mark">∞</span><span>INFINITY <b>ROLE PLAY</b></span></a>
-    <button class="nav-toggle" id="navToggle">☰</button>
+    <a href="#home" class="brand">
+      <span class="logo-mark">∞</span>
+      <span class="brand-copy">INFINITY <b>ROLE PLAY</b></span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu">☰</button>
     <nav id="navMenu">
-      <a href="#home">Home</a><a href="#rules">Rules</a><a href="whitelist.html">Whitelist</a><a href="admins.html">Server Admins</a><a href="admin-apply.html">Admin Apply</a>
-      <a href="#downloads">Downloads</a>
-      <a class="btn small ghost" id="loginNavBtn" href="login.html">Login</a><a class="btn small primary" id="registerNavBtn" href="Register.html">Register</a>
+      <a href="#home">HOME</a>
+      <a href="#path">HOW TO PLAY</a>
+      <a href="#rules">RULES</a>
+      <a href="#gallery">GALLERY</a>
+      <a href="admins.html">ADMINS</a>
+      <a href="admin-apply.html">ADMIN APPLY</a>
+      <a class="btn small ghost" id="loginNavBtn" href="login.html">LOGIN</a>
+      <a class="btn small primary" id="registerNavBtn" href="Register.html">REGISTER</a>
       <a id="profileIconBtn" class="profile-icon-btn hidden" href="profile.html" title="My Profile" aria-label="My Profile">
         <img id="profileIconImg" alt="Profile">
         <span id="profileIconFallback">👤</span>
       </a>
-
-      <button class="btn small ghost hidden" id="logoutNavBtn">Logout</button>
-      <a class="btn small admin-link" href="admin.html">Admin</a>
+      <button class="btn small ghost hidden" id="logoutNavBtn">LOGOUT</button>
+      <a class="btn small admin-link" href="admin.html">ADMIN</a>
     </nav>
   </header>
 
-
-
-
-
   <main>
-    <section id="homeHero" class="hero-with-banner hero section"><div id="heroBannerSlider" class="hero-banner-slider" aria-hidden="true"><div class="hero-banner-slide active"></div><div class="hero-banner-slide"></div><div class="hero-banner-slide"></div></div><div class="hero-banner-overlay" aria-hidden="true"></div>
-      <div class="hero-copy">
-        <div class="pill">SRI LANKAN SA-MP ROLEPLAY SERVER</div>
-        <h1>WELCOME TO <span>INFINITY ROLE PLAY</span></h1>
-        <p>Build your character, follow the city rules and start your roleplay journey with our community.</p>
-        <div class="hero-actions">
-          <a class="btn primary" href="whitelist.html">Apply Whitelist</a>
-          <button class="btn ghost" id="copyIpBtn">Copy Server IP</button>
-        </div>
-        
-    <div class="server-ip-card" id="serverIpCard">
-      <div class="server-ip-info">
-        <span class="server-ip-label">SERVER IP</span>
-        <strong id="serverIpText">51.68.107.75:11999</strong>
+    <section id="homeHero" class="hero hero-with-banner section">
+      <div id="heroBannerSlider" class="hero-banner-slider" aria-hidden="true">
+        <div class="hero-banner-slide active"></div>
+        <div class="hero-banner-slide"></div>
+        <div class="hero-banner-slide"></div>
       </div>
-      <button class="server-copy-btn" id="serverIpCopyBtn" type="button">Copy IP</button>
-      <div class="server-online">
-        <span class="online-dot"></span>
-        <span>Online address</span>
-      </div>
-    </div>
+      <div class="hero-banner-overlay" aria-hidden="true"></div>
 
-<div class="card community-banner-card">
-  <a id="communityBannerLink" href="#" target="_blank" rel="noopener noreferrer">
-    <img id="communityBannerImage" class="community-banner-image hidden" alt="Infinity Role Play Banner">
-    <div id="communityBannerFallback" class="community-banner-fallback">
-      <div class="community-infinity">∞</div>
-      <div class="community-title">INFINITY RP</div>
-      <div class="community-subtitle">Whitelist • Roleplay • Community</div>
-    </div>
-  </a>
-</div>
+      <div class="hero-copy">
+        <span class="nex-kicker nx-reveal nx-delay-1">INFINITY ROLEPLAY</span>
+        <h1 class="nx-reveal nx-delay-2">WELCOME TO<br><span>INFINITY</span><br>ROLE PLAY</h1>
+        <p class="nx-reveal nx-delay-3">Build your character, follow the city rules and create your own story in our Sri Lankan SA-MP roleplay community.</p>
+
+        <div class="hero-actions nx-reveal nx-delay-4">
+          <a class="nex-pill-btn" href="whitelist.html">● &nbsp; WHITELIST APPLY</a>
+          <button class="nex-text-btn" id="copyIpBtn">COPY SERVER IP →</button>
+        </div>
+
+        <div class="hero-server-line nx-reveal nx-delay-5">
+          <span class="online-dot"></span>
+          <div>
+            <small>SERVER ADDRESS</small>
+            <strong id="serverIpText">51.68.107.75:11999</strong>
+            <span id="serverIp" class="visually-hidden">51.68.107.75:11999</span>
+          </div>
+          <button id="serverIpCopyBtn" class="mini-copy" type="button">COPY</button>
+        </div>
+
+        <div class="hero-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      </div>
     </section>
 
-    <section id="rules" class="section">
-      <div class="section-head">
-        <div><span class="eyebrow">CITY GUIDE</span><h2>Server Rules</h2></div>
-        <p>Rules are loaded from Firebase and can be updated from the admin panel.</p>
+    <section id="path" class="section path-section">
+      <div class="nex-section-title">
+        <span>CHOOSE YOUR PATH</span>
+        <h2>START YOUR<br>STORY</h2>
+      </div>
+
+      <div class="path-list">
+        <a href="whitelist.html" class="path-card">
+          <div class="path-icon">01</div>
+          <div><h3>WHITELIST</h3><p>Apply for access and begin your character story in Infinity Role Play.</p></div>
+          <b>→</b>
+        </a>
+        <a href="#downloads" class="path-card">
+          <div class="path-icon">02</div>
+          <div><h3>DOWNLOAD & PLAY</h3><p>Get the SA-MP app and Infinity data files required to connect.</p></div>
+          <b>→</b>
+        </a>
+        <a href="admins.html" class="path-card">
+          <div class="path-icon">03</div>
+          <div><h3>SERVER STAFF</h3><p>Meet the Infinity Role Play admin team and server management.</p></div>
+          <b>→</b>
+        </a>
+      </div>
+    </section>
+
+    <section class="section character-cta">
+      <div class="character-copy">
+        <span class="nex-kicker">PLAYER PROFILE</span>
+        <h2>YOUR<br><span>CHARACTER</span></h2>
+        <p>Login to manage your profile, verified VIP identity and application status.</p>
+        <div class="cta-actions">
+          <a class="nex-pill-btn" href="login.html">● &nbsp; LOGIN TO VIEW</a>
+          <a class="nex-outline-btn" href="Register.html">CREATE ACCOUNT</a>
+        </div>
+      </div>
+      <div class="character-mark">∞</div>
+    </section>
+
+    <section id="rules" class="section rules-nex-section">
+      <div class="nex-section-title">
+        <span>CITY GUIDE</span>
+        <h2>SERVER<br>RULES</h2>
       </div>
       <div id="rulesGrid" class="rules-grid">
         <div class="card skeleton">Loading rules...</div>
       </div>
     </section>
 
-<!-- ===== MIDDLE STATUS AREA ===== -->
-<div class="middle-status-area">
-<section class="section live-server-status-section hidden" id="liveServerStatus"><div class="card live-server-status-card"><div class="live-server-status-head"><div><span class="eyebrow">LIVE SERVER STATUS</span><h2>Infinity Role Play</h2></div><span id="serverOnlineBadge" class="server-status-badge checking">CHECKING...</span></div><div class="live-server-stats"><div class="live-stat"><span>Players Online</span><strong><span id="livePlayerCount">--</span> / <span id="liveMaxPlayers">--</span></strong></div><div class="live-stat"><span>Server IP</span><strong>51.68.107.75:11999</strong></div><div class="live-stat"><span>Game Mode</span><strong id="liveGameMode">Loading...</strong></div></div><p id="liveServerStatusText">Checking server...</p></div></section>
-<section id="releaseCountdownSection" class="release-countdown-section hidden">
-  <div class="card release-countdown-card">
-    <span class="eyebrow">SERVER RELEASE</span>
-    <h2>Infinity Role Play Launch Countdown</h2>
-    <div class="release-countdown-grid">
-      <div><strong id="cdDays">00</strong><span>Days</span></div>
-      <div><strong id="cdHours">00</strong><span>Hours</span></div>
-      <div><strong id="cdMinutes">00</strong><span>Minutes</span></div>
-      <div><strong id="cdSeconds">00</strong><span>Seconds</span></div>
-    </div>
-    <p id="releaseCountdownDate" class="release-countdown-date"></p>
-  </div>
-</section>
-</div>
-<!-- ===== END MIDDLE STATUS AREA ===== -->
+    <div class="middle-status-area">
+      <section class="section live-server-status-section hidden" id="liveServerStatus">
+        <div class="card live-server-status-card">
+          <div class="live-server-status-head">
+            <div><span class="eyebrow">LIVE SERVER</span><h2>SERVER STATUS</h2></div>
+            <span id="serverOnlineBadge" class="server-status-badge checking">CHECKING...</span>
+          </div>
+          <div class="live-server-stats">
+            <div class="live-stat"><span>PLAYERS ONLINE</span><strong><span id="livePlayerCount">--</span> / <span id="liveMaxPlayers">--</span></strong></div>
+            <div class="live-stat"><span>SERVER IP</span><strong>51.68.107.75:11999</strong></div>
+            <div class="live-stat"><span>GAME MODE</span><strong id="liveGameMode">Loading...</strong></div>
+          </div>
+          <p id="liveServerStatusText">Checking server...</p>
+        </div>
+      </section>
 
-<section id="downloads" class="section">
-      <div class="section-head">
-        <div><span class="eyebrow">GET STARTED</span><h2>Downloads</h2></div>
-        <p>Download links are managed from the admin panel.</p>
+      <section id="releaseCountdownSection" class="release-countdown-section hidden">
+        <div class="card release-countdown-card">
+          <span class="eyebrow">SERVER RELEASE</span>
+          <h2>LAUNCH COUNTDOWN</h2>
+          <div class="release-countdown-grid">
+            <div><strong id="cdDays">00</strong><span>DAYS</span></div>
+            <div><strong id="cdHours">00</strong><span>HOURS</span></div>
+            <div><strong id="cdMinutes">00</strong><span>MINUTES</span></div>
+            <div><strong id="cdSeconds">00</strong><span>SECONDS</span></div>
+          </div>
+          <p id="releaseCountdownDate" class="release-countdown-date"></p>
+        </div>
+      </section>
+    </div>
+
+    <section id="downloads" class="section downloads-nex-section">
+      <div class="nex-section-title">
+        <span>PLAY INFINITY</span>
+        <h2>GET<br>STARTED</h2>
       </div>
       <div class="download-grid">
-        <article class="card download-card">
-          <div class="download-icon">📱</div><h3>SA-MP App</h3>
-          <p>Download the Android SA-MP launcher/app required to connect.</p>
-          <a id="sampDownload" class="btn primary disabled" href="#" target="_blank" rel="noopener">Download SAMP App</a>
+        <article class="path-card download-nex-card">
+          <div class="path-icon">APP</div>
+          <div><h3>SA-MP APP</h3><p>Download the Android SA-MP launcher/app required to join the server.</p></div>
+          <a id="sampDownload" class="nex-pill-btn disabled" href="#" target="_blank" rel="noopener">DOWNLOAD</a>
         </article>
-        <article class="card download-card">
-          <div class="download-icon">📦</div><h3>Infinity Data File</h3>
-          <p>Download the latest Infinity Role Play data/resource package.</p>
-          <a id="dataDownload" class="btn ghost disabled" href="#" target="_blank" rel="noopener">Download Data File</a>
+        <article class="path-card download-nex-card">
+          <div class="path-icon">DATA</div>
+          <div><h3>INFINITY DATA</h3><p>Download the latest Infinity Role Play resource and data package.</p></div>
+          <a id="dataDownload" class="nex-outline-btn disabled" href="#" target="_blank" rel="noopener">DOWNLOAD</a>
         </article>
       </div>
     </section>
 
-<section class="section server-gallery-section" id="serverGallery"><div class="section-heading"><span class="eyebrow">SERVER MOMENTS</span><h2>Infinity Role Play Gallery</h2></div><div class="server-gallery-slider card"><div id="serverGalleryTrack" class="server-gallery-track"><div class="server-gallery-placeholder">Gallery images will appear here.</div></div><button id="galleryPrevBtn" class="gallery-nav gallery-prev" type="button">‹</button><button id="galleryNextBtn" class="gallery-nav gallery-next" type="button">›</button><div id="serverGalleryDots" class="server-gallery-dots"></div></div></section><section class="section trailer-photo-section" id="serverTrailer"><div class="section-heading"><span class="eyebrow">SERVER TRAILER</span><h2>Infinity Role Play Trailer</h2></div><div id="trailerPhotoCard" class="card trailer-photo-card hidden"><img id="trailerPhoto" alt="Infinity Role Play Trailer"></div></section><section class="section" id="downloads">
-  <div class="card downloads-card">
-    <span class="eyebrow">DOWNLOADS</span>
-    <h2>SA-MP Client & Server Data</h2>
-    <p>Download the required files for Infinity Role Play.</p>
-    <div class="download-actions">
-      <a id="sampDownloadBtn" class="btn primary" href="#" target="_blank" rel="noopener noreferrer">Download SAMP App</a>
-      <a id="dataDownloadBtn" class="btn ghost" href="#" target="_blank" rel="noopener noreferrer">Download Data File</a>
-    </div>
-    <p id="downloadStatus" class="form-status"></p>
-  </div>
-</section>
+    <section class="section community-strip">
+      <div class="card community-banner-card">
+        <a id="communityBannerLink" href="#" target="_blank" rel="noopener noreferrer">
+          <img id="communityBannerImage" class="community-banner-image hidden" alt="Infinity Role Play Banner">
+          <div id="communityBannerFallback" class="community-banner-fallback">
+            <div class="community-infinity">∞</div>
+            <div class="community-title">INFINITY ROLE PLAY</div>
+            <div class="community-subtitle">A NEW STORY BEGINS</div>
+          </div>
+        </a>
+      </div>
+    </section>
 
-</main>
+    <section id="gallery" class="section gallery-nex-section">
+      <div class="nex-section-title">
+        <span>SERVER MOMENTS</span>
+        <h2>YOUR<br>STORY</h2>
+      </div>
+      <div class="server-gallery-slider card">
+        <div id="serverGalleryTrack" class="server-gallery-track">
+          <div class="server-gallery-placeholder">Gallery images will appear here.</div>
+        </div>
+        <button id="galleryPrevBtn" class="gallery-nav gallery-prev" type="button" aria-label="Previous">‹</button>
+        <button id="galleryNextBtn" class="gallery-nav gallery-next" type="button" aria-label="Next">›</button>
+        <div id="serverGalleryDots" class="server-gallery-dots"></div>
+      </div>
+    </section>
+
+    <section class="section trailer-photo-section" id="serverTrailer">
+      <div class="nex-section-title">
+        <span>OFFICIAL MEDIA</span>
+        <h2>SERVER<br>TRAILER</h2>
+      </div>
+      <div id="trailerPhotoCard" class="card trailer-photo-card hidden">
+        <img id="trailerPhoto" alt="Infinity Role Play Trailer">
+      </div>
+    </section>
+
+    <section class="section faq-section">
+      <div class="nex-section-title">
+        <span>FAQ</span>
+        <h2>GOT<br>QUESTIONS?</h2>
+      </div>
+      <details><summary>How do I create an account?</summary><p>Open Register, create your account with email/password or continue with Google.</p></details>
+      <details><summary>How do I join the server?</summary><p>Login, complete the whitelist application, download the required files and use the server address shown above.</p></details>
+      <details><summary>Where can I view my application?</summary><p>Your profile shows your account information and application status.</p></details>
+      <details><summary>How do I contact server staff?</summary><p>Use the Server Admins page or the Live Chat available on the website.</p></details>
+    </section>
+  </main>
 
   <button id="chatToggleBtn" class="chat-fab" aria-label="Open live chat">💬</button>
   <aside id="floatingChat" class="floating-chat hidden">
     <div class="floating-chat-head">
-      <div><b>Live Chat</b><small>Infinity Role Play</small></div>
+      <div><b>LIVE CHAT</b><small>Infinity Role Play</small></div>
       <button id="chatCloseBtn">×</button>
     </div>
     <div id="chatMessages" class="chat-messages floating-messages"></div>
     <form id="chatForm" class="chat-form">
       <input id="chatInput" maxlength="300" placeholder="Login to send a message..." autocomplete="off">
-      <button class="btn primary" type="submit">Send</button>
+      <button class="btn primary" type="submit">SEND</button>
     </form>
   </aside>
 
-
-  
-
-
-<footer>© <span id="year"></span> Infinity Role Play • SA-MP Community</footer>
+  <footer class="nex-footer">
+    <div class="footer-brand"><span class="logo-mark">∞</span><b>INFINITY ROLE PLAY</b></div>
+    <p>© <span id="year"></span> Infinity Role Play • Sri Lankan SA-MP Community</p>
+  </footer>
 
   <script src="firebase-config.js"></script>
-<script src="site-brand.js"></script>
+  <script src="site-brand.js"></script>
   <script src="user-utils.js"></script>
-<script src="app.js"></script>
+  <script src="app.js"></script>
+  <script src="notifications.js"></script>
 
-
-
+  <script>
+  (function(){
+    if(typeof db==="undefined") return;
+    const img=document.getElementById("communityBannerImage");
+    const fallback=document.getElementById("communityBannerFallback");
+    const link=document.getElementById("communityBannerLink");
+    db.ref("settings").on("value",snap=>{
+      const s=snap.val()||{};
+      const imageUrl=(s.communityBannerUrl||"").trim();
+      const clickUrl=(s.communityBannerClickUrl||"").trim();
+      if(imageUrl){
+        img.src=imageUrl; img.classList.remove("hidden");
+        if(fallback) fallback.classList.add("hidden");
+      }else{
+        img.removeAttribute("src"); img.classList.add("hidden");
+        if(fallback) fallback.classList.remove("hidden");
+      }
+      if(link){link.href=clickUrl||"#";link.style.cursor=clickUrl?"pointer":"default";}
+    });
+  })();
+  </script>
 
 <script>
 (function(){
-  if(typeof db === "undefined") return;
-  const img = document.getElementById("communityBannerImage");
-  const fallback = document.getElementById("communityBannerFallback");
-  const link = document.getElementById("communityBannerLink");
-  if(!img) return;
-
-  db.ref("settings").on("value", snap => {
-    const s = snap.val() || {};
-    const imageUrl = (s.communityBannerUrl || "").trim();
-    const clickUrl = (s.communityBannerClickUrl || "").trim();
-
-    if(imageUrl){
-      img.src = imageUrl;
-      img.classList.remove("hidden");
-      if(fallback) fallback.classList.add("hidden");
-    }else{
-      img.removeAttribute("src");
-      img.classList.add("hidden");
-      if(fallback) fallback.classList.remove("hidden");
-    }
-
-    if(link){
-      link.href = clickUrl || "#";
-      link.style.cursor = clickUrl ? "pointer" : "default";
-    }
+  const revealEls = document.querySelectorAll(
+    '.path-card,.nex-section-title,.character-copy,.character-mark,.rule-card,'+
+    '.live-server-status-card,.release-countdown-card,.download-nex-card,'+
+    '.community-banner-card,.server-gallery-slider,.trailer-photo-card,.faq-section details'
+  );
+  revealEls.forEach((el,i)=>{
+    el.classList.add('nx-scroll-reveal');
+    el.style.setProperty('--nx-delay', Math.min((i%4)*80,240)+'ms');
   });
+
+  if('IntersectionObserver' in window){
+    const io=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('nx-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    },{threshold:.12,rootMargin:'0px 0px -35px 0px'});
+    revealEls.forEach(el=>io.observe(el));
+  }else{
+    revealEls.forEach(el=>el.classList.add('nx-visible'));
+  }
+
+  // subtle parallax/zoom feel on active hero image
+  const hero=document.getElementById('homeHero');
+  if(hero){
+    window.addEventListener('scroll',()=>{
+      const y=Math.min(window.scrollY,700);
+      hero.style.setProperty('--hero-shift',(y*.08)+'px');
+    },{passive:true});
+  }
 })();
 </script>
 
-<script src="notifications.js"></script>
 </body>
 </html>

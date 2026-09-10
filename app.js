@@ -36,18 +36,18 @@ if(typeof window.ensureInfinityUser!=="function"){
 }
 
 const $ = (s)=>document.querySelector(s);
-const serverIpEl = $("#serverIp"), rulesGrid=$("#rulesGrid"), sampDownload=$("#sampDownload"), dataDownload=$("#dataDownload");
+const serverIpEl = $("#serverIp")||$("#serverIpText"), rulesGrid=$("#rulesGrid"), sampDownload=$("#sampDownload"), dataDownload=$("#dataDownload");
 let currentUser=null, currentProfile=null;
 
 $("#year").textContent = new Date().getFullYear();
 $("#navToggle").onclick=()=>$("#navMenu").classList.toggle("open");
 $("#chatToggleBtn").onclick=()=>$("#floatingChat").classList.remove("hidden");
 $("#chatCloseBtn").onclick=()=>$("#floatingChat").classList.add("hidden");
-$("#copyIpBtn").onclick=async()=>{await navigator.clipboard.writeText(serverIpEl.textContent.trim()); $("#copyIpBtn").textContent="Copied!"; setTimeout(()=>$("#copyIpBtn").textContent="Copy Server IP",1200)};
+if($("#copyIpBtn")) $("#copyIpBtn").onclick=async()=>{const ip=(serverIpEl?.textContent||"51.68.107.75:11999").trim();await navigator.clipboard.writeText(ip);$("#copyIpBtn").textContent="COPIED ✓";setTimeout(()=>$("#copyIpBtn").textContent="COPY SERVER IP →",1200)};
 
 db.ref("settings").on("value", snap=>{
   const s=snap.val()||{};
-  serverIpEl.textContent=s.serverIp||"51.68.107.75:11999";
+  if(serverIpEl) serverIpEl.textContent=s.serverIp||"51.68.107.75:11999";
   setDownload(sampDownload,s.sampUrl); setDownload(dataDownload,s.dataUrl);
 });
 function setDownload(el,url){
