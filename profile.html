@@ -58,8 +58,8 @@
         <div class="daily-reward-head">
           <div>
             <span class="eyebrow">DAILY SERVER REWARD</span>
-            <h2>Claim 100 eCoin + $1,000</h2>
-            <p>Link your SA-MP account once, then claim your daily reward here.</p>
+            <h2>Claim 100 eCoin</h2>
+            <p>Link your SA-MP account once, then collect eCoin every day. Convert it to server cash whenever you want.</p>
           </div>
           <div class="reward-coin-icon">◈</div>
         </div>
@@ -90,11 +90,30 @@
 
           <div class="reward-box">
             <div><span>Daily eCoin</span><b>+100</b></div>
-            <div><span>Server Cash</span><b>+$1,000</b></div>
+            <div><span>Cash Now</span><b>$0</b></div>
           </div>
           <button id="claimDailyRewardBtn" class="btn primary reward-claim-btn" type="button">CLAIM DAILY REWARD</button>
           <div id="dailyRewardMessage" class="daily-reward-message">Checking reward status...</div>
         </div>
+      </section>
+
+      <section class="ecoin-convert-card" id="ecoinConvertCard">
+        <div class="daily-reward-head">
+          <div>
+            <span class="eyebrow">ECOIN EXCHANGE</span>
+            <h2>Convert eCoin to Server Cash</h2>
+            <p>Keep your eCoin balance and exchange only the amount you want. Conversion rate: 1 eCoin = $10.</p>
+          </div>
+          <div class="reward-coin-icon">$</div>
+        </div>
+        <div class="ecoin-convert-balance">Available eCoin: <b id="convertAvailableEcoin">0</b></div>
+        <div class="ecoin-convert-row">
+          <input id="convertEcoinInput" type="number" min="1" step="1" placeholder="eCoin amount">
+          <button id="convertAllEcoinBtn" class="btn ghost" type="button">USE ALL</button>
+          <button id="convertEcoinBtn" class="btn primary" type="button">CONVERT</button>
+        </div>
+        <div class="ecoin-convert-preview">You will receive: <b id="convertCashPreview">$0</b> server cash</div>
+        <div id="convertEcoinMessage" class="daily-reward-message">Choose how much eCoin you want to convert.</div>
       </section>
 
       <section class="redeem-code-card" id="redeemCodeCard">
@@ -102,7 +121,7 @@
           <div>
             <span class="eyebrow">REDEEM CODE</span>
             <h2>Redeem eCoin Code</h2>
-            <p>Enter a code from the Infinity RP team. The eCoin reward and matching server cash are added to your linked SA-MP account.</p>
+            <p>Enter a code from the Infinity RP team. Redeemed eCoin is saved to your linked SA-MP account until you choose to convert it.</p>
           </div>
           <div class="reward-coin-icon">✦</div>
         </div>
@@ -110,7 +129,7 @@
           <input id="redeemCodeInput" maxlength="32" autocomplete="off" placeholder="ENTER-CODE">
           <button id="redeemCodeBtn" class="btn primary" type="button">REDEEM</button>
         </div>
-        <small class="reward-help">Your SA-MP account must be linked first. 1 eCoin = $10 server cash.</small>
+        <small class="reward-help">Your SA-MP account must be linked first. Redeeming a code adds eCoin only. 1 eCoin = $10 server cash when you convert it.</small>
         <div id="redeemCodeMessage" class="daily-reward-message">Enter a redeem code to claim your reward.</div>
         <div id="redeemHistory" class="redeem-history"></div>
       </section>

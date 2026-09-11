@@ -111,16 +111,16 @@ exports.handler = async (event) => {
           `INSERT INTO website_redeem_claims
            (code_id, code, firebase_uid, server_uid, ecoin_reward, cash_reward)
            VALUES (?, ?, ?, ?, ?, ?)`,
-          [c.id,c.code,authUser.uid,serverUid,c.ecoin_reward,c.cash_reward]
+          [c.id,c.code,authUser.uid,serverUid,c.ecoin_reward,0]
         );
         await conn.execute("UPDATE website_redeem_codes SET used_count = used_count + 1 WHERE id = ?",[c.id]);
         await conn.execute(
-          "UPDATE users SET ecoin=COALESCE(ecoin,0)+?, cash=COALESCE(cash,0)+? WHERE uid=?",
-          [c.ecoin_reward,c.cash_reward,serverUid]
+          "UPDATE users SET ecoin=COALESCE(ecoin,0)+? WHERE uid=?",
+          [c.ecoin_reward,serverUid]
         );
         const [updated]=await conn.execute("SELECT uid,username,ecoin,cash FROM users WHERE uid=? LIMIT 1",[serverUid]);
         await conn.commit();
-        return response(200,{ok:true,redeemed:true,reward:{ecoin:Number(c.ecoin_reward),cash:Number(c.cash_reward)},account:updated[0]});
+        return response(200,{ok:true,redeemed:true,reward:{ecoin:Number(c.ecoin_reward),cash:0},account:updated[0]});
       }catch(e){ try{await conn.rollback();}catch{} throw e; }
     }
 
@@ -148,13 +148,13 @@ exports.handler = async (event) => {
           `INSERT INTO website_redeem_codes
            (code, ecoin_reward, cash_reward, max_uses, active, expires_at, created_by)
            VALUES (?, ?, ?, ?, 1, ?, ?)`,
-          [code,ecoin,cash,maxUses,expiresAt?expiresAt.toISOString().slice(0,19).replace('T',' '):null,authUser.uid]
+          [code,ecoin,0,maxUses,expiresAt?expiresAt.toISOString().slice(0,19).replace('T',' '):null,authUser.uid]
         );
       }catch(e){
         if(e.code==="ER_DUP_ENTRY") return response(409,{ok:false,error:"REDEEM_CODE_EXISTS"});
         throw e;
       }
-      return response(200,{ok:true,code:{code,ecoin_reward:ecoin,cash_reward:cash,max_uses:maxUses}});
+      return response(200,{ok:true,code:{code,ecoin_reward:ecoin,cash_reward:0,convert_cash_value:cash,max_uses:maxUses}});
     }
 
     if(action==="admin_list"){
@@ -164,6 +164,21 @@ exports.handler = async (event) => {
          FROM website_redeem_codes ORDER BY id DESC LIMIT 100`
       );
       return response(200,{ok:true,codes:rows});
+    }
+
+    if(action==="admin_claims"){
+      await requireAdmin(authUser);
+      const [rows]=await conn.execute(
+        `SELECT rc.id, rc.code, rc.firebase_uid, rc.server_uid,
+                COALESCE(u.username, wal.server_username, 'Unknown') AS server_username,
+                rc.ecoin_reward, rc.cash_reward, rc.claimed_at
+         FROM website_redeem_claims rc
+         LEFT JOIN users u ON u.uid = rc.server_uid
+         LEFT JOIN website_account_links wal ON wal.firebase_uid = rc.firebase_uid
+         ORDER BY rc.claimed_at DESC, rc.id DESC
+         LIMIT 200`
+      );
+      return response(200,{ok:true,claims:rows});
     }
 
     if(action==="admin_toggle"){

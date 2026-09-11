@@ -141,7 +141,7 @@
 
     <section class="card admin-section redeem-admin-section">
       <div class="section-row">
-        <div><h2>Redeem Codes</h2><p>Create eCoin codes for players. Server cash is calculated automatically at $10 per eCoin.</p></div>
+        <div><h2>Redeem Codes</h2><p>Create eCoin codes for players. Codes now give eCoin only; players can convert eCoin to server cash later at $10 per eCoin.</p></div>
         <button id="refreshRedeemCodesBtn" class="btn ghost small" type="button">Refresh</button>
       </div>
       <form id="redeemCodeAdminForm" class="form-grid">
@@ -152,7 +152,7 @@
         <label>eCoin Reward
           <input id="adminRedeemEcoin" type="number" min="1" max="1000000" value="100" required>
         </label>
-        <label>Server Cash (Auto)
+        <label>Cash Value When Converted
           <input id="adminRedeemCashPreview" value="$1,000" readonly>
         </label>
         <label>Max Uses
@@ -167,6 +167,15 @@
         </div>
       </form>
       <div id="adminRedeemCodesList" class="redeem-admin-list"></div>
+
+      <div class="redeem-claims-head section-row">
+        <div>
+          <h3>Redeemed Players</h3>
+          <p>Players who successfully used a redeem code and received eCoin. Cash is only added later when the player converts eCoin.</p>
+        </div>
+        <button id="refreshRedeemClaimsBtn" class="btn ghost small" type="button">Refresh Claims</button>
+      </div>
+      <div id="adminRedeemClaimsList" class="redeem-claims-admin-list"></div>
     </section>
 
     <section class="card admin-section">

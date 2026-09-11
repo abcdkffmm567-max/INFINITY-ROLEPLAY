@@ -738,7 +738,7 @@ async function loadAdminRedeemCodes(){
     const rows=data.codes||[];
     if(!rows.length){box.innerHTML="<p>No redeem codes created yet.</p>";return;}
     box.innerHTML=rows.map(c=>`<article class="redeem-admin-item">
-      <div><strong>${esc(c.code)}</strong><small>+${Number(c.ecoin_reward).toLocaleString()} eCoin · +$${Number(c.cash_reward).toLocaleString()} · Uses ${Number(c.used_count)}/${Number(c.max_uses)}${c.expires_at?` · Expires ${fmt(c.expires_at)}`:""}</small></div>
+      <div><strong>${esc(c.code)}</strong><small>+${Number(c.ecoin_reward).toLocaleString()} eCoin · Converts to $${(Number(c.ecoin_reward)*10).toLocaleString()} · Uses ${Number(c.used_count)}/${Number(c.max_uses)}${c.expires_at?` · Expires ${fmt(c.expires_at)}`:""}</small></div>
       <span class="status-pill ${Number(c.active)?"accepted":"rejected"}">${Number(c.active)?"ACTIVE":"OFF"}</span>
       <button class="btn ${Number(c.active)?"danger":"success"} small" type="button" onclick="toggleRedeemCode(${Number(c.id)},${Number(c.active)?0:1})">${Number(c.active)?"Disable":"Enable"}</button>
     </article>`).join("");
@@ -755,14 +755,35 @@ if($("#redeemCodeAdminForm")) $("#redeemCodeAdminForm").addEventListener("submit
   try{
     st.textContent="Creating...";
     const data=await adminRedeemApi("admin_create",{code,ecoin,maxUses,expiresAt:expiresAt||null});
-    st.textContent=`Created: ${data.code.code} (+${Number(data.code.ecoin_reward).toLocaleString()} eCoin / +$${Number(data.code.cash_reward).toLocaleString()})`;
+    st.textContent=`Created: ${data.code.code} (+${Number(data.code.ecoin_reward).toLocaleString()} eCoin)`;
     $("#adminRedeemCode").value="";
     await loadAdminRedeemCodes();
     if(typeof showNotice==="function")showNotice(`Redeem code ${data.code.code} created.`,"Redeem Code","success");
   }catch(err){st.textContent="Create failed: "+err.message;if(typeof showNotice==="function")showNotice(err.message,"Redeem Code","danger");}
 });
 
-if($("#refreshRedeemCodesBtn")) $("#refreshRedeemCodesBtn").addEventListener("click",loadAdminRedeemCodes);
+async function loadAdminRedeemClaims(){
+  const box=$("#adminRedeemClaimsList"); if(!box||!adminUser)return;
+  box.innerHTML="<p>Loading redeemed players...</p>";
+  try{
+    const data=await adminRedeemApi("admin_claims");
+    const rows=data.claims||[];
+    if(!rows.length){box.innerHTML='<p class="muted">No redeem claims yet.</p>';return;}
+    box.innerHTML=`<div class="redeem-claims-table-wrap"><table class="redeem-claims-table">
+      <thead><tr><th>Player</th><th>Code</th><th>Reward</th><th>Claimed</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr>
+        <td><strong>${esc(r.server_username||"Unknown")}</strong><small>Server UID: ${Number(r.server_uid)||0}</small></td>
+        <td><span class="redeem-code-chip">${esc(r.code||"")}</span></td>
+        <td><strong>+${Number(r.ecoin_reward||0).toLocaleString()} eCoin</strong><small>Cash is not automatic</small></td>
+        <td>${fmt(r.claimed_at)}</td>
+      </tr>`).join("")}</tbody>
+    </table></div>`;
+  }catch(err){box.innerHTML="<p>Could not load redeemed players: "+esc(err.message)+"</p>";}
+}
+
+if($("#refreshRedeemCodesBtn")) $("#refreshRedeemCodesBtn").addEventListener("click",async()=>{await loadAdminRedeemCodes();await loadAdminRedeemClaims();});
+if($("#refreshRedeemClaimsBtn")) $("#refreshRedeemClaimsBtn").addEventListener("click",loadAdminRedeemClaims);
 window.toggleRedeemCode=async(id,active)=>{try{await adminRedeemApi("admin_toggle",{id,active:!!active});await loadAdminRedeemCodes();}catch(err){if(typeof showNotice==="function")showNotice(err.message,"Redeem Code","danger");}};
 
-auth.onAuthStateChanged(user=>{if(user)setTimeout(()=>{updateRedeemCashPreview();loadAdminRedeemCodes();},350);});
+auth.onAuthStateChanged(user=>{if(user)setTimeout(()=>{updateRedeemCashPreview();loadAdminRedeemCodes();loadAdminRedeemClaims();},350);});
+

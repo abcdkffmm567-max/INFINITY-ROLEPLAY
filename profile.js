@@ -142,7 +142,7 @@ function setAvatar(url,name){
   $("#profileAvatar").src=url||`https://ui-avatars.com/api/?name=${encodeURIComponent(name||"User")}&background=111827&color=ffffff`;
 }
 
-// ===== Daily SA-MP Reward: 100 eCoin + $1,000 =====
+// ===== Daily SA-MP Reward: 100 eCoin =====
 const rewardEls = {
   linkArea: document.getElementById("serverLinkArea"),
   linkedArea: document.getElementById("linkedRewardArea"),
@@ -167,6 +167,8 @@ function rewardErrorMessage(code){
     WEBSITE_ACCOUNT_ALREADY_LINKED:"Your website account is already linked to a different SA-MP account.",
     SERVER_ACCOUNT_NOT_LINKED:"Link your SA-MP account first.",
     ALREADY_CLAIMED_TODAY:"You already claimed today's reward.",
+    INVALID_CONVERT_AMOUNT:"Enter a valid eCoin amount.",
+    NOT_ENOUGH_ECOIN:"You do not have enough eCoin.",
     SERVER_MISSING_DB_HOST:"Database connection is not configured on Netlify.",
     SERVER_MISSING_DB_USER:"Database connection is not configured on Netlify.",
     SERVER_MISSING_DB_PASSWORD:"Database connection is not configured on Netlify.",
@@ -207,6 +209,7 @@ function renderRewardStatus(data){
   rewardEls.uid.textContent="UID: "+(data.account?.uid??"-");
   rewardEls.ecoin.textContent=Number(data.account?.ecoin||0).toLocaleString();
   rewardEls.cash.textContent="$"+Number(data.account?.cash||0).toLocaleString();
+  if(typeof syncConvertBalance==="function") syncConvertBalance(data.account?.ecoin||0);
   window.dispatchEvent(new Event("ecoin-balance-changed"));
   rewardEls.claimBtn.disabled=!!data.claimedToday;
   if(data.claimedToday){
@@ -214,7 +217,7 @@ function renderRewardStatus(data){
     rewardEls.message.textContent="Reward claimed. Come back tomorrow after 12:00 AM Sri Lanka time.";
   }else{
     rewardEls.claimBtn.textContent="CLAIM DAILY REWARD";
-    rewardEls.message.textContent="Ready to claim: +100 eCoin and +$1,000 server cash.";
+    rewardEls.message.textContent="Ready to claim: +100 eCoin. Convert it to server cash whenever you want.";
   }
 }
 
@@ -255,7 +258,7 @@ if(rewardEls.claimBtn){
     rewardEls.claimBtn.textContent="CLAIMING...";
     try{
       const data=await rewardApi("claim");
-      showNotice("100 eCoin + $1,000 added to your SA-MP account!","Daily Reward Claimed","success");
+      showNotice("100 eCoin added to your SA-MP account!","Daily Reward Claimed","success");
       renderRewardStatus({...data,linked:true,claimedToday:true});
     }catch(err){
       showNotice(rewardErrorMessage(err.message),"Claim Failed","danger");
@@ -270,7 +273,55 @@ auth.onAuthStateChanged(user=>{
 });
 
 
-// ===== Redeem Code: eCoin + server cash =====
+// ===== eCoin -> Server Cash conversion =====
+const convertEls={
+  available:document.getElementById("convertAvailableEcoin"),
+  input:document.getElementById("convertEcoinInput"),
+  allBtn:document.getElementById("convertAllEcoinBtn"),
+  btn:document.getElementById("convertEcoinBtn"),
+  preview:document.getElementById("convertCashPreview"),
+  message:document.getElementById("convertEcoinMessage")
+};
+let currentServerEcoin=0;
+
+function syncConvertBalance(value){
+  currentServerEcoin=Math.max(0,Number(value||0));
+  if(convertEls.available) convertEls.available.textContent=currentServerEcoin.toLocaleString();
+  updateConvertPreview();
+}
+
+function updateConvertPreview(){
+  if(!convertEls.preview)return;
+  const amount=Math.max(0,Math.floor(Number(convertEls.input?.value||0)));
+  convertEls.preview.textContent="$"+(amount*10).toLocaleString();
+}
+if(convertEls.input) convertEls.input.addEventListener("input",updateConvertPreview);
+if(convertEls.allBtn) convertEls.allBtn.addEventListener("click",()=>{
+  if(convertEls.input){convertEls.input.value=String(currentServerEcoin||"");updateConvertPreview();}
+});
+if(convertEls.btn) convertEls.btn.addEventListener("click",async()=>{
+  const amount=Math.floor(Number(convertEls.input?.value||0));
+  if(!amount||amount<1){showNotice("Enter the eCoin amount you want to convert.","eCoin Exchange","danger");return;}
+  convertEls.btn.disabled=true;convertEls.btn.textContent="CONVERTING...";
+  try{
+    const data=await rewardApi("convert",{amount});
+    const cash=Number(data.conversion?.cash||0);
+    showNotice(`${amount.toLocaleString()} eCoin converted to $${cash.toLocaleString()} server cash.`,"eCoin Converted","success");
+    if(convertEls.message) convertEls.message.textContent=`Success: ${amount.toLocaleString()} eCoin → $${cash.toLocaleString()} server cash.`;
+    if(convertEls.input) convertEls.input.value="";
+    if(rewardEls.ecoin) rewardEls.ecoin.textContent=Number(data.account?.ecoin||0).toLocaleString();
+    if(rewardEls.cash) rewardEls.cash.textContent="$"+Number(data.account?.cash||0).toLocaleString();
+    syncConvertBalance(data.account?.ecoin||0);
+    window.dispatchEvent(new Event("ecoin-balance-changed"));
+  }catch(err){
+    const msg=rewardErrorMessage(err.message);
+    if(convertEls.message) convertEls.message.textContent=msg;
+    showNotice(msg,"eCoin Exchange Failed","danger");
+    await loadDailyRewardStatus();
+  }finally{convertEls.btn.disabled=false;convertEls.btn.textContent="CONVERT";updateConvertPreview();}
+});
+
+// ===== Redeem Code: eCoin only =====
 const redeemEls={
   input:document.getElementById("redeemCodeInput"),
   btn:document.getElementById("redeemCodeBtn"),
@@ -312,7 +363,7 @@ async function loadRedeemHistory(){
   try{
     const data=await redeemApi("history");
     const rows=data.claims||[];
-    redeemEls.history.innerHTML=rows.length?rows.map(r=>`<div class="redeem-history-item"><b>${String(r.code||"")}</b><span>+${Number(r.ecoin_reward||0).toLocaleString()} eCoin · +$${Number(r.cash_reward||0).toLocaleString()}</span></div>`).join(""):"";
+    redeemEls.history.innerHTML=rows.length?rows.map(r=>`<div class="redeem-history-item"><b>${String(r.code||"")}</b><span>+${Number(r.ecoin_reward||0).toLocaleString()} eCoin</span></div>`).join(""):"";
   }catch{}
 }
 
@@ -323,11 +374,12 @@ if(redeemEls.btn){
     redeemEls.btn.disabled=true; redeemEls.btn.textContent="REDEEMING...";
     try{
       const data=await redeemApi("redeem",{code});
-      redeemEls.message.textContent=`Success: +${Number(data.reward.ecoin).toLocaleString()} eCoin and +$${Number(data.reward.cash).toLocaleString()} server cash.`;
+      redeemEls.message.textContent=`Success: +${Number(data.reward.ecoin).toLocaleString()} eCoin added to your balance.`;
       redeemEls.input.value="";
-      showNotice(`${Number(data.reward.ecoin).toLocaleString()} eCoin + $${Number(data.reward.cash).toLocaleString()} added to your SA-MP account!`,"Code Redeemed","success");
+      showNotice(`${Number(data.reward.ecoin).toLocaleString()} eCoin added to your balance!`,"Code Redeemed","success");
       if(rewardEls.ecoin) rewardEls.ecoin.textContent=Number(data.account?.ecoin||0).toLocaleString();
       if(rewardEls.cash) rewardEls.cash.textContent="$"+Number(data.account?.cash||0).toLocaleString();
+      syncConvertBalance(data.account?.ecoin||0);
       window.dispatchEvent(new Event("ecoin-balance-changed"));
       await loadRedeemHistory();
     }catch(err){

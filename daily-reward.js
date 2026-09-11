@@ -185,7 +185,7 @@ exports.handler = async (event) => {
           await conn.execute(
             `INSERT INTO website_daily_rewards
              (firebase_uid, server_uid, claim_date, ecoin_reward, cash_reward)
-             VALUES (?, ?, ?, 100, 1000)`,
+             VALUES (?, ?, ?, 100, 0)`,
             [authUser.uid, serverUid, dateKey]
           );
         } catch (e) {
@@ -197,7 +197,7 @@ exports.handler = async (event) => {
         }
 
         await conn.execute(
-          "UPDATE users SET ecoin = COALESCE(ecoin,0) + 100, cash = COALESCE(cash,0) + 1000 WHERE uid = ?",
+          "UPDATE users SET ecoin = COALESCE(ecoin,0) + 100 WHERE uid = ?",
           [serverUid]
         );
 
@@ -210,8 +210,64 @@ exports.handler = async (event) => {
         return response(200, {
           ok:true,
           claimed:true,
-          reward:{ ecoin:100, cash:1000 },
+          reward:{ ecoin:100, cash:0 },
           nextClaimAt:nextSriLankaMidnightISO(),
+          account:updated[0]
+        });
+      } catch (e) {
+        try { await conn.rollback(); } catch {}
+        throw e;
+      }
+    }
+
+    if (action === "convert") {
+      const amount = Number(body.amount);
+      if (!Number.isInteger(amount) || amount < 1 || amount > 100000000) {
+        return response(400, { ok:false, error:"INVALID_CONVERT_AMOUNT" });
+      }
+
+      await conn.beginTransaction();
+      try {
+        const [links] = await conn.execute(
+          "SELECT server_uid, server_username FROM website_account_links WHERE firebase_uid = ? LIMIT 1 FOR UPDATE",
+          [authUser.uid]
+        );
+        if (!links.length) {
+          await conn.rollback();
+          return response(400, { ok:false, error:"SERVER_ACCOUNT_NOT_LINKED" });
+        }
+
+        const serverUid = Number(links[0].server_uid);
+        const [players] = await conn.execute(
+          "SELECT uid, username, ecoin, cash FROM users WHERE uid = ? LIMIT 1 FOR UPDATE",
+          [serverUid]
+        );
+        if (!players.length) {
+          await conn.rollback();
+          return response(404, { ok:false, error:"SERVER_ACCOUNT_NOT_FOUND" });
+        }
+
+        const currentEcoin = Number(players[0].ecoin || 0);
+        if (currentEcoin < amount) {
+          await conn.rollback();
+          return response(409, { ok:false, error:"NOT_ENOUGH_ECOIN", available:currentEcoin });
+        }
+
+        const cashToAdd = amount * 10;
+        await conn.execute(
+          "UPDATE users SET ecoin = COALESCE(ecoin,0) - ?, cash = COALESCE(cash,0) + ? WHERE uid = ?",
+          [amount, cashToAdd, serverUid]
+        );
+
+        const [updated] = await conn.execute(
+          "SELECT uid, username, ecoin, cash FROM users WHERE uid = ? LIMIT 1",
+          [serverUid]
+        );
+        await conn.commit();
+        return response(200, {
+          ok:true,
+          converted:true,
+          conversion:{ ecoin:amount, cash:cashToAdd, rate:10 },
           account:updated[0]
         });
       } catch (e) {
