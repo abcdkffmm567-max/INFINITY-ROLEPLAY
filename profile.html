@@ -66,16 +66,13 @@
 
         <div id="serverLinkArea" class="server-link-area">
           <div class="reward-status-pill" id="rewardLinkStatus">Server account not linked</div>
-          <div class="reward-link-grid">
-            <label>Server UID
-              <input id="serverUidInput" type="number" min="1" inputmode="numeric" placeholder="Example: 1075">
-            </label>
+          <div class="reward-link-grid reward-link-grid-single">
             <label>Server Username
-              <input id="serverUsernameInput" maxlength="24" placeholder="Example: Jack_Sparow">
+              <input id="serverUsernameInput" maxlength="24" autocomplete="off" placeholder="Example: Jack_Sparow">
             </label>
           </div>
           <button id="linkServerAccountBtn" class="btn primary" type="button">Link Server Account</button>
-          <small class="reward-help">UID and username must exactly match your SA-MP account.</small>
+          <small class="reward-help">Enter your exact SA-MP username. Your Server UID is found automatically from MySQL.</small>
         </div>
 
         <div id="linkedRewardArea" class="linked-reward-area hidden">

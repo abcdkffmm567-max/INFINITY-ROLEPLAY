@@ -147,7 +147,6 @@ const rewardEls = {
   linkArea: document.getElementById("serverLinkArea"),
   linkedArea: document.getElementById("linkedRewardArea"),
   linkStatus: document.getElementById("rewardLinkStatus"),
-  uidInput: document.getElementById("serverUidInput"),
   usernameInput: document.getElementById("serverUsernameInput"),
   linkBtn: document.getElementById("linkServerAccountBtn"),
   claimBtn: document.getElementById("claimDailyRewardBtn"),
@@ -162,8 +161,8 @@ function rewardErrorMessage(code){
   const map={
     LOGIN_REQUIRED:"Please login again.",
     INVALID_LOGIN:"Your login session expired. Please login again.",
-    INVALID_SERVER_ACCOUNT:"Enter a valid server UID and username.",
-    SERVER_ACCOUNT_NOT_FOUND:"Server account not found. Check UID and username.",
+    INVALID_SERVER_ACCOUNT:"Enter a valid SA-MP username.",
+    SERVER_ACCOUNT_NOT_FOUND:"Server account not found. Check your SA-MP username.",
     SERVER_ACCOUNT_ALREADY_LINKED:"This SA-MP account is already linked to another website account.",
     WEBSITE_ACCOUNT_ALREADY_LINKED:"Your website account is already linked to a different SA-MP account.",
     SERVER_ACCOUNT_NOT_LINKED:"Link your SA-MP account first.",
@@ -208,6 +207,7 @@ function renderRewardStatus(data){
   rewardEls.uid.textContent="UID: "+(data.account?.uid??"-");
   rewardEls.ecoin.textContent=Number(data.account?.ecoin||0).toLocaleString();
   rewardEls.cash.textContent="$"+Number(data.account?.cash||0).toLocaleString();
+  window.dispatchEvent(new Event("ecoin-balance-changed"));
   rewardEls.claimBtn.disabled=!!data.claimedToday;
   if(data.claimedToday){
     rewardEls.claimBtn.textContent="CLAIMED TODAY ✓";
@@ -233,12 +233,11 @@ async function loadDailyRewardStatus(){
 
 if(rewardEls.linkBtn){
   rewardEls.linkBtn.addEventListener("click",async()=>{
-    const serverUid=Number(rewardEls.uidInput.value);
     const username=rewardEls.usernameInput.value.trim();
     rewardEls.linkBtn.disabled=true;
     rewardEls.linkBtn.textContent="LINKING...";
     try{
-      const data=await rewardApi("link",{serverUid,username});
+      const data=await rewardApi("link",{username});
       showNotice("SA-MP account linked successfully.","Account Linked","success");
       await loadDailyRewardStatus();
     }catch(err){

@@ -86,17 +86,17 @@ exports.handler = async (event) => {
     const action = String(body.action || "status");
 
     if (action === "link") {
-      const serverUid = Number(body.serverUid);
       const username = String(body.username || "").trim();
-      if (!Number.isInteger(serverUid) || serverUid <= 0 || !/^[A-Za-z0-9_\.\[\]-]{2,24}$/.test(username)) {
+      if (!/^[A-Za-z0-9_\.\[\]-]{2,24}$/.test(username)) {
         return response(400, { ok:false, error:"INVALID_SERVER_ACCOUNT" });
       }
 
       const [players] = await conn.execute(
-        "SELECT uid, username, ecoin, cash FROM users WHERE uid = ? AND BINARY username = BINARY ? LIMIT 1",
-        [serverUid, username]
+        "SELECT uid, username, ecoin, cash FROM users WHERE BINARY username = BINARY ? LIMIT 1",
+        [username]
       );
       if (!players.length) return response(404, { ok:false, error:"SERVER_ACCOUNT_NOT_FOUND" });
+      const serverUid = Number(players[0].uid);
 
       const [existingByServer] = await conn.execute(
         "SELECT firebase_uid FROM website_account_links WHERE server_uid = ? LIMIT 1",
