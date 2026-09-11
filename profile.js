@@ -268,3 +268,74 @@ if(rewardEls.claimBtn){
 auth.onAuthStateChanged(user=>{
   if(user) setTimeout(loadDailyRewardStatus,150);
 });
+
+
+// ===== Redeem Code: eCoin + server cash =====
+const redeemEls={
+  input:document.getElementById("redeemCodeInput"),
+  btn:document.getElementById("redeemCodeBtn"),
+  message:document.getElementById("redeemCodeMessage"),
+  history:document.getElementById("redeemHistory")
+};
+
+function redeemErrorMessage(code){
+  const map={
+    LOGIN_REQUIRED:"Please login again.",
+    INVALID_LOGIN:"Your login session expired. Please login again.",
+    SERVER_ACCOUNT_NOT_LINKED:"Link your SA-MP account first.",
+    SERVER_ACCOUNT_NOT_FOUND:"Linked SA-MP account was not found.",
+    INVALID_REDEEM_CODE:"Enter a valid redeem code.",
+    REDEEM_CODE_NOT_FOUND:"Redeem code not found.",
+    REDEEM_CODE_DISABLED:"This redeem code is disabled.",
+    REDEEM_CODE_EXPIRED:"This redeem code has expired.",
+    REDEEM_CODE_USED_UP:"This redeem code has reached its usage limit.",
+    REDEEM_CODE_ALREADY_USED:"You already used this redeem code."
+  };
+  return map[code]||rewardErrorMessage(code)||code||"Redeem service error.";
+}
+
+async function redeemApi(action,extra={}){
+  if(!currentUser) throw new Error("LOGIN_REQUIRED");
+  const token=await currentUser.getIdToken();
+  const res=await fetch("/api/redeem-code",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+    body:JSON.stringify({action,...extra})
+  });
+  let data={}; try{data=await res.json();}catch{}
+  if(!res.ok||!data.ok) throw new Error(data.error||"REDEEM_API_ERROR");
+  return data;
+}
+
+async function loadRedeemHistory(){
+  if(!currentUser||!redeemEls.history)return;
+  try{
+    const data=await redeemApi("history");
+    const rows=data.claims||[];
+    redeemEls.history.innerHTML=rows.length?rows.map(r=>`<div class="redeem-history-item"><b>${String(r.code||"")}</b><span>+${Number(r.ecoin_reward||0).toLocaleString()} eCoin · +$${Number(r.cash_reward||0).toLocaleString()}</span></div>`).join(""):"";
+  }catch{}
+}
+
+if(redeemEls.btn){
+  redeemEls.btn.addEventListener("click",async()=>{
+    const code=String(redeemEls.input.value||"").trim().toUpperCase();
+    if(!code){showNotice("Enter a redeem code.","Redeem Code","danger");return;}
+    redeemEls.btn.disabled=true; redeemEls.btn.textContent="REDEEMING...";
+    try{
+      const data=await redeemApi("redeem",{code});
+      redeemEls.message.textContent=`Success: +${Number(data.reward.ecoin).toLocaleString()} eCoin and +$${Number(data.reward.cash).toLocaleString()} server cash.`;
+      redeemEls.input.value="";
+      showNotice(`${Number(data.reward.ecoin).toLocaleString()} eCoin + $${Number(data.reward.cash).toLocaleString()} added to your SA-MP account!`,"Code Redeemed","success");
+      if(rewardEls.ecoin) rewardEls.ecoin.textContent=Number(data.account?.ecoin||0).toLocaleString();
+      if(rewardEls.cash) rewardEls.cash.textContent="$"+Number(data.account?.cash||0).toLocaleString();
+      window.dispatchEvent(new Event("ecoin-balance-changed"));
+      await loadRedeemHistory();
+    }catch(err){
+      const msg=redeemErrorMessage(err.message);
+      redeemEls.message.textContent=msg;
+      showNotice(msg,"Redeem Failed","danger");
+    }finally{redeemEls.btn.disabled=false;redeemEls.btn.textContent="REDEEM";}
+  });
+}
+
+auth.onAuthStateChanged(user=>{if(user)setTimeout(loadRedeemHistory,250);});

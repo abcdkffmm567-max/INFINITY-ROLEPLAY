@@ -139,6 +139,36 @@
 
     
 
+    <section class="card admin-section redeem-admin-section">
+      <div class="section-row">
+        <div><h2>Redeem Codes</h2><p>Create eCoin codes for players. Server cash is calculated automatically at $10 per eCoin.</p></div>
+        <button id="refreshRedeemCodesBtn" class="btn ghost small" type="button">Refresh</button>
+      </div>
+      <form id="redeemCodeAdminForm" class="form-grid">
+        <label>Redeem Code
+          <input id="adminRedeemCode" maxlength="32" placeholder="INFINITY-100">
+          <small>Leave empty to generate a code automatically.</small>
+        </label>
+        <label>eCoin Reward
+          <input id="adminRedeemEcoin" type="number" min="1" max="1000000" value="100" required>
+        </label>
+        <label>Server Cash (Auto)
+          <input id="adminRedeemCashPreview" value="$1,000" readonly>
+        </label>
+        <label>Max Uses
+          <input id="adminRedeemMaxUses" type="number" min="1" max="100000" value="1" required>
+        </label>
+        <label class="full">Expiry Date & Time (Optional)
+          <input id="adminRedeemExpires" type="datetime-local">
+        </label>
+        <div class="full">
+          <button class="btn primary" type="submit">Create Redeem Code</button>
+          <span id="adminRedeemStatus"></span>
+        </div>
+      </form>
+      <div id="adminRedeemCodesList" class="redeem-admin-list"></div>
+    </section>
+
     <section class="card admin-section">
       <div class="section-row"><h2>Server Rules</h2><button id="addRuleBtn" class="btn small primary" type="button">+ Add Rule</button></div>
       <div id="rulesAdmin"></div>
