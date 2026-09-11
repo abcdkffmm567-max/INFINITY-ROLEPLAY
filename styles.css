@@ -1586,3 +1586,44 @@ input::placeholder,textarea::placeholder{
 #adminLoginCard:not(.hidden) ~ #adminDashboard{
   display:none!important;
 }
+
+
+/* ===== Daily SA-MP Reward ===== */
+.daily-reward-card{
+  margin-top:22px;
+  padding:22px;
+  border:1px solid rgba(69,190,255,.25);
+  border-radius:24px;
+  background:linear-gradient(145deg,rgba(7,30,50,.98),rgba(5,20,35,.98));
+  box-shadow:0 18px 60px rgba(0,88,160,.14), inset 0 1px 0 rgba(255,255,255,.04);
+}
+.daily-reward-head{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:18px}
+.daily-reward-head h2{margin:5px 0 6px;font-size:clamp(1.25rem,4vw,1.8rem);color:#fff}
+.daily-reward-head p{margin:0;color:#8eacc0;line-height:1.55}
+.reward-coin-icon{width:62px;height:62px;border-radius:20px;display:grid;place-items:center;font-size:2rem;font-weight:900;background:linear-gradient(135deg,#0c70ff,#37c9ff);color:white;box-shadow:0 10px 30px rgba(42,166,255,.28)}
+.reward-status-pill{display:inline-flex;padding:8px 12px;border-radius:999px;background:rgba(22,149,255,.1);border:1px solid rgba(70,187,255,.22);color:#9fdcff;font-size:.82rem;font-weight:700;margin-bottom:14px}
+.reward-link-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.reward-link-grid label{display:grid;gap:7px;color:#a9c5d8;font-size:.82rem;font-weight:700}
+.reward-help{display:block;margin-top:10px;color:#7596aa}
+.linked-server-account{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px;border-radius:18px;background:rgba(7,24,40,.8);border:1px solid rgba(83,190,255,.17)}
+.linked-server-account strong{display:block;color:#fff;font-size:1.1rem;margin:5px 0 3px}
+.linked-server-account small{color:#80a6bd}
+.reward-label{font-size:.7rem;letter-spacing:.13em;color:#64caff;font-weight:800}
+.reward-balances{display:flex;gap:10px}
+.reward-balances div{min-width:90px;text-align:center;padding:10px 12px;border-radius:14px;background:rgba(18,125,209,.11);border:1px solid rgba(56,171,255,.16)}
+.reward-balances span{display:block;font-size:.7rem;color:#86a9bf}
+.reward-balances b{display:block;color:#fff;margin-top:3px}
+.reward-box{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.reward-box div{padding:14px;text-align:center;border-radius:16px;background:linear-gradient(135deg,rgba(10,92,185,.18),rgba(37,186,255,.09));border:1px solid rgba(60,180,255,.18)}
+.reward-box span{display:block;font-size:.75rem;color:#8fb2c8}
+.reward-box b{display:block;margin-top:5px;color:#fff;font-size:1.15rem}
+.reward-claim-btn{width:100%;min-height:50px;font-weight:900;letter-spacing:.03em}
+.reward-claim-btn:disabled{opacity:.58;cursor:not-allowed}
+.daily-reward-message{text-align:center;margin-top:11px;color:#85a9bf;font-size:.84rem;line-height:1.5}
+@media(max-width:640px){
+  .daily-reward-card{padding:16px;border-radius:20px}
+  .reward-link-grid{grid-template-columns:1fr}
+  .linked-server-account{align-items:flex-start;flex-direction:column}
+  .reward-balances{width:100%}
+  .reward-balances div{flex:1;min-width:0}
+}

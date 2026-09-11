@@ -52,6 +52,54 @@
         </div>
       </form>
 
+
+
+      <section class="daily-reward-card" id="dailyRewardCard">
+        <div class="daily-reward-head">
+          <div>
+            <span class="eyebrow">DAILY SERVER REWARD</span>
+            <h2>Claim 100 eCoin + $1,000</h2>
+            <p>Link your SA-MP account once, then claim your daily reward here.</p>
+          </div>
+          <div class="reward-coin-icon">◈</div>
+        </div>
+
+        <div id="serverLinkArea" class="server-link-area">
+          <div class="reward-status-pill" id="rewardLinkStatus">Server account not linked</div>
+          <div class="reward-link-grid">
+            <label>Server UID
+              <input id="serverUidInput" type="number" min="1" inputmode="numeric" placeholder="Example: 1075">
+            </label>
+            <label>Server Username
+              <input id="serverUsernameInput" maxlength="24" placeholder="Example: Jack_Sparow">
+            </label>
+          </div>
+          <button id="linkServerAccountBtn" class="btn primary" type="button">Link Server Account</button>
+          <small class="reward-help">UID and username must exactly match your SA-MP account.</small>
+        </div>
+
+        <div id="linkedRewardArea" class="linked-reward-area hidden">
+          <div class="linked-server-account">
+            <div>
+              <span class="reward-label">LINKED SERVER ACCOUNT</span>
+              <strong id="linkedServerName">-</strong>
+              <small id="linkedServerUid">UID: -</small>
+            </div>
+            <div class="reward-balances">
+              <div><span>eCoin</span><b id="serverEcoinBalance">0</b></div>
+              <div><span>Cash</span><b id="serverCashBalance">$0</b></div>
+            </div>
+          </div>
+
+          <div class="reward-box">
+            <div><span>Daily eCoin</span><b>+100</b></div>
+            <div><span>Server Cash</span><b>+$1,000</b></div>
+          </div>
+          <button id="claimDailyRewardBtn" class="btn primary reward-claim-btn" type="button">CLAIM DAILY REWARD</button>
+          <div id="dailyRewardMessage" class="daily-reward-message">Checking reward status...</div>
+        </div>
+      </section>
+
       <div class="profile-note">
         <b>Tip:</b> Tap Profile Photo and choose an image from your phone. If you logged in with Google, you can also restore your Google profile photo.
       </div>
