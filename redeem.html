@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#05070b">
+  <title>Redeem Code | Infinity Role Play</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <header class="nav">
+    <a class="brand" href="index.html"><span class="logo-mark">∞</span><span>INFINITY <b>ROLE PLAY</b></span></a>
+    <div class="redeem-page-nav">
+      <a class="btn small ghost" href="index.html">HOME</a>
+      <a class="btn small ghost" href="profile.html">PROFILE</a>
+    </div>
+  </header>
+
+  <main class="section redeem-page-shell">
+    <section class="redeem-page-hero">
+      <span class="eyebrow">INFINITY ROLE PLAY</span>
+      <h1>REDEEM <span>CODE</span></h1>
+      <p>Enter your Infinity RP redeem code and collect eCoin. Your eCoin stays in your linked server account until you choose to convert it to server cash from Profile.</p>
+    </section>
+
+    <section class="redeem-code-card redeem-standalone-card" id="redeemCodeCard">
+      <div class="daily-reward-head">
+        <div>
+          <span class="eyebrow">ECOIN REWARD</span>
+          <h2>Claim Your Code</h2>
+          <p>Redeeming a code adds eCoin only. It will not automatically convert to server money.</p>
+        </div>
+        <div class="reward-coin-icon">✦</div>
+      </div>
+
+      <div id="redeemAccountState" class="redeem-account-state">Checking your linked server account...</div>
+      <div class="redeem-current-balance">Current eCoin: <b id="redeemEcoinBalance">—</b></div>
+
+      <div class="redeem-entry-row">
+        <input id="redeemCodeInput" maxlength="32" autocomplete="off" placeholder="ENTER-CODE">
+        <button id="redeemCodeBtn" class="btn primary" type="button">REDEEM</button>
+      </div>
+      <small class="reward-help">Your SA-MP account must be linked first. If it is not linked, go to Profile and link your exact server username.</small>
+      <div id="redeemCodeMessage" class="daily-reward-message">Enter a redeem code to claim your eCoin.</div>
+
+      <div class="redeem-history-head">
+        <div><span class="eyebrow">YOUR HISTORY</span><h3>Redeemed Codes</h3></div>
+        <button id="refreshRedeemHistory" class="btn small ghost" type="button">REFRESH</button>
+      </div>
+      <div id="redeemHistory" class="redeem-history"></div>
+    </section>
+  </main>
+
+  <script src="firebase-config.js"></script>
+  <script src="site-brand.js"></script>
+  <script src="redeem-page.js"></script>
+  <script src="notifications.js"></script>
+</body>
+</html>
