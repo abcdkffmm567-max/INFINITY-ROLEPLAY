@@ -1,10 +1,17 @@
 const $=s=>document.querySelector(s);
 let adminUser=null;
 
+// Use a dedicated Firebase Auth instance for the Admin Panel.
+// This keeps the admin login completely separate from the normal website user session.
+// So if the public website signs out an unverified/normal user, the admin session stays logged in.
+const adminFirebaseApp = firebase.apps.find(app=>app.name==="infinityAdmin") || firebase.initializeApp(firebaseConfig, "infinityAdmin");
+const adminAuth = adminFirebaseApp.auth();
+const adminDb = adminFirebaseApp.database();
+
 // Keep the Firebase admin session across refreshes, tab closes and browser restarts.
 // Firebase normally defaults to LOCAL persistence, but we set it explicitly here
 // so the Admin Panel does not appear to log out immediately on some browsers.
-const adminPersistenceReady = auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+const adminPersistenceReady = adminAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
   .catch(err=>{
     console.warn("Could not enable local admin persistence:", err);
   });
@@ -30,7 +37,7 @@ async function verifyAdminUser(user){
   // Keep the known primary admin usable even if the RTDB value was accidentally
   // stored as a string/number or a transient rules issue affects the lookup.
   if(user.uid === PRIMARY_ADMIN_UID) return true;
-  const snap = await db.ref("admins/"+user.uid).once("value");
+  const snap = await adminDb.ref("admins/"+user.uid).once("value");
   return isAdminValue(snap.val());
 }
 
@@ -59,7 +66,7 @@ $("#adminLoginForm").onsubmit=async e=>{
   try{
     await adminPersistenceReady;
     const email=adminUsernameToEmail(username);
-    const cred=await auth.signInWithEmailAndPassword(email,password);
+    const cred=await adminAuth.signInWithEmailAndPassword(email,password);
 
     const isAdmin = await verifyAdminUser(cred.user);
     if(!isAdmin){
@@ -83,7 +90,7 @@ $("#adminLoginForm").onsubmit=async e=>{
   }
 };
 
-auth.onAuthStateChanged(async user=>{
+adminAuth.onAuthStateChanged(async user=>{
   await adminPersistenceReady;
 
   if(!user){
@@ -114,14 +121,14 @@ auth.onAuthStateChanged(async user=>{
 });
 
 $("#adminLogout").onclick=async()=>{
-  await auth.signOut();
+  await adminAuth.signOut();
   location.reload();
 };
 
 function startDashboard(){
  if(dashboardStarted)return;
  dashboardStarted=true;
- db.ref("settings").on("value",s=>{
+ adminDb.ref("settings").on("value",s=>{
    const v=s.val()||{};
    $("#adminServerIp").value=v.serverIp||"148.113.8.119:26000";
    $("#sampUrl").value=v.sampUrl||"";
@@ -146,7 +153,7 @@ function startDashboard(){
    const communityBannerUrl=$("#communityBannerUrl") ? $("#communityBannerUrl").value.trim() : "";
    const communityBannerClickUrl=$("#communityBannerClickUrl") ? $("#communityBannerClickUrl").value.trim() : "";
    try{
-     await db.ref("settings").update({
+     await adminDb.ref("settings").update({
        serverIp,
        sampUrl,
        dataUrl,
@@ -166,9 +173,9 @@ function startDashboard(){
      $("#settingsStatus").textContent=err.message;
    }
  };
- db.ref("rules").on("value",renderRules);
- db.ref("whitelist").on("value",s=>{allApps=s.val()||{};renderApps();updateStats()});
- db.ref("users").on("value",s=>{
+ adminDb.ref("rules").on("value",renderRules);
+ adminDb.ref("whitelist").on("value",s=>{allApps=s.val()||{};renderApps();updateStats()});
+ adminDb.ref("users").on("value",s=>{
    allUsers=s.val()||{};
    $("#userCount").textContent=s.numChildren();
    renderUsersManagement();
@@ -178,7 +185,7 @@ function startDashboard(){
    const box=$("#usersManagementList");
    if(box) box.innerHTML="<p>Could not load users: "+esc(err.message||"Permission denied")+"</p>";
  });
- db.ref("serverAdmins").on("value",s=>{
+ adminDb.ref("serverAdmins").on("value",s=>{
    allServerAdmins=s.val()||{};
    renderServerAdminsAdmin();
  },err=>{
@@ -186,9 +193,9 @@ function startDashboard(){
    const box=$("#serverAdminsAdminList");
    if(box) box.innerHTML="<p>Could not load server admins: "+esc(err.message||"Permission denied")+"</p>";
  });
- db.ref("adminApplications").on("value",x=>{allAdminApplications=x.val()||{};renderAdminApplications();},err=>{const b=$("#adminApplicationsList");if(b)b.innerHTML="<p>"+esc(err.message)+"</p>";});
- db.ref("siteSettings/adminApplyBackgroundURL").on("value",s=>{const i=$("#adminApplyBackgroundURL");if(i)i.value=s.val()||"";});
- db.ref("siteSettings/whitelistApplicationsOpen").on("value",s=>{
+ adminDb.ref("adminApplications").on("value",x=>{allAdminApplications=x.val()||{};renderAdminApplications();},err=>{const b=$("#adminApplicationsList");if(b)b.innerHTML="<p>"+esc(err.message)+"</p>";});
+ adminDb.ref("siteSettings/adminApplyBackgroundURL").on("value",s=>{const i=$("#adminApplyBackgroundURL");if(i)i.value=s.val()||"";});
+ adminDb.ref("siteSettings/whitelistApplicationsOpen").on("value",s=>{
    const open=s.val()!==false;
    const cb=$("#whitelistApplicationsOpen");
    const badge=$("#whitelistAccessBadge");
@@ -198,7 +205,7 @@ function startDashboard(){
      badge.className="status-pill "+(open?"accepted":"rejected");
    }
  });
- db.ref("siteSettings/releaseCountdown").on("value",s=>{
+ adminDb.ref("siteSettings/releaseCountdown").on("value",s=>{
    const v=s.val()||{};
    const input=$("#releaseDateTime");
    const enabled=$("#releaseCountdownEnabled");
@@ -209,16 +216,16 @@ function startDashboard(){
    }
    if(enabled) enabled.checked=v.enabled!==false;
  });
- db.ref("chat").limitToLast(100).on("value",renderAdminChat);
+ adminDb.ref("chat").limitToLast(100).on("value",renderAdminChat);
 }
 function renderRules(snap){
  const box=$("#rulesAdmin"), rules=snap.val()||{};box.innerHTML="";
  const entries=Object.entries(rules).sort((a,b)=>(a[1].order||0)-(b[1].order||0));
  if(!entries.length){seedRules();return}
  entries.forEach(([id,r])=>box.insertAdjacentHTML("beforeend",`<div class="rule-editor"><input data-k="${id}" data-f="title" value="${escAttr(r.title||"")}"><textarea data-k="${id}" data-f="text">${esc(r.text||"")}</textarea><button class="btn danger small" onclick="deleteRule('${id}')">Delete</button></div>`));
- box.querySelectorAll("input,textarea").forEach(el=>el.onchange=()=>db.ref(`rules/${el.dataset.k}/${el.dataset.f}`).set(el.value));
+ box.querySelectorAll("input,textarea").forEach(el=>el.onchange=()=>adminDb.ref(`rules/${el.dataset.k}/${el.dataset.f}`).set(el.value));
 }
-$("#addRuleBtn").onclick=async()=>{const s=await db.ref("rules").once("value");const count=s.numChildren();await db.ref("rules").push({title:"New Rule",text:"Write rule description here.",order:count})};
+$("#addRuleBtn").onclick=async()=>{const s=await adminDb.ref("rules").once("value");const count=s.numChildren();await adminDb.ref("rules").push({title:"New Rule",text:"Write rule description here.",order:count})};
 async function seedRules(){const defs=[
  {title:"Respect Everyone",text:"No harassment, racism, hate speech, threats or toxic behavior.",order:0},
  {title:"No RDM / VDM",text:"Do not kill or attack players without a valid roleplay reason.",order:1},
@@ -226,8 +233,8 @@ async function seedRules(){const defs=[
  {title:"No Powergaming",text:"Do not force unrealistic actions or impossible outcomes.",order:3},
  {title:"Stay In Character",text:"Keep roleplay situations in character whenever possible.",order:4},
  {title:"Follow Staff Decisions",text:"Respect staff instructions and use proper appeals for disputes.",order:5}
- ];const obj={};defs.forEach(x=>obj[db.ref("rules").push().key]=x);await db.ref("rules").set(obj)}
-window.deleteRule=id=>{if(confirm("Delete this rule?"))db.ref("rules/"+id).remove()};
+ ];const obj={};defs.forEach(x=>obj[adminDb.ref("rules").push().key]=x);await adminDb.ref("rules").set(obj)}
+window.deleteRule=id=>{if(confirm("Delete this rule?"))adminDb.ref("rules/"+id).remove()};
 
 
 function renderUsersManagementOriginal(){
@@ -272,7 +279,7 @@ window.giveVerified=async uid=>{
  const user=allUsers[uid]||{};
  if(!confirm(`Give verified blue badge to ${user.displayName||user.infinityId||"this user"}?`))return;
  try{
-   await db.ref("users/"+uid).update({
+   await adminDb.ref("users/"+uid).update({
      verified:true,
      verifiedAt:firebase.database.ServerValue.TIMESTAMP,
      verifiedBy:"Infinity Admin"
@@ -285,7 +292,7 @@ window.removeVerified=async uid=>{
  const user=allUsers[uid]||{};
  if(!confirm(`Remove verified badge from ${user.displayName||user.infinityId||"this user"}?`))return;
  try{
-   await db.ref("users/"+uid).update({
+   await adminDb.ref("users/"+uid).update({
      verified:false,
      verifiedAt:null,
      verifiedBy:null
@@ -300,7 +307,7 @@ window.banUser=async uid=>{
  if(reason===null)return;
  if(!confirm(`Ban ${user.displayName||user.infinityId||"this user"}?`))return;
  try{
-   await db.ref("users/"+uid).update({
+   await adminDb.ref("users/"+uid).update({
      banned:true,
      banReason:reason.trim(),
      bannedAt:firebase.database.ServerValue.TIMESTAMP,
@@ -313,7 +320,7 @@ window.unbanUser=async uid=>{
  const user=allUsers[uid]||{};
  if(!confirm(`Unban ${user.displayName||user.infinityId||"this user"}?`))return;
  try{
-   await db.ref("users/"+uid).update({
+   await adminDb.ref("users/"+uid).update({
      banned:false,
      banReason:null,
      bannedAt:null,
@@ -386,7 +393,7 @@ if($("#serverAdminForm")) $("#serverAdminForm").onsubmit=async e=>{
     return;
   }
 
-  const targetId=id||db.ref("serverAdmins").push().key;
+  const targetId=id||adminDb.ref("serverAdmins").push().key;
   $("#serverAdminStatus").textContent=file?"Uploading photo...":"Saving...";
 
   try{
@@ -397,7 +404,7 @@ if($("#serverAdminForm")) $("#serverAdminForm").onsubmit=async e=>{
       await ref.put(file);
       photoURL=await ref.getDownloadURL();
     }
-    await db.ref("serverAdmins/"+targetId).set({
+    await adminDb.ref("serverAdmins/"+targetId).set({
       serverName,realName,phone,rank,order,photoURL,
       updatedAt:firebase.database.ServerValue.TIMESTAMP,
       updatedBy:adminUser.uid
@@ -430,7 +437,7 @@ window.deleteServerAdmin=async id=>{
   const a=allServerAdmins[id]||{};
   if(!confirm(`Delete ${a.serverName||"this server admin"} from the Server Admins page?`))return;
   try{
-    await db.ref("serverAdmins/"+id).remove();
+    await adminDb.ref("serverAdmins/"+id).remove();
     if($("#serverAdminEditId").value===id) resetServerAdminForm();
   }catch(err){
     showNotice("Delete failed: "+err.message,"Error","danger");
@@ -451,8 +458,8 @@ function renderAdminApplications(){
  <label class="full">Admin Note<textarea id="adminNote_${x.uid}" rows="2">${esc(x.adminNote||"")}</textarea></label>
  <div class="admin-user-actions"><button class="btn primary small" onclick="setAdminApplicationStatus('${x.uid}','Accepted')">Accept</button><button class="btn ghost small" onclick="setAdminApplicationStatus('${x.uid}','Rejected')">Reject</button><button class="btn ghost small" onclick="setAdminApplicationStatus('${x.uid}','Pending')">Pending</button><button class="btn danger small" onclick="deleteAdminApplication('${x.uid}')">Delete</button></div></article>`).join("")
 }
-window.setAdminApplicationStatus=async(uid,status)=>{const note=$("#adminNote_"+uid)?.value.trim()||"";try{await db.ref("adminApplications/"+uid).update({status,adminNote:note,reviewedAt:firebase.database.ServerValue.TIMESTAMP,reviewedBy:adminUser.uid});showNotice("Application marked "+status+".","Admin Application")}catch(e){showNotice("Update failed: "+e.message,"Error","danger")}};
-window.deleteAdminApplication=async uid=>{if(!confirm("Delete this admin application?"))return;try{await db.ref("adminApplications/"+uid).remove()}catch(e){showNotice("Delete failed: "+e.message,"Error","danger")}};
+window.setAdminApplicationStatus=async(uid,status)=>{const note=$("#adminNote_"+uid)?.value.trim()||"";try{await adminDb.ref("adminApplications/"+uid).update({status,adminNote:note,reviewedAt:firebase.database.ServerValue.TIMESTAMP,reviewedBy:adminUser.uid});showNotice("Application marked "+status+".","Admin Application")}catch(e){showNotice("Update failed: "+e.message,"Error","danger")}};
+window.deleteAdminApplication=async uid=>{if(!confirm("Delete this admin application?"))return;try{await adminDb.ref("adminApplications/"+uid).remove()}catch(e){showNotice("Delete failed: "+e.message,"Error","danger")}};
 if($("#filterAdminApps"))$("#filterAdminApps").onchange=renderAdminApplications;
 
 
@@ -467,7 +474,7 @@ if($("#releaseCountdownForm")) $("#releaseCountdownForm").onsubmit=async e=>{
   if(!Number.isFinite(timestamp)){st.textContent="Invalid date/time.";return;}
   try{
     st.textContent="Saving...";
-    await db.ref("siteSettings/releaseCountdown").set({
+    await adminDb.ref("siteSettings/releaseCountdown").set({
       timestamp,
       enabled,
       updatedAt:firebase.database.ServerValue.TIMESTAMP,
@@ -486,7 +493,7 @@ if($("#clearAllChatBtn")) $("#clearAllChatBtn").onclick=async()=>{
   try{
     $("#clearAllChatBtn").disabled=true;
     $("#clearAllChatBtn").textContent="Clearing...";
-    await db.ref("chat").remove();
+    await adminDb.ref("chat").remove();
     showNotice("Live Chat cleared successfully.","Live Chat");
   }catch(err){
     showNotice("Could not clear chat: "+err.message,"Error","danger");
@@ -504,7 +511,7 @@ if($("#saveWhitelistAccessBtn")) $("#saveWhitelistAccessBtn").onclick=async()=>{
   const st=$("#whitelistAccessStatus");
   try{
     st.textContent="Saving...";
-    await db.ref("siteSettings/whitelistApplicationsOpen").set(open);
+    await adminDb.ref("siteSettings/whitelistApplicationsOpen").set(open);
     st.textContent=open?"Whitelist form unlocked.":"Whitelist form locked.";
   }catch(err){
     st.textContent="Save failed: "+(err.message||err);
@@ -514,8 +521,8 @@ if($("#saveWhitelistAccessBtn")) $("#saveWhitelistAccessBtn").onclick=async()=>{
 
 
 function renderChatMuteUsers(){const b=$("#chatMuteUsersList");if(!b)return;const a=Object.entries(allUsers||{}).map(([uid,v])=>({uid,...v}));if(!a.length){b.innerHTML="<p>No registered users found.</p>";return}b.innerHTML=a.map(u=>{const m=u.chatMuted===true,n=u.displayName||u.name||u.email||"User",av=u.photoURL||`https://ui-avatars.com/api/?name=${encodeURIComponent(n)}&background=111827&color=ffffff`;return `<article class="admin-user-card"><img class="admin-user-avatar" src="${escAttr(av)}"><div class="admin-user-info"><div class="admin-user-name">${esc(n)}</div><small>${m?"Muted from Live Chat":"Can use Live Chat"}</small></div><div class="admin-user-actions"><button class="btn ${m?"ghost":"danger"} small" onclick="setChatMute('${u.uid}',${m?'false':'true'})">${m?"Unmute":"Mute"}</button></div></article>`}).join("")}
-window.setChatMute=async(uid,muted)=>{try{await db.ref("users/"+uid+"/chatMuted").set(muted===true);showNotice(muted?"User muted from Live Chat.":"User unmuted.","Live Chat")}catch(e){showNotice("Mute update failed: "+e.message,"Error","danger")}};
-if($("#saveAdminApplyBackgroundBtn"))$("#saveAdminApplyBackgroundBtn").onclick=async()=>{const u=$("#adminApplyBackgroundURL").value.trim(),st=$("#adminApplyBackgroundStatus");try{st.textContent="Saving...";await db.ref("siteSettings/adminApplyBackgroundURL").set(u);st.textContent=u?"Background saved.":"Background removed."}catch(e){st.textContent="Save failed: "+e.message}};
+window.setChatMute=async(uid,muted)=>{try{await adminDb.ref("users/"+uid+"/chatMuted").set(muted===true);showNotice(muted?"User muted from Live Chat.":"User unmuted.","Live Chat")}catch(e){showNotice("Mute update failed: "+e.message,"Error","danger")}};
+if($("#saveAdminApplyBackgroundBtn"))$("#saveAdminApplyBackgroundBtn").onclick=async()=>{const u=$("#adminApplyBackgroundURL").value.trim(),st=$("#adminApplyBackgroundStatus");try{st.textContent="Saving...";await adminDb.ref("siteSettings/adminApplyBackgroundURL").set(u);st.textContent=u?"Background saved.":"Background removed."}catch(e){st.textContent="Save failed: "+e.message}};
 
 $("#filterApps").onchange=renderApps;
 function renderApps(){
@@ -565,8 +572,8 @@ function appHtml(a){
    <div class="app-actions"><button class="btn success small" onclick="setAppStatus('${a.id}','accepted')">Accept</button><button class="btn danger small" onclick="setAppStatus('${a.id}','rejected')">Reject</button><button class="btn ghost small" onclick="addNote('${a.id}')">Admin Note</button></div>
  </article>`
 }
-window.setAppStatus=async(id,status)=>{await db.ref("whitelist/"+id).update({status,reviewedAt:firebase.database.ServerValue.TIMESTAMP,reviewedBy:adminUser.uid})}
-window.addNote=async id=>{const n=prompt("Admin note:");if(n!==null)await db.ref("whitelist/"+id+"/adminNote").set(n)}
+window.setAppStatus=async(id,status)=>{await adminDb.ref("whitelist/"+id).update({status,reviewedAt:firebase.database.ServerValue.TIMESTAMP,reviewedBy:adminUser.uid})}
+window.addNote=async id=>{const n=prompt("Admin note:");if(n!==null)await adminDb.ref("whitelist/"+id+"/adminNote").set(n)}
 function updateStats(){
  const a=Object.values(allApps);$("#pendingCount").textContent=a.filter(x=>x.status==="pending").length;$("#acceptedCount").textContent=a.filter(x=>x.status==="accepted").length;$("#rejectedCount").textContent=a.filter(x=>x.status==="rejected").length;
 }
@@ -577,7 +584,7 @@ $("#adminChatForm").onsubmit=async e=>{
  e.preventDefault();if(!adminUser)return;const text=$("#adminChatInput").value.trim();if(!text)return;
  const name="Infinity Admin";
  const photoURL="";
- await db.ref("chat").push().set({
+ await adminDb.ref("chat").push().set({
    uid:adminUser.uid,
    name,
    photoURL,
@@ -595,7 +602,7 @@ function fmt(t){return t?new Date(t).toLocaleString():"now"}
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function escAttr(v){return esc(v)}
 
-db.ref("siteSettings").on("value",s=>{
+adminDb.ref("siteSettings").on("value",s=>{
   const v=s.val()||{};
   const a=$("#sampDownloadUrl");
   const d=$("#dataDownloadUrl");
@@ -610,7 +617,7 @@ if($("#saveDownloadLinksBtn")) $("#saveDownloadLinksBtn").onclick=async()=>{
   const st=$("#downloadLinksStatus");
   try{
     st.textContent="Saving...";
-    await db.ref("siteSettings").update({
+    await adminDb.ref("siteSettings").update({
       sampDownloadUrl:samp,
       dataDownloadUrl:data
     });
@@ -661,19 +668,19 @@ This action cannot be undone.`)) return;
     updates["publicUsers/"+uid]=null;
     updates["userApplications/"+uid]=null;
     updates["adminApplications/"+uid]=null;
-    await db.ref().update(updates);
+    await adminDb.ref().update(updates);
     showNotice("User deleted from website User Management.","Deleted","success");
   }catch(err){
     showNotice("Delete failed: "+err.message,"Error","danger");
   }
 };
 
-db.ref("siteSettings/serverGallery").on("value",x=>{const v=x.val()||{};for(let i=1;i<=5;i++){const e=$("#galleryImage"+i);if(e)e.value=v["image"+i]||""}});
-db.ref("siteSettings/trailerPhotoUrl").on("value",x=>{const e=$("#trailerPhotoUrl");if(e)e.value=x.val()||""});
-if($("#saveGalleryTrailerBtn"))$("#saveGalleryTrailerBtn").onclick=async()=>{const g={};for(let i=1;i<=5;i++)g["image"+i]=($("#galleryImage"+i)?.value||"").trim();const t=($("#trailerPhotoUrl")?.value||"").trim(),st=$("#galleryTrailerStatus");try{st.textContent="Saving...";await db.ref("siteSettings/serverGallery").set(g);await db.ref("siteSettings/trailerPhotoUrl").set(t);st.textContent="Saved."}catch(e){st.textContent="Save failed: "+e.message}};
+adminDb.ref("siteSettings/serverGallery").on("value",x=>{const v=x.val()||{};for(let i=1;i<=5;i++){const e=$("#galleryImage"+i);if(e)e.value=v["image"+i]||""}});
+adminDb.ref("siteSettings/trailerPhotoUrl").on("value",x=>{const e=$("#trailerPhotoUrl");if(e)e.value=x.val()||""});
+if($("#saveGalleryTrailerBtn"))$("#saveGalleryTrailerBtn").onclick=async()=>{const g={};for(let i=1;i<=5;i++)g["image"+i]=($("#galleryImage"+i)?.value||"").trim();const t=($("#trailerPhotoUrl")?.value||"").trim(),st=$("#galleryTrailerStatus");try{st.textContent="Saving...";await adminDb.ref("siteSettings/serverGallery").set(g);await adminDb.ref("siteSettings/trailerPhotoUrl").set(t);st.textContent="Saved."}catch(e){st.textContent="Save failed: "+e.message}};
 
 
-db.ref("siteSettings/livePlayerCountEnabled").on("value",snap=>{
+adminDb.ref("siteSettings/livePlayerCountEnabled").on("value",snap=>{
   const enabled = snap.val() !== false;
   const cb = $("#livePlayerCountEnabled");
   const badge = $("#liveCountToggleBadge");
@@ -691,7 +698,7 @@ if($("#saveLivePlayerCountToggle")) $("#saveLivePlayerCountToggle").onclick=asyn
   const st = $("#livePlayerCountToggleStatus");
   try{
     st.textContent = "Saving...";
-    await db.ref("siteSettings/livePlayerCountEnabled").set(enabled);
+    await adminDb.ref("siteSettings/livePlayerCountEnabled").set(enabled);
     st.textContent = enabled ? "Live Player Count turned ON." : "Live Player Count turned OFF.";
   }catch(err){
     console.error(err);
@@ -706,7 +713,7 @@ if($("#saveLivePlayerCountToggle")) $("#saveLivePlayerCountToggle").onclick=asyn
 
 /* ===== Admin Login Settings ===== */
 function getCurrentAdminUsername(){
-  const email=String(auth.currentUser?.email||"");
+  const email=String(adminAuth.currentUser?.email||"");
   return email.endsWith("@infinityrp.com")
     ? email.slice(0,-"@infinityrp.com".length)
     : email.split("@")[0]||"infinityadmin";
@@ -719,7 +726,7 @@ function loadAdminAccountSettings(){
 
 if($("#adminAccountForm")) $("#adminAccountForm").onsubmit=async e=>{
   e.preventDefault();
-  if(!auth.currentUser){
+  if(!adminAuth.currentUser){
     $("#adminAccountStatus").textContent="Admin session not found.";
     return;
   }
@@ -744,12 +751,12 @@ if($("#adminAccountForm")) $("#adminAccountForm").onsubmit=async e=>{
   try{
     status.textContent="Saving...";
 
-    if(auth.currentUser.email!==newEmail){
-      await auth.currentUser.updateEmail(newEmail);
+    if(adminAuth.currentUser.email!==newEmail){
+      await adminAuth.currentUser.updateEmail(newEmail);
     }
 
     if(newPassword){
-      await auth.currentUser.updatePassword(newPassword);
+      await adminAuth.currentUser.updatePassword(newPassword);
       $("#adminAccountPassword").value="";
     }
 
@@ -852,7 +859,7 @@ if($("#refreshRedeemCodesBtn")) $("#refreshRedeemCodesBtn").addEventListener("cl
 if($("#refreshRedeemClaimsBtn")) $("#refreshRedeemClaimsBtn").addEventListener("click",loadAdminRedeemClaims);
 window.toggleRedeemCode=async(id,active)=>{try{await adminRedeemApi("admin_toggle",{id,active:!!active});await loadAdminRedeemCodes();}catch(err){if(typeof showNotice==="function")showNotice(err.message,"Redeem Code","danger");}};
 
-auth.onAuthStateChanged(user=>{if(user)setTimeout(()=>{updateRedeemCashPreview();loadAdminRedeemCodes();loadAdminRedeemClaims();},350);});
+adminAuth.onAuthStateChanged(user=>{if(user)setTimeout(()=>{updateRedeemCashPreview();loadAdminRedeemCodes();loadAdminRedeemClaims();},350);});
 
 
 /* ===== Vehicle Shop Admin ===== */
@@ -874,4 +881,4 @@ window.deleteShopVehicle=async(id,name)=>{if(!confirm(`Delete ${name} from Vehic
 async function loadAdminVehiclePurchases(){const box=$('#adminVehiclePurchasesList');if(!box||!adminUser)return;box.innerHTML='<p>Loading purchases...</p>';try{const d=await adminVehicleApi('admin_purchases');const rows=d.purchases||[];box.innerHTML=rows.length?`<div class="redeem-claims-table-wrap"><table class="redeem-claims-table"><thead><tr><th>Player</th><th>Vehicle</th><th>eCoin</th><th>Vehicle ID</th><th>Date</th></tr></thead><tbody>${rows.map(r=>`<tr><td><strong>${esc(r.server_username)}</strong><small>UID: ${Number(r.server_uid)}</small></td><td>${esc(r.vehicle_name)}<small>Model ${Number(r.modelid)}</small></td><td>${Number(r.ecoin_price).toLocaleString()}</td><td>${Number(r.vehicle_id)}</td><td>${fmt(r.purchased_at)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">No vehicle purchases yet.</p>'}catch(e){box.innerHTML='<p>Could not load purchases: '+esc(e.message)+'</p>'}}
 if($('#refreshVehicleShopBtn'))$('#refreshVehicleShopBtn').onclick=loadAdminVehicleShop;
 if($('#refreshVehiclePurchasesBtn'))$('#refreshVehiclePurchasesBtn').onclick=loadAdminVehiclePurchases;
-auth.onAuthStateChanged(user=>{if(user)setTimeout(()=>{loadAdminVehicleShop();loadAdminVehiclePurchases()},450)});
+adminAuth.onAuthStateChanged(user=>{if(user)setTimeout(()=>{loadAdminVehicleShop();loadAdminVehiclePurchases()},450)});
