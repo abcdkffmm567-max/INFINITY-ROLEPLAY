@@ -42,7 +42,7 @@
       <p>Paste direct/external download links here. Users will open these links from the website download buttons.</p>
       <form id="serverSettingsForm" class="form-grid">
         <label class="full">Server IP
-          <input id="adminServerIp" required placeholder="51.68.107.75:11999">
+          <input id="adminServerIp" required placeholder="148.113.8.119:26000">
         </label>
         
     <label class="full">Server Logo Image Link
@@ -138,6 +138,25 @@
 
 
     
+
+    <section class="card admin-section vehicle-shop-admin-section">
+      <div class="section-row">
+        <div><h2>Vehicle Shop</h2><p>Add vehicles that players can buy with eCoin. Purchases are added directly to the linked SA-MP account.</p></div>
+        <button id="refreshVehicleShopBtn" class="btn ghost small" type="button">Refresh</button>
+      </div>
+      <form id="vehicleShopAdminForm" class="form-grid">
+        <label>Vehicle Name<input id="adminVehicleName" maxlength="60" placeholder="Infernus" required></label>
+        <label>SA-MP Model ID<input id="adminVehicleModelId" type="number" min="400" max="611" placeholder="411" required></label>
+        <label>eCoin Price<input id="adminVehicleEcoinPrice" type="number" min="1" value="500" required></label>
+        <label>Sort Order<input id="adminVehicleSort" type="number" value="0"></label>
+        <label class="full">Vehicle Image URL<input id="adminVehicleImage" type="url" placeholder="https://example.com/infernus.png"></label>
+        <label class="full">Description<textarea id="adminVehicleDescription" rows="3" maxlength="300" placeholder="Fast sports car for city driving."></textarea></label>
+        <div class="full"><button class="btn primary" type="submit">Add Vehicle</button><span id="adminVehicleShopStatus"></span></div>
+      </form>
+      <div id="adminVehicleShopList" class="vehicle-admin-list"></div>
+      <div class="section-row vehicle-purchases-head"><div><h3>Recent Vehicle Purchases</h3><p>Players who bought vehicles using eCoin.</p></div><button id="refreshVehiclePurchasesBtn" class="btn ghost small" type="button">Refresh Purchases</button></div>
+      <div id="adminVehiclePurchasesList"></div>
+    </section>
 
     <section class="card admin-section redeem-admin-section">
       <div class="section-row">

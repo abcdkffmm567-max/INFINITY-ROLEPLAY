@@ -92,7 +92,7 @@ function startDashboard(){
  dashboardStarted=true;
  db.ref("settings").on("value",s=>{
    const v=s.val()||{};
-   $("#adminServerIp").value=v.serverIp||"51.68.107.75:11999";
+   $("#adminServerIp").value=v.serverIp||"148.113.8.119:26000";
    $("#sampUrl").value=v.sampUrl||"";
    $("#dataUrl").value=v.dataUrl||"";
    if($("#serverLogoUrl")) $("#serverLogoUrl").value=v.serverLogoUrl||"";
@@ -823,3 +823,24 @@ window.toggleRedeemCode=async(id,active)=>{try{await adminRedeemApi("admin_toggl
 
 auth.onAuthStateChanged(user=>{if(user)setTimeout(()=>{updateRedeemCashPreview();loadAdminRedeemCodes();loadAdminRedeemClaims();},350);});
 
+
+/* ===== Vehicle Shop Admin ===== */
+async function adminVehicleApi(action,extra={}){
+  if(!adminUser) throw new Error('ADMIN_REQUIRED');
+  const token=await adminUser.getIdToken();
+  const res=await fetch('/api/vehicle-shop',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({action,...extra})});
+  let data={};try{data=await res.json();}catch{}
+  if(!res.ok||!data.ok)throw new Error(data.error||'VEHICLE_SHOP_API_ERROR');
+  return data;
+}
+async function loadAdminVehicleShop(){
+  const box=$('#adminVehicleShopList');if(!box||!adminUser)return;box.innerHTML='<p>Loading vehicles...</p>';
+  try{const d=await adminVehicleApi('admin_list');const rows=d.vehicles||[];box.innerHTML=rows.length?rows.map(v=>`<article class="vehicle-admin-item"><div class="vehicle-admin-main">${v.image_url?`<img src="${esc(v.image_url)}" alt="">`:''}<div><strong>${esc(v.name)}</strong><small>Model ID ${Number(v.modelid)} · ${Number(v.ecoin_price).toLocaleString()} eCoin</small><small>${esc(v.description||'')}</small></div></div><span class="status-pill ${Number(v.active)?'accepted':'rejected'}">${Number(v.active)?'ACTIVE':'OFF'}</span><div class="vehicle-admin-actions"><button class="btn small ${Number(v.active)?'danger':'success'}" onclick="toggleShopVehicle(${Number(v.id)},${Number(v.active)?0:1})">${Number(v.active)?'Disable':'Enable'}</button><button class="btn small danger" onclick="deleteShopVehicle(${Number(v.id)},'${esc(v.name).replace(/'/g,'&#39;')}')">Delete</button></div></article>`).join(''):'<p>No vehicles added yet.</p>'}catch(e){box.innerHTML='<p>Could not load vehicle shop: '+esc(e.message)+'</p>'}
+}
+if($('#vehicleShopAdminForm'))$('#vehicleShopAdminForm').addEventListener('submit',async e=>{e.preventDefault();const st=$('#adminVehicleShopStatus');try{st.textContent='Adding...';await adminVehicleApi('admin_create',{name:$('#adminVehicleName').value,modelid:Number($('#adminVehicleModelId').value),ecoinPrice:Number($('#adminVehicleEcoinPrice').value),imageUrl:$('#adminVehicleImage').value,description:$('#adminVehicleDescription').value,sortOrder:Number($('#adminVehicleSort').value||0)});st.textContent='Vehicle added.';e.target.reset();$('#adminVehicleEcoinPrice').value=500;$('#adminVehicleSort').value=0;await loadAdminVehicleShop();showNotice('Vehicle added to shop.','Vehicle Shop','success')}catch(err){st.textContent='Failed: '+err.message;showNotice(err.message,'Vehicle Shop','danger')}});
+window.toggleShopVehicle=async(id,active)=>{try{await adminVehicleApi('admin_toggle',{id,active:!!active});await loadAdminVehicleShop()}catch(e){showNotice(e.message,'Vehicle Shop','danger')}};
+window.deleteShopVehicle=async(id,name)=>{if(!confirm(`Delete ${name} from Vehicle Shop?`))return;try{await adminVehicleApi('admin_delete',{id});await loadAdminVehicleShop()}catch(e){showNotice(e.message,'Vehicle Shop','danger')}};
+async function loadAdminVehiclePurchases(){const box=$('#adminVehiclePurchasesList');if(!box||!adminUser)return;box.innerHTML='<p>Loading purchases...</p>';try{const d=await adminVehicleApi('admin_purchases');const rows=d.purchases||[];box.innerHTML=rows.length?`<div class="redeem-claims-table-wrap"><table class="redeem-claims-table"><thead><tr><th>Player</th><th>Vehicle</th><th>eCoin</th><th>Vehicle ID</th><th>Date</th></tr></thead><tbody>${rows.map(r=>`<tr><td><strong>${esc(r.server_username)}</strong><small>UID: ${Number(r.server_uid)}</small></td><td>${esc(r.vehicle_name)}<small>Model ${Number(r.modelid)}</small></td><td>${Number(r.ecoin_price).toLocaleString()}</td><td>${Number(r.vehicle_id)}</td><td>${fmt(r.purchased_at)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">No vehicle purchases yet.</p>'}catch(e){box.innerHTML='<p>Could not load purchases: '+esc(e.message)+'</p>'}}
+if($('#refreshVehicleShopBtn'))$('#refreshVehicleShopBtn').onclick=loadAdminVehicleShop;
+if($('#refreshVehiclePurchasesBtn'))$('#refreshVehiclePurchasesBtn').onclick=loadAdminVehiclePurchases;
+auth.onAuthStateChanged(user=>{if(user)setTimeout(()=>{loadAdminVehicleShop();loadAdminVehiclePurchases()},450)});
