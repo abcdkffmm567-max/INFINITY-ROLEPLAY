@@ -108,10 +108,18 @@ async function saveProfilePhotoEverywhere(photoURL,{updateAuth=true}={}){
     try{ await currentUser.updateProfile({photoURL}); }catch(e){ console.warn("Auth photo update skipped:",e); }
   }
   const updatedAt=firebase.database.ServerValue.TIMESTAMP;
-  await Promise.all([
-    db.ref("users/"+currentUser.uid).update({photoURL,updatedAt}),
-    db.ref("publicUsers/"+currentUser.uid).update({photoURL})
-  ]);
+
+  // Save the private profile first. This is the source of truth.
+  await db.ref("users/"+currentUser.uid).update({photoURL,updatedAt});
+
+  // Public mirror is useful for chat avatars, but a rule failure here must not
+  // make the whole profile photo upload fail.
+  try{
+    await db.ref("publicUsers/"+currentUser.uid).update({photoURL});
+  }catch(e){
+    console.warn("publicUsers photo mirror skipped:",e);
+  }
+
   currentProfile.photoURL=photoURL;
   setAvatar(photoURL,currentProfile.displayName||currentUser.displayName||"Player");
 }
@@ -137,59 +145,27 @@ $("#profilePhotoInput").addEventListener("change",async e=>{
     return;
   }
 
-  $("#profileUploadBar").style.width="5%";
+  $("#profileUploadBar").style.width="10%";
   $("#profileUploadStatus").textContent="Preparing image...";
 
-  // Prepare a small local copy first. This is also our fallback when
-  // Firebase Storage is unavailable or its rules have not been deployed.
-  let fallbackDataURL="";
   try{
-    fallbackDataURL=await compressProfileImage(file);
-  }catch(err){
-    $("#profileUploadStatus").textContent=err.message;
-    $("#profileUploadBar").style.width="0%";
-    return;
-  }
+    // Store a compressed avatar directly in Realtime Database.
+    // This avoids Firebase Storage uploads getting stuck at 5% because of
+    // Storage rules/CORS/bucket configuration.
+    const dataURL=await compressProfileImage(file);
+    $("#profileUploadBar").style.width="55%";
+    $("#profileUploadStatus").textContent="Saving profile photo...";
 
-  try{
-    const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"");
-    const ref=storage.ref(`profilePhotos/${currentUser.uid}/avatar.${ext}`);
-    const task=ref.put(file,{contentType:file.type});
+    await saveProfilePhotoEverywhere(dataURL,{updateAuth:false});
 
-    $("#profileUploadStatus").textContent="Uploading...";
-
-    await new Promise((resolve,reject)=>{
-      task.on("state_changed",
-        snap=>{
-          const p=Math.max(5,Math.round((snap.bytesTransferred/snap.totalBytes)*100));
-          $("#profileUploadBar").style.width=p+"%";
-          $("#profileUploadStatus").textContent=`Uploading ${p}%`;
-        },
-        reject,
-        resolve
-      );
-    });
-
-    const photoURL=await task.snapshot.ref.getDownloadURL();
-    await saveProfilePhotoEverywhere(photoURL,{updateAuth:true});
-    $("#profileUploadStatus").textContent="Profile photo updated successfully.";
     $("#profileUploadBar").style.width="100%";
-    showNotice("Your profile photo was uploaded successfully.","Profile Updated","success");
-  }catch(storageErr){
-    console.warn("Firebase Storage upload failed. Using database fallback.",storageErr);
-    try{
-      // The compressed image is stored only in the user's own Firebase profile.
-      // This makes profile-photo upload continue to work even if Storage rejects uploads.
-      await saveProfilePhotoEverywhere(fallbackDataURL,{updateAuth:false});
-      $("#profileUploadStatus").textContent="Profile photo updated successfully.";
-      $("#profileUploadBar").style.width="100%";
-      showNotice("Your profile photo was saved successfully.","Profile Updated","success");
-    }catch(dbErr){
-      console.error(dbErr);
-      $("#profileUploadStatus").textContent=dbErr.message||"Profile photo upload failed.";
-      $("#profileUploadBar").style.width="0%";
-      showNotice(dbErr.message||"Profile photo upload failed.","Upload Error","danger");
-    }
+    $("#profileUploadStatus").textContent="Profile photo updated successfully.";
+    showNotice("Your profile photo was saved successfully.","Profile Updated","success");
+  }catch(err){
+    console.error(err);
+    $("#profileUploadBar").style.width="0%";
+    $("#profileUploadStatus").textContent=err.message||"Profile photo upload failed.";
+    showNotice(err.message||"Profile photo upload failed.","Upload Error","danger");
   }finally{
     e.target.value="";
   }
