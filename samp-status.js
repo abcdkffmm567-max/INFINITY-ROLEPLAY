@@ -1,5 +1,5 @@
 const dgram=require("dgram");
-const HOST="51.68.107.75", PORT=11999;
+const HOST="148.113.8.119", PORT=26000;
 function query(){
   return new Promise((resolve,reject)=>{
     const ip=HOST.split(".").map(Number), b=Buffer.alloc(11);

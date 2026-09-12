@@ -43,11 +43,11 @@ $("#year").textContent = new Date().getFullYear();
 $("#navToggle").onclick=()=>$("#navMenu").classList.toggle("open");
 $("#chatToggleBtn").onclick=()=>$("#floatingChat").classList.remove("hidden");
 $("#chatCloseBtn").onclick=()=>$("#floatingChat").classList.add("hidden");
-if($("#copyIpBtn")) $("#copyIpBtn").onclick=async()=>{const ip=(serverIpEl?.textContent||"51.68.107.75:11999").trim();await navigator.clipboard.writeText(ip);$("#copyIpBtn").textContent="COPIED ✓";setTimeout(()=>$("#copyIpBtn").textContent="COPY SERVER IP →",1200)};
+if($("#copyIpBtn")) $("#copyIpBtn").onclick=async()=>{const ip=(serverIpEl?.textContent||"148.113.8.119:26000").trim();await navigator.clipboard.writeText(ip);$("#copyIpBtn").textContent="COPIED ✓";setTimeout(()=>$("#copyIpBtn").textContent="COPY SERVER IP →",1200)};
 
 db.ref("settings").on("value", snap=>{
   const s=snap.val()||{};
-  if(serverIpEl) serverIpEl.textContent=s.serverIp||"51.68.107.75:11999";
+  if(serverIpEl) { const savedIp=(s.serverIp||"").trim(); serverIpEl.textContent=(!savedIp || savedIp==="51.68.107.75:11999") ? "148.113.8.119:26000" : savedIp; }
   setDownload(sampDownload,s.sampUrl); setDownload(dataDownload,s.dataUrl);
 });
 function setDownload(el,url){
@@ -287,7 +287,7 @@ auth.onAuthStateChanged(async user=>{
   const copyBtn=document.getElementById("serverIpCopyBtn");
   if(!ipEl)return;
 
-  const DEFAULT_IP="51.68.107.75:11999";
+  const DEFAULT_IP="148.113.8.119:26000";
   ipEl.textContent=DEFAULT_IP;
 
   if(typeof db!=="undefined"){
@@ -326,7 +326,7 @@ auth.onAuthStateChanged(async user=>{
 const heroCopyBtn=document.getElementById("copyIpBtn");
 if(heroCopyBtn){
   heroCopyBtn.onclick=async()=>{
-    const ip=(document.getElementById("serverIpText")?.textContent||"51.68.107.75:11999").trim();
+    const ip=(document.getElementById("serverIpText")?.textContent||"148.113.8.119:26000").trim();
     try{
       await navigator.clipboard.writeText(ip);
       if(typeof showNotice==="function") showNotice(ip+" copied to clipboard.","Server IP Copied","success");
