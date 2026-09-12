@@ -74,6 +74,48 @@ $("#profileForm").onsubmit=async e=>{
   }catch(err){ showNotice(err.message,"Error","danger"); }
 };
 
+async function compressProfileImage(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onerror=()=>reject(new Error("Could not read the selected image."));
+    reader.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error("The selected image could not be opened."));
+      img.onload=()=>{
+        const max=512;
+        let w=img.naturalWidth||img.width;
+        let h=img.naturalHeight||img.height;
+        if(w>max||h>max){
+          const scale=Math.min(max/w,max/h);
+          w=Math.max(1,Math.round(w*scale));
+          h=Math.max(1,Math.round(h*scale));
+        }
+        const canvas=document.createElement("canvas");
+        canvas.width=w; canvas.height=h;
+        const ctx=canvas.getContext("2d");
+        ctx.drawImage(img,0,0,w,h);
+        // JPEG keeps the Realtime Database fallback small and works everywhere.
+        resolve(canvas.toDataURL("image/jpeg",0.82));
+      };
+      img.src=reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function saveProfilePhotoEverywhere(photoURL,{updateAuth=true}={}){
+  if(updateAuth){
+    try{ await currentUser.updateProfile({photoURL}); }catch(e){ console.warn("Auth photo update skipped:",e); }
+  }
+  const updatedAt=firebase.database.ServerValue.TIMESTAMP;
+  await Promise.all([
+    db.ref("users/"+currentUser.uid).update({photoURL,updatedAt}),
+    db.ref("publicUsers/"+currentUser.uid).update({photoURL})
+  ]);
+  currentProfile.photoURL=photoURL;
+  setAvatar(photoURL,currentProfile.displayName||currentUser.displayName||"Player");
+}
+
 $("#profilePhotoInput").addEventListener("change",async e=>{
   const file=e.target.files && e.target.files[0];
   if(!file||!currentUser)return;
@@ -95,38 +137,62 @@ $("#profilePhotoInput").addEventListener("change",async e=>{
     return;
   }
 
-  const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"");
-  const ref=storage.ref(`profilePhotos/${currentUser.uid}/avatar.${ext}`);
-  const task=ref.put(file,{contentType:file.type});
+  $("#profileUploadBar").style.width="5%";
+  $("#profileUploadStatus").textContent="Preparing image...";
 
-  $("#profileUploadStatus").textContent="Uploading...";
-  task.on("state_changed",
-    snap=>{
-      const p=Math.round((snap.bytesTransferred/snap.totalBytes)*100);
-      $("#profileUploadBar").style.width=p+"%";
-      $("#profileUploadStatus").textContent=`Uploading ${p}%`;
-    },
-    err=>{
-      $("#profileUploadStatus").textContent=err.message;
+  // Prepare a small local copy first. This is also our fallback when
+  // Firebase Storage is unavailable or its rules have not been deployed.
+  let fallbackDataURL="";
+  try{
+    fallbackDataURL=await compressProfileImage(file);
+  }catch(err){
+    $("#profileUploadStatus").textContent=err.message;
+    $("#profileUploadBar").style.width="0%";
+    return;
+  }
+
+  try{
+    const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"");
+    const ref=storage.ref(`profilePhotos/${currentUser.uid}/avatar.${ext}`);
+    const task=ref.put(file,{contentType:file.type});
+
+    $("#profileUploadStatus").textContent="Uploading...";
+
+    await new Promise((resolve,reject)=>{
+      task.on("state_changed",
+        snap=>{
+          const p=Math.max(5,Math.round((snap.bytesTransferred/snap.totalBytes)*100));
+          $("#profileUploadBar").style.width=p+"%";
+          $("#profileUploadStatus").textContent=`Uploading ${p}%`;
+        },
+        reject,
+        resolve
+      );
+    });
+
+    const photoURL=await task.snapshot.ref.getDownloadURL();
+    await saveProfilePhotoEverywhere(photoURL,{updateAuth:true});
+    $("#profileUploadStatus").textContent="Profile photo updated successfully.";
+    $("#profileUploadBar").style.width="100%";
+    showNotice("Your profile photo was uploaded successfully.","Profile Updated","success");
+  }catch(storageErr){
+    console.warn("Firebase Storage upload failed. Using database fallback.",storageErr);
+    try{
+      // The compressed image is stored only in the user's own Firebase profile.
+      // This makes profile-photo upload continue to work even if Storage rejects uploads.
+      await saveProfilePhotoEverywhere(fallbackDataURL,{updateAuth:false});
+      $("#profileUploadStatus").textContent="Profile photo updated successfully.";
+      $("#profileUploadBar").style.width="100%";
+      showNotice("Your profile photo was saved successfully.","Profile Updated","success");
+    }catch(dbErr){
+      console.error(dbErr);
+      $("#profileUploadStatus").textContent=dbErr.message||"Profile photo upload failed.";
       $("#profileUploadBar").style.width="0%";
-    },
-    async()=>{
-      try{
-        const photoURL=await task.snapshot.ref.getDownloadURL();
-        await currentUser.updateProfile({photoURL});
-        await db.ref("users/"+currentUser.uid).update({
-          photoURL,
-          updatedAt:firebase.database.ServerValue.TIMESTAMP
-        });
-        currentProfile.photoURL=photoURL;
-        setAvatar(photoURL,currentProfile.displayName);
-        $("#profileUploadStatus").textContent="Profile photo updated successfully.";
-        $("#profileUploadBar").style.width="100%";
-      }catch(err){
-        $("#profileUploadStatus").textContent=err.message;
-      }
+      showNotice(dbErr.message||"Profile photo upload failed.","Upload Error","danger");
     }
-  );
+  }finally{
+    e.target.value="";
+  }
 });
 
 $("#resetGooglePhotoBtn").onclick=async()=>{
