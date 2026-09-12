@@ -95,9 +95,18 @@ $("#whitelistForm").onsubmit=async e=>{
   if(!currentUser){ location.href="login.html"; return; }
 
   const f=new FormData(e.target);
+  const accountPassword=String(f.get("accountPassword")||"");
+  const confirmAccountPassword=String(f.get("confirmAccountPassword")||"");
+  if(accountPassword!==confirmAccountPassword){
+    $("#wlStatus").textContent="RP Account Passwords do not match. Please type the same password twice.";
+    e.target.querySelector('[name="confirmAccountPassword"]')?.focus();
+    return;
+  }
+
   const backstory=String(f.get("backstory")||"").trim();
-  if(countWords(backstory)<200){
-    $("#wlStatus").textContent=`Backstory must be at least 200 words. Current: ${countWords(backstory)} words.`;
+  const backstoryWords=countWords(backstory);
+  if(backstory && backstoryWords<20){
+    $("#wlStatus").textContent=`If you add a backstory, it must be at least 20 words. Current: ${backstoryWords} words. You can also leave it blank.`;
     backstoryEl?.focus();
     return;
   }
@@ -121,7 +130,7 @@ $("#whitelistForm").onsubmit=async e=>{
       action:"create",
       applicationId,
       inGameName:String(f.get("inGameName")||"").trim(),
-      password:String(f.get("accountPassword")||""),
+      password:accountPassword,
       characterAge:Number(f.get("characterAge")),
       skinId:Number(f.get("skinId"))
     });

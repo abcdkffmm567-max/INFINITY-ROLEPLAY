@@ -92,7 +92,11 @@
         </label>
         <label>11. RP Account Password
           <input required type="password" minlength="6" maxlength="64" name="accountPassword" autocomplete="new-password" placeholder="Create server account password">
-          <small>This password is sent securely to the server account API and is never stored in Firebase or shown to admins.</small>
+          <small>Use the exact password you want to type when joining the SA-MP server.</small>
+        </label>
+        <label>11. Confirm RP Account Password
+          <input required type="password" minlength="6" maxlength="64" name="confirmAccountPassword" autocomplete="new-password" placeholder="Type the same password again">
+          <small>The two passwords must match. The password is not stored in Firebase or shown to admins.</small>
         </label>
         <label>12. Character Skin ID
           <input required type="number" min="0" max="311" name="skinId" placeholder="299">
@@ -100,9 +104,9 @@
         <label>14. First Job
           <select required name="firstJob"><option value="">Select first job</option><option>PD</option><option>EMS</option><option>Mechanic</option><option>Civ</option><option>Gang</option><option>Business</option></select>
         </label>
-        <label class="full">13. Character Backstory <span class="field-required">(Minimum 200 words)</span>
-          <textarea required name="backstory" rows="12" placeholder="Include where they were born, family, childhood, education, why they came to the city, goals, and personality."></textarea>
-          <div class="word-counter"><span id="backstoryWords">0</span> / 200 words minimum</div>
+        <label class="full">13. Character Backstory <span class="field-optional">(Optional — if provided, minimum 20 words)</span>
+          <textarea name="backstory" rows="8" placeholder="Optional. If you add a backstory, write at least 20 words about where your character was born, family, childhood, education, why they came to the city, goals, and personality."></textarea>
+          <div class="word-counter"><span id="backstoryWords">0</span> words — optional (20+ words if entered)</div>
         </label>
 
         <label class="checkbox full"><input required type="checkbox" name="rulesAccepted"> I have read and agree to follow the Infinity Role Play server rules.</label>

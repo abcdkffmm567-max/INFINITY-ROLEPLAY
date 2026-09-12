@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "dependencies": {
-    "mysql2": "^3.15.0"
+    "mysql2": "^3.15.0",
+    "hash-wasm": "^4.12.0"
   }
 }

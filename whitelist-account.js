@@ -1,5 +1,5 @@
 const mysql=require("mysql2/promise");
-const crypto=require("crypto");
+const {whirlpool}=require("hash-wasm");
 
 const FIREBASE_WEB_API_KEY=process.env.FIREBASE_WEB_API_KEY||"AIzaSyDWxZPjXFtLPP4GfueoLdohMhGjvrD_z2c";
 
@@ -31,13 +31,11 @@ function normalizeServerName(value){
   return name;
 }
 
-function hashPassword(password){
-  // Existing Infinity RP password values are 128-character hashes. This creates uppercase SHA-512 hex.
-  // If the gamemode uses a different password plugin/hash, change PASSWORD_HASH_ALGO in Netlify.
-  const algo=String(process.env.PASSWORD_HASH_ALGO||"sha512").toLowerCase();
-  if(algo==="plain") return password;
-  if(algo!=="sha512") throw Object.assign(new Error("UNSUPPORTED_PASSWORD_HASH_ALGO"),{statusCode:500});
-  return crypto.createHash("sha512").update(password,"utf8").digest("hex").toUpperCase();
+async function hashPassword(password){
+  // DL.pwn verifies SA-MP passwords with WP_Hash.
+  // WP_Hash is Whirlpool and stores a 128-character hexadecimal digest.
+  // Force Whirlpool here so website-created accounts use the same format as the game server.
+  return (await whirlpool(password)).toUpperCase();
 }
 
 exports.handler=async event=>{
@@ -88,7 +86,7 @@ exports.handler=async event=>{
       return response(409,{ok:false,error:"SERVER_USERNAME_EXISTS"});
     }
 
-    const passwordHash=hashPassword(password);
+    const passwordHash=await hashPassword(password);
     const [insert]=await conn.execute(
       `INSERT INTO users (username,password,regdate,lastlogin,setup,age,skin,cash,ecoin)
        VALUES (?, ?, NOW(), NULL, 1, ?, ?, 5000, 0)`,
