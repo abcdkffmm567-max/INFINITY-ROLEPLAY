@@ -56,4 +56,4 @@ async function redeem(){
 btn.addEventListener("click",redeem);
 input.addEventListener("keydown",e=>{if(e.key==="Enter")redeem();});
 $r("refreshRedeemHistory").addEventListener("click",loadHistory);
-auth.onAuthStateChanged(async user=>{if(!user){location.href="login.html";return;} redeemUser=user; await Promise.all([loadAccount(),loadHistory()]);});
+auth.onAuthStateChanged(async user=>{if(!user){location.href="login.html";return;}await user.reload();user=auth.currentUser||user;if(user.email&&user.emailVerified!==true){try{await sendInfinityVerificationEmail(user)}catch(e){}await auth.signOut();location.href="login.html";return;}redeemUser=user;await Promise.all([loadAccount(),loadHistory()]);});

@@ -17,6 +17,14 @@ let currentUser=null,currentProfile=null,googlePhoto="";
 
 auth.onAuthStateChanged(async user=>{
   if(!user){ location.href="login.html"; return; }
+  await user.reload();
+  user=auth.currentUser||user;
+  if(user.email && user.emailVerified!==true){
+    try{await sendInfinityVerificationEmail(user);}catch(e){}
+    await auth.signOut();
+    location.href="login.html";
+    return;
+  }
 
   currentUser=user;
 

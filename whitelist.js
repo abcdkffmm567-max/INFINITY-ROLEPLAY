@@ -42,6 +42,17 @@ auth.onAuthStateChanged(async user=>{
     refreshWhitelistLock();
     return;
   }
+  await user.reload();
+  user=auth.currentUser||user;
+  if(user.email && user.emailVerified!==true){
+    try{await sendInfinityVerificationEmail(user);}catch(e){}
+    $("#wlStatus").textContent="Verify your email before applying. A verification link has been sent.";
+    await auth.signOut();
+    currentUser=null;
+    refreshWhitelistLock();
+    return;
+  }
+  currentUser=user;
   try{
     currentProfile=await ensureInfinityUser(user);
   }catch(err){

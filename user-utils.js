@@ -1,3 +1,21 @@
+
+function firebaseEmailIsVerified(user){
+  if(!user) return false;
+  if(!user.email) return true;
+  return user.emailVerified === true;
+}
+
+async function sendInfinityVerificationEmail(user){
+  if(!user || !user.email) throw new Error("No email address found for this account.");
+  const actionCodeSettings={
+    url: location.origin + "/login.html?emailVerified=1",
+    handleCodeInApp: false
+  };
+  await user.sendEmailVerification(actionCodeSettings);
+}
+
+window.firebaseEmailIsVerified=firebaseEmailIsVerified;
+window.sendInfinityVerificationEmail=sendInfinityVerificationEmail;
 function makeInfinityId(uid){
   const clean=String(uid||"USER").replace(/[^a-zA-Z0-9]/g,"").toUpperCase();
   return "INF"+clean.slice(0,8).padEnd(8,"0");

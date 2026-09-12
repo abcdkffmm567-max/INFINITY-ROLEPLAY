@@ -25,6 +25,7 @@
       <span class="eyebrow">WELCOME BACK</span>
       <h1>Login</h1>
       <p>Login to access whitelist applications and live chat.</p>
+      <p class="auth-message">Unverified Email/Password accounts cannot login. A new verification link is sent automatically when needed.</p>
 
       <form id="pageLoginForm" class="auth-form">
         <label>Email
@@ -49,13 +50,25 @@
   <script>
     const form=document.getElementById("pageLoginForm");
     const status=document.getElementById("pageAuthStatus");
+    if(new URLSearchParams(location.search).get("emailVerified")==="1")
+      status.textContent="Email verification completed. You can login now.";
     form.addEventListener("submit",async(e)=>{
       e.preventDefault();
       const f=new FormData(form);
       status.textContent="Logging in...";
       try{
         const cred=await auth.signInWithEmailAndPassword(f.get("email"),f.get("password"));
-        const profile=await ensureInfinityUser(cred.user);
+        await cred.user.reload();
+        const user=auth.currentUser||cred.user;
+        if(user.email && user.emailVerified!==true){
+          try{ await sendInfinityVerificationEmail(user); }catch(e){ console.warn("Verification resend failed:",e); }
+          const mail=user.email;
+          await auth.signOut();
+          status.textContent="Email not verified. A new verification link was sent to "+mail+".";
+          if(typeof showNotice==="function") showNotice("Verify your email before logging in. A new link was sent to "+mail+".","Email Verification Required","info");
+          return;
+        }
+        const profile=await ensureInfinityUser(user);
         if(profile.banned===true){
           const reason=profile.banReason||"";
           await auth.signOut();
@@ -70,6 +83,16 @@
     googleProvider.setCustomParameters({prompt:"select_account"});
 
     async function finishGoogle(user){
+      await user.reload();
+      user=auth.currentUser||user;
+      if(user.email && user.emailVerified!==true){
+        await sendInfinityVerificationEmail(user);
+        const mail=user.email;
+        await auth.signOut();
+        status.textContent="Email not verified. Verification link sent to "+mail+".";
+        if(typeof showNotice==="function") showNotice("Verify your email before continuing.","Email Verification Required","info");
+        return;
+      }
       const profile=await ensureInfinityUser(user,{
         displayName:user.displayName||"Player", email:user.email||"",
         photoURL:user.photoURL||"", provider:"google"

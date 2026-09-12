@@ -25,6 +25,7 @@
       <span class="eyebrow">JOIN INFINITY RP</span>
       <h1>Create Account</h1>
       <p>Register your account to submit a whitelist application and use live chat.</p>
+      <p class="auth-message">Email verification is required before website access. Email/Password users receive a Firebase verification link.</p>
 
       <form id="pageRegisterForm" class="auth-form">
         <label>Display Name
@@ -66,19 +67,32 @@
       try{
         const cred=await auth.createUserWithEmailAndPassword(f.get("email"),f.get("password"));
         await cred.user.updateProfile({displayName:f.get("displayName")});
-        await ensureInfinityUser(cred.user,{
-          displayName:f.get("displayName"),
-          email:f.get("email")
-        });
-        status.textContent="Account created. Redirecting...";
-        setTimeout(()=>location.href="index.html",700);
-      }catch(err){ status.textContent=err.message; }
+        await sendInfinityVerificationEmail(cred.user);
+        await auth.signOut();
+        status.textContent="Verification link sent to your email. Open the link, verify your email, then login.";
+        if(typeof showNotice==="function") showNotice("Verification link sent to "+f.get("email")+". Verify your email before logging in.","Verify Your Email","success");
+        form.reset();
+      }catch(err){
+        let msg=err.message||"Registration failed.";
+        if(err.code==="auth/email-already-in-use") msg="This email already has an account. Login and verify the email if needed.";
+        status.textContent=msg;
+      }
     });
 
     const googleProvider=new firebase.auth.GoogleAuthProvider();
     googleProvider.setCustomParameters({prompt:"select_account"});
 
     async function finishGoogle(user){
+      await user.reload();
+      user=auth.currentUser||user;
+      if(user.email && user.emailVerified!==true){
+        await sendInfinityVerificationEmail(user);
+        const mail=user.email;
+        await auth.signOut();
+        status.textContent="Verification link sent to "+mail+". Verify your email, then continue with Google again.";
+        if(typeof showNotice==="function") showNotice("Verification link sent to "+mail+".","Verify Your Email","success");
+        return;
+      }
       const profile=await ensureInfinityUser(user,{
         displayName:user.displayName||"Player", email:user.email||"",
         photoURL:user.photoURL||"", provider:"google"
