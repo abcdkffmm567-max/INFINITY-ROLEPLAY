@@ -128,6 +128,25 @@ exports.handler = async (event) => {
       });
     }
 
+    if (action === "unlink") {
+      const [links] = await conn.execute(
+        "SELECT server_uid, server_username FROM website_account_links WHERE firebase_uid = ? LIMIT 1",
+        [authUser.uid]
+      );
+      if (!links.length) return response(200, { ok:true, linked:false, alreadyUnlinked:true });
+
+      await conn.execute(
+        "DELETE FROM website_account_links WHERE firebase_uid = ?",
+        [authUser.uid]
+      );
+
+      return response(200, {
+        ok:true,
+        linked:false,
+        unlinkedAccount:{ uid:links[0].server_uid, username:links[0].server_username }
+      });
+    }
+
     if (action === "status") {
       const [links] = await conn.execute(
         `SELECT l.server_uid, l.server_username, u.ecoin, u.cash

@@ -200,6 +200,7 @@ const rewardEls = {
   usernameInput: document.getElementById("serverUsernameInput"),
   linkBtn: document.getElementById("linkServerAccountBtn"),
   claimBtn: document.getElementById("claimDailyRewardBtn"),
+  unlinkBtn: document.getElementById("unlinkServerAccountBtn"),
   name: document.getElementById("linkedServerName"),
   uid: document.getElementById("linkedServerUid"),
   ecoin: document.getElementById("serverEcoinBalance"),
@@ -216,6 +217,7 @@ function rewardErrorMessage(code){
     SERVER_ACCOUNT_ALREADY_LINKED:"This SA-MP account is already linked to another website account.",
     WEBSITE_ACCOUNT_ALREADY_LINKED:"Your website account is already linked to a different SA-MP account.",
     SERVER_ACCOUNT_NOT_LINKED:"Link your SA-MP account first.",
+    UNLINK_FAILED:"Could not unlink the server account. Try again.",
     ALREADY_CLAIMED_TODAY:"You already claimed today's reward.",
     INVALID_CONVERT_AMOUNT:"Enter a valid eCoin amount.",
     NOT_ENOUGH_ECOIN:"You do not have enough eCoin.",
@@ -298,6 +300,27 @@ if(rewardEls.linkBtn){
     }finally{
       rewardEls.linkBtn.disabled=false;
       rewardEls.linkBtn.textContent="Link Server Account";
+    }
+  });
+}
+
+if(rewardEls.unlinkBtn){
+  rewardEls.unlinkBtn.addEventListener("click",async()=>{
+    const serverName=rewardEls.name?.textContent||"this server account";
+    if(!window.confirm(`Unlink ${serverName} from your website account? Your SA-MP account, eCoin, cash and purchase history will NOT be deleted.`)) return;
+    rewardEls.unlinkBtn.disabled=true;
+    rewardEls.unlinkBtn.textContent="UNLINKING...";
+    try{
+      await rewardApi("unlink");
+      showNotice("Server account unlinked successfully. You can link another account now.","Account Unlinked","success");
+      if(rewardEls.usernameInput) rewardEls.usernameInput.value="";
+      await loadDailyRewardStatus();
+      window.dispatchEvent(new Event("ecoin-balance-changed"));
+    }catch(err){
+      showNotice(rewardErrorMessage(err.message),"Unlink Failed","danger");
+    }finally{
+      rewardEls.unlinkBtn.disabled=false;
+      rewardEls.unlinkBtn.textContent="UNLINK SERVER ACCOUNT";
     }
   });
 }
