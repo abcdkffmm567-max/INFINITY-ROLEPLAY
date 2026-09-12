@@ -87,12 +87,39 @@ exports.handler=async event=>{
     }
 
     const passwordHash=await hashPassword(password);
-    const [insert]=await conn.execute(
-      `INSERT INTO users (username,password,regdate,lastlogin,setup,age,skin,cash,ecoin)
-       VALUES (?, ?, NOW(), NULL, 1, ?, ?, 5000, 0)`,
-      [username,passwordHash,age,skin]
-    );
-    const serverUid=Number(insert.insertId);
+
+    // Some VibeGames database imports do not preserve AUTO_INCREMENT on users.uid.
+    // Support both schemas: use MySQL AUTO_INCREMENT when available, otherwise
+    // safely allocate the next UID under a named MySQL lock.
+    const [uidColumns]=await conn.execute("SHOW COLUMNS FROM users LIKE 'uid'");
+    const uidIsAutoIncrement=uidColumns.length && /auto_increment/i.test(String(uidColumns[0].Extra||""));
+
+    let serverUid;
+    if(uidIsAutoIncrement){
+      const [insert]=await conn.execute(
+        `INSERT INTO users (username,password,regdate,lastlogin,setup,age,skin,cash,ecoin)
+         VALUES (?, ?, NOW(), NULL, 1, ?, ?, 5000, 0)`,
+        [username,passwordHash,age,skin]
+      );
+      serverUid=Number(insert.insertId);
+    }else{
+      const lockName="infinity_users_uid_allocator";
+      const [lockRows]=await conn.execute("SELECT GET_LOCK(?, 10) AS locked",[lockName]);
+      if(Number(lockRows?.[0]?.locked)!==1){
+        throw new Error("UID_ALLOCATOR_BUSY");
+      }
+      try{
+        const [uidRows]=await conn.execute("SELECT COALESCE(MAX(uid),0)+1 AS next_uid FROM users");
+        serverUid=Number(uidRows?.[0]?.next_uid||1);
+        await conn.execute(
+          `INSERT INTO users (uid,username,password,regdate,lastlogin,setup,age,skin,cash,ecoin)
+           VALUES (?, ?, ?, NOW(), NULL, 1, ?, ?, 5000, 0)`,
+          [serverUid,username,passwordHash,age,skin]
+        );
+      }finally{
+        try{await conn.execute("SELECT RELEASE_LOCK(?)",[lockName]);}catch{}
+      }
+    }
 
     await conn.execute(
       `INSERT INTO website_account_links (firebase_uid,server_uid,server_username)
