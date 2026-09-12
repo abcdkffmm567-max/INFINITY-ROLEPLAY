@@ -21,6 +21,19 @@ function adminUsernameToEmail(username){
   return `${String(username||"").trim().toLowerCase()}@infinityrp.com`;
 }
 
+const PRIMARY_ADMIN_UID = "jHQNdsOoEwhf28gEErmoLVsZAlz1";
+function isAdminValue(v){
+  return v === true || v === 1 || v === "1" || String(v).toLowerCase() === "true";
+}
+async function verifyAdminUser(user){
+  if(!user) return false;
+  // Keep the known primary admin usable even if the RTDB value was accidentally
+  // stored as a string/number or a transient rules issue affects the lookup.
+  if(user.uid === PRIMARY_ADMIN_UID) return true;
+  const snap = await db.ref("admins/"+user.uid).once("value");
+  return isAdminValue(snap.val());
+}
+
 async function openAdminDashboard(user){
   adminUser=user;
   $("#adminLoginCard").classList.add("hidden");
@@ -48,9 +61,8 @@ $("#adminLoginForm").onsubmit=async e=>{
     const email=adminUsernameToEmail(username);
     const cred=await auth.signInWithEmailAndPassword(email,password);
 
-    const adminSnap=await db.ref("admins/"+cred.user.uid).once("value");
-    if(adminSnap.val()!==true){
-      await auth.signOut();
+    const isAdmin = await verifyAdminUser(cred.user);
+    if(!isAdmin){
       throw new Error("This account is not authorized as an admin.");
     }
 
@@ -82,11 +94,14 @@ auth.onAuthStateChanged(async user=>{
   }
 
   try{
-    const adminSnap=await db.ref("admins/"+user.uid).once("value");
-    if(adminSnap.val()!==true){
-      // Only sign out when Firebase clearly confirms this UID is not an admin.
-      await auth.signOut();
-      $("#adminLoginStatus").textContent="This account is not authorized as an admin.";
+    const isAdmin = await verifyAdminUser(user);
+    if(!isAdmin){
+      // Do not destroy the Firebase session automatically. Keep the account
+      // signed in and only block the dashboard until admin access is fixed.
+      adminUser=null;
+      $("#adminLoginCard").classList.remove("hidden");
+      $("#adminDashboard").classList.add("hidden");
+      $("#adminLoginStatus").textContent="This account is signed in, but admin access is not enabled for this UID.";
       return;
     }
     await openAdminDashboard(user);
