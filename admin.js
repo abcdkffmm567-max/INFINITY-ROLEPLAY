@@ -1,5 +1,13 @@
 const $=s=>document.querySelector(s);
 let adminUser=null;
+
+// Keep the Firebase admin session across refreshes, tab closes and browser restarts.
+// Firebase normally defaults to LOCAL persistence, but we set it explicitly here
+// so the Admin Panel does not appear to log out immediately on some browsers.
+const adminPersistenceReady = auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  .catch(err=>{
+    console.warn("Could not enable local admin persistence:", err);
+  });
 let allApps={};
 let allUsers={};
 let allPublicUsers={};
@@ -36,6 +44,7 @@ $("#adminLoginForm").onsubmit=async e=>{
   $("#adminLoginStatus").textContent="Logging in...";
 
   try{
+    await adminPersistenceReady;
     const email=adminUsernameToEmail(username);
     const cred=await auth.signInWithEmailAndPassword(email,password);
 
@@ -63,6 +72,8 @@ $("#adminLoginForm").onsubmit=async e=>{
 };
 
 auth.onAuthStateChanged(async user=>{
+  await adminPersistenceReady;
+
   if(!user){
     adminUser=null;
     $("#adminLoginCard").classList.remove("hidden");
@@ -73,12 +84,17 @@ auth.onAuthStateChanged(async user=>{
   try{
     const adminSnap=await db.ref("admins/"+user.uid).once("value");
     if(adminSnap.val()!==true){
+      // Only sign out when Firebase clearly confirms this UID is not an admin.
       await auth.signOut();
+      $("#adminLoginStatus").textContent="This account is not authorized as an admin.";
       return;
     }
     await openAdminDashboard(user);
   }catch(err){
     console.error("Admin auth-state check failed:",err);
+    // Do not destroy the persisted Firebase session because of a temporary
+    // network/database read failure. Keep the user signed in and show a message.
+    $("#adminLoginStatus").textContent="Admin session is still signed in. Could not verify admin access right now — check your connection and refresh.";
   }
 });
 
