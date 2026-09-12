@@ -1,5 +1,5 @@
 [build]
-  command = "mkdir -p netlify/functions && cp samp-status.js netlify/functions/samp-status.js && cp daily-reward.js netlify/functions/daily-reward.js && cp redeem-code.js netlify/functions/redeem-code.js"
+  command = "mkdir -p netlify/functions && cp samp-status.js netlify/functions/samp-status.js && cp daily-reward.js netlify/functions/daily-reward.js && cp redeem-code.js netlify/functions/redeem-code.js && cp whitelist-account.js netlify/functions/whitelist-account.js"
   publish = "."
 
 [functions]
@@ -20,5 +20,11 @@
 [[redirects]]
   from = "/api/redeem-code"
   to = "/.netlify/functions/redeem-code"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/whitelist-account"
+  to = "/.netlify/functions/whitelist-account"
   status = 200
   force = true

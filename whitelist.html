@@ -37,16 +37,79 @@
           </div>
         </div>
       </div>
-      <form id="whitelistForm" class="card form-grid">
-      <label>Real Name<input required name="realName" placeholder="Your name"></label>
-      <label>Age<input required type="number" min="13" max="80" name="age" placeholder="18"></label>
-      <label>Discord Name<input required name="discord" placeholder="name#0000"></label>
-      <label>SA-MP / RP Name<input required name="rpName" placeholder="Firstname_Lastname"></label>
-      <label class="full">Why do you want to join Infinity Role Play?<textarea required minlength="30" name="reason" rows="4"></textarea></label>
-      <label class="full">What is Roleplay? Explain in your own words.<textarea required minlength="30" name="rpExplain" rows="4"></textarea></label>
-      <label class="full">Give one example of RDM / VDM / MG.<textarea required minlength="20" name="scenario" rows="4"></textarea></label>
-      <label class="checkbox full"><input required type="checkbox"> I have read and agree to follow the server rules.</label>
-      <div class="full form-actions"><button class="btn primary" type="submit">Submit Whitelist</button><span id="wlStatus"></span></div>
+      <form id="whitelistForm" class="card form-grid whitelist-detailed-form">
+        <div class="full whitelist-form-heading">
+          <span class="eyebrow">OOC - OUT OF CHARACTER</span>
+          <h3>Out of Character Information</h3>
+        </div>
+
+        <label>1. Discord Name + ID
+          <input required name="discord" maxlength="80" placeholder="name / 123456789012345678">
+        </label>
+        <label>2. In-Game Name
+          <input required name="inGameName" maxlength="24" placeholder="John Carter">
+          <small>Use a realistic RP name. It will be saved to the server as John_Carter.</small>
+        </label>
+        <label>3. Age
+          <input required type="number" min="14" max="80" name="oocAge" placeholder="18">
+          <small>Must be 14+</small>
+        </label>
+        <label>4. Country + Timezone
+          <input required name="countryTimezone" maxlength="80" placeholder="Sri Lanka / GMT+5:30">
+        </label>
+        <label>5. Do you have a working Mic?
+          <select required name="workingMic"><option value="">Select</option><option>Yes</option><option>No</option></select>
+        </label>
+        <label>6. Hours you can play per week
+          <input required type="number" min="1" max="168" name="hoursPerWeek" placeholder="20">
+        </label>
+        <label>7. Have you RP'd before?
+          <select required name="rpBefore"><option value="">Select</option><option>Yes</option><option>No</option></select>
+        </label>
+        <label>Previous servers + how long
+          <input name="previousServers" maxlength="250" placeholder="If Yes, list servers and experience">
+        </label>
+        <label>8. Ever banned from an RP server?
+          <select required name="bannedBefore"><option value="">Select</option><option>Yes</option><option>No</option></select>
+        </label>
+        <label>If Yes, why?
+          <input name="banReason" maxlength="250" placeholder="Leave blank if No">
+        </label>
+
+        <div class="full whitelist-form-heading character-heading">
+          <span class="eyebrow">CHARACTER INFORMATION</span>
+          <h3>Character Information</h3>
+        </div>
+
+        <label>9. Character Full Name
+          <input required name="characterFullName" maxlength="60" placeholder="John Carter">
+        </label>
+        <label>10. Character Age
+          <input required type="number" min="18" max="100" name="characterAge" placeholder="24">
+        </label>
+        <label>10. Date of Birth
+          <input required type="date" name="characterDob">
+        </label>
+        <label>11. RP Account Password
+          <input required type="password" minlength="6" maxlength="64" name="accountPassword" autocomplete="new-password" placeholder="Create server account password">
+          <small>This password is sent securely to the server account API and is never stored in Firebase or shown to admins.</small>
+        </label>
+        <label>12. Character Skin ID
+          <input required type="number" min="0" max="311" name="skinId" placeholder="299">
+        </label>
+        <label>14. First Job
+          <select required name="firstJob"><option value="">Select first job</option><option>PD</option><option>EMS</option><option>Mechanic</option><option>Civ</option><option>Gang</option><option>Business</option></select>
+        </label>
+        <label class="full">13. Character Backstory <span class="field-required">(Minimum 200 words)</span>
+          <textarea required name="backstory" rows="12" placeholder="Include where they were born, family, childhood, education, why they came to the city, goals, and personality."></textarea>
+          <div class="word-counter"><span id="backstoryWords">0</span> / 200 words minimum</div>
+        </label>
+
+        <label class="checkbox full"><input required type="checkbox" name="rulesAccepted"> I have read and agree to follow the Infinity Role Play server rules.</label>
+        <div class="full whitelist-account-note">
+          <b>Automatic Server Account:</b> When you submit this application, a SA-MP server account will be created automatically using your In-Game Name, password, character age and skin ID. Your website account will also be linked to that server account.
+        </div>
+        <div class="full form-actions"><button class="btn primary" id="submitWhitelistBtn" type="submit">Submit Whitelist & Create Account</button><span id="wlStatus"></span></div>
       </form>
     </div>
 

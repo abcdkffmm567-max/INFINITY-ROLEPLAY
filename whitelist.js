@@ -9,7 +9,7 @@ function setWhitelistLock(locked,title,text,showAuthActions=false){
   if($("#whitelistLockTitle")) $("#whitelistLockTitle").textContent=title||"Whitelist Application Locked";
   if($("#whitelistLockText")) $("#whitelistLockText").textContent=text||"";
   if($("#whitelistLockActions")) $("#whitelistLockActions").classList.toggle("hidden",!showAuthActions);
-  if(form) form.querySelectorAll("input,textarea,button").forEach(el=>el.disabled=locked);
+  if(form) form.querySelectorAll("input,textarea,button,select").forEach(el=>el.disabled=locked);
 }
 
 function refreshWhitelistLock(){
@@ -55,25 +55,131 @@ auth.onAuthStateChanged(async user=>{
   loadMyApplication();
 });
 
+const backstoryEl=document.querySelector('[name="backstory"]');
+if(backstoryEl){
+  backstoryEl.addEventListener("input",()=>{
+    const count=countWords(backstoryEl.value);
+    const out=$("#backstoryWords");
+    if(out) out.textContent=count;
+  });
+}
+
+function countWords(v){
+  return String(v||"").trim().split(/\s+/).filter(Boolean).length;
+}
+
+function normalizeServerName(v){
+  return String(v||"").trim().replace(/\s+/g,"_");
+}
+
+async function createServerAccount(payload){
+  const token=await currentUser.getIdToken(true);
+  const r=await fetch("/api/whitelist-account",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+    body:JSON.stringify(payload)
+  });
+  let data={};
+  try{data=await r.json();}catch{}
+  if(!r.ok||!data.ok){
+    const err=new Error(data.error||"SERVER_ACCOUNT_CREATE_FAILED");
+    err.details=data;
+    throw err;
+  }
+  return data;
+}
+
 $("#whitelistForm").onsubmit=async e=>{
   e.preventDefault();
   if(!whitelistOpen){ $("#wlStatus").textContent="Whitelist applications are currently closed."; return; }
   if(!currentUser){ location.href="login.html"; return; }
+
   const f=new FormData(e.target);
-  const data={
-    uid:currentUser.uid,email:currentUser.email,
-    displayName:currentProfile?.displayName||currentUser.displayName||"User",infinityId:currentProfile?.infinityId||makeInfinityId(currentUser.uid),
-    realName:f.get("realName"),age:Number(f.get("age")),discord:f.get("discord"),rpName:f.get("rpName"),
-    reason:f.get("reason"),rpExplain:f.get("rpExplain"),scenario:f.get("scenario"),
-    status:"pending",createdAt:firebase.database.ServerValue.TIMESTAMP
-  };
+  const backstory=String(f.get("backstory")||"").trim();
+  if(countWords(backstory)<200){
+    $("#wlStatus").textContent=`Backstory must be at least 200 words. Current: ${countWords(backstory)} words.`;
+    backstoryEl?.focus();
+    return;
+  }
+  if(f.get("rpBefore")==="Yes"&&!String(f.get("previousServers")||"").trim()){
+    $("#wlStatus").textContent="Please enter the RP servers you played on and how long.";
+    return;
+  }
+  if(f.get("bannedBefore")==="Yes"&&!String(f.get("banReason")||"").trim()){
+    $("#wlStatus").textContent="Please explain why you were banned.";
+    return;
+  }
+
+  const applicationId=db.ref("whitelist").push().key;
+  const btn=$("#submitWhitelistBtn");
+  const oldText=btn?.textContent;
+  if(btn){btn.disabled=true;btn.textContent="Creating Server Account...";}
+  $("#wlStatus").textContent="Creating your SA-MP account securely...";
+
   try{
-    const key=db.ref("whitelist").push().key;
-    await db.ref("whitelist/"+key).set(data);
-    await db.ref("userApplications/"+currentUser.uid+"/"+key).set(true);
-    $("#wlStatus").textContent="Submitted successfully.";
-    e.target.reset();loadMyApplication();
-  }catch(err){$("#wlStatus").textContent=err.message}
+    const account=await createServerAccount({
+      action:"create",
+      applicationId,
+      inGameName:String(f.get("inGameName")||"").trim(),
+      password:String(f.get("accountPassword")||""),
+      characterAge:Number(f.get("characterAge")),
+      skinId:Number(f.get("skinId"))
+    });
+
+    const data={
+      uid:currentUser.uid,
+      email:currentUser.email||"",
+      displayName:currentProfile?.displayName||currentUser.displayName||"User",
+      infinityId:currentProfile?.infinityId||makeInfinityId(currentUser.uid),
+      discord:String(f.get("discord")||"").trim(),
+      inGameName:String(f.get("inGameName")||"").trim(),
+      serverUsername:account.account?.username||normalizeServerName(f.get("inGameName")),
+      oocAge:Number(f.get("oocAge")),
+      countryTimezone:String(f.get("countryTimezone")||"").trim(),
+      workingMic:String(f.get("workingMic")||""),
+      hoursPerWeek:Number(f.get("hoursPerWeek")),
+      rpBefore:String(f.get("rpBefore")||""),
+      previousServers:String(f.get("previousServers")||"").trim(),
+      bannedBefore:String(f.get("bannedBefore")||""),
+      banReason:String(f.get("banReason")||"").trim(),
+      characterFullName:String(f.get("characterFullName")||"").trim(),
+      characterAge:Number(f.get("characterAge")),
+      characterDob:String(f.get("characterDob")||""),
+      skinId:Number(f.get("skinId")),
+      backstory,
+      firstJob:String(f.get("firstJob")||""),
+      rulesAccepted:true,
+      accountCreated:true,
+      accountAlreadyLinked:account.alreadyLinked===true,
+      serverUid:Number(account.account?.uid||0),
+      status:"pending",
+      createdAt:firebase.database.ServerValue.TIMESTAMP
+    };
+
+    // Never store the RP account password in Firebase.
+    await db.ref("whitelist/"+applicationId).set(data);
+    await db.ref("userApplications/"+currentUser.uid+"/"+applicationId).set(true);
+    $("#wlStatus").textContent=`Submitted successfully. Server account ${data.serverUsername} (UID ${data.serverUid}) is ready.`;
+    e.target.reset();
+    if($("#backstoryWords")) $("#backstoryWords").textContent="0";
+    loadMyApplication();
+  }catch(err){
+    console.error(err);
+    const messages={
+      INVALID_SERVER_NAME:"In-Game Name is invalid. Use a realistic name such as John Carter or John_Carter.",
+      SERVER_USERNAME_EXISTS:"That In-Game Name already exists on the SA-MP server. Choose another name.",
+      WEBSITE_ACCOUNT_ALREADY_LINKED:"Your website account is already linked to a different SA-MP account.",
+      INVALID_PASSWORD:"RP account password must be 6-64 characters.",
+      INVALID_SKIN_ID:"Character Skin ID must be between 0 and 311.",
+      INVALID_CHARACTER_AGE:"Character age must be between 18 and 100.",
+      SERVER_ACCOUNT_CREATE_FAILED:"Could not create the SA-MP account. Please contact an admin.",
+      LOGIN_REQUIRED:"Please login again and retry.",
+      INVALID_LOGIN:"Your login session expired. Please login again."
+    };
+    $("#wlStatus").textContent=messages[err.message]||err.message||"Submission failed.";
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent=oldText||"Submit Whitelist & Create Account";}
+  }
 };
 
 async function loadMyApplication(){
@@ -84,6 +190,6 @@ async function loadMyApplication(){
   const apps=await Promise.all(ids.map(id=>db.ref("whitelist/"+id).once("value").then(s=>({id,...s.val()}))));
   apps.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
   const a=apps[0];
-  $("#myApplication").innerHTML=`<p><b>${esc(a.rpName||"Application")}</b></p><span class="status-badge status-${a.status}">${String(a.status).toUpperCase()}</span>${a.adminNote?`<p>Admin note: ${esc(a.adminNote)}</p>`:""}`;
+  $("#myApplication").innerHTML=`<p><b>${esc(a.serverUsername||a.inGameName||"Application")}</b></p><span class="status-badge status-${a.status}">${String(a.status).toUpperCase()}</span>${a.accountCreated?`<p>Server Account: <b>${esc(a.serverUsername||"")}</b> &nbsp; UID: <b>${esc(a.serverUid||"")}</b></p>`:""}${a.adminNote?`<p>Admin note: ${esc(a.adminNote)}</p>`:""}`;
 }
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}

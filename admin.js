@@ -493,11 +493,47 @@ function renderApps(){
  if(!entries.length){box.innerHTML="<p>No applications found.</p>";return}
  entries.forEach(a=>box.insertAdjacentHTML("beforeend",appHtml(a)));
 }
-function appHtml(a){return `<article class="application-card">
- <div class="section-row"><div><h3>${esc(a.rpName||"Unknown")}</h3><div class="application-meta"><span>${esc(a.realName||"")}</span><span>Age: ${esc(a.age||"")}</span><span>${esc(a.discord||"")}</span><span>${fmt(a.createdAt)}</span></div></div><span class="status-badge status-${a.status}">${String(a.status||"pending").toUpperCase()}</span></div>
- <div class="answers"><div class="answer"><b>Why join?</b>${esc(a.reason||"")}</div><div class="answer"><b>What is Roleplay?</b>${esc(a.rpExplain||"")}</div><div class="answer"><b>RDM / VDM / MG example</b>${esc(a.scenario||"")}</div></div>
- <div class="app-actions"><button class="btn success small" onclick="setAppStatus('${a.id}','accepted')">Accept</button><button class="btn danger small" onclick="setAppStatus('${a.id}','rejected')">Reject</button><button class="btn ghost small" onclick="addNote('${a.id}')">Admin Note</button></div>
- </article>`}
+function appHtml(a){
+ const legacy = a.rpName || a.reason || a.rpExplain || a.scenario;
+ if(legacy){
+   return `<article class="application-card">
+    <div class="section-row"><div><h3>${esc(a.rpName||"Unknown")}</h3><div class="application-meta"><span>${esc(a.realName||"")}</span><span>Age: ${esc(a.age||"")}</span><span>${esc(a.discord||"")}</span><span>${fmt(a.createdAt)}</span></div></div><span class="status-badge status-${a.status}">${String(a.status||"pending").toUpperCase()}</span></div>
+    <div class="answers"><div class="answer"><b>Why join?</b>${esc(a.reason||"")}</div><div class="answer"><b>What is Roleplay?</b>${esc(a.rpExplain||"")}</div><div class="answer"><b>RDM / VDM / MG example</b>${esc(a.scenario||"")}</div></div>
+    <div class="app-actions"><button class="btn success small" onclick="setAppStatus('${a.id}','accepted')">Accept</button><button class="btn danger small" onclick="setAppStatus('${a.id}','rejected')">Reject</button><button class="btn ghost small" onclick="addNote('${a.id}')">Admin Note</button></div>
+   </article>`;
+ }
+ return `<article class="application-card">
+   <div class="section-row">
+     <div>
+       <h3>${esc(a.serverUsername||a.inGameName||a.characterFullName||"Unknown")}</h3>
+       <div class="application-meta">
+         <span>Website: ${esc(a.displayName||a.infinityId||"")}</span>
+         <span>OOC Age: ${esc(a.oocAge||"")}</span>
+         <span>${esc(a.discord||"")}</span>
+         <span>${fmt(a.createdAt)}</span>
+       </div>
+       ${a.accountCreated?`<div class="server-account-badge">✓ Server Account: ${esc(a.serverUsername||"")} · UID ${esc(a.serverUid||"")}</div>`:`<div class="server-account-badge">Server account not confirmed</div>`}
+     </div>
+     <span class="status-badge status-${a.status}">${String(a.status||"pending").toUpperCase()}</span>
+   </div>
+   <div class="answers whitelist-answers">
+     <div class="answer"><b>1. Discord Name + ID</b>${esc(a.discord||"")}</div>
+     <div class="answer"><b>2. In-Game Name</b>${esc(a.inGameName||"")}<br><small>Server: ${esc(a.serverUsername||"")}</small></div>
+     <div class="answer"><b>3. OOC Age</b>${esc(a.oocAge||"")}</div>
+     <div class="answer"><b>4. Country + Timezone</b>${esc(a.countryTimezone||"")}</div>
+     <div class="answer"><b>5. Working Mic</b>${esc(a.workingMic||"")}</div>
+     <div class="answer"><b>6. Hours / Week</b>${esc(a.hoursPerWeek||"")}</div>
+     <div class="answer"><b>7. RP Before?</b>${esc(a.rpBefore||"")}${a.previousServers?`<br><small>${esc(a.previousServers)}</small>`:""}</div>
+     <div class="answer"><b>8. Banned Before?</b>${esc(a.bannedBefore||"")}${a.banReason?`<br><small>${esc(a.banReason)}</small>`:""}</div>
+     <div class="answer"><b>9. Character Full Name</b>${esc(a.characterFullName||"")}</div>
+     <div class="answer"><b>10. Character Age + DOB</b>${esc(a.characterAge||"")} · ${esc(a.characterDob||"")}</div>
+     <div class="answer"><b>12. Character Skin ID</b>${esc(a.skinId??"")}</div>
+     <div class="answer"><b>14. First Job</b>${esc(a.firstJob||"")}</div>
+     <div class="answer full-answer"><b>13. Character Backstory</b>${esc(a.backstory||"")}</div>
+   </div>
+   <div class="app-actions"><button class="btn success small" onclick="setAppStatus('${a.id}','accepted')">Accept</button><button class="btn danger small" onclick="setAppStatus('${a.id}','rejected')">Reject</button><button class="btn ghost small" onclick="addNote('${a.id}')">Admin Note</button></div>
+ </article>`
+}
 window.setAppStatus=async(id,status)=>{await db.ref("whitelist/"+id).update({status,reviewedAt:firebase.database.ServerValue.TIMESTAMP,reviewedBy:adminUser.uid})}
 window.addNote=async id=>{const n=prompt("Admin note:");if(n!==null)await db.ref("whitelist/"+id+"/adminNote").set(n)}
 function updateStats(){
