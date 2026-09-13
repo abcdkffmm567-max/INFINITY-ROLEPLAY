@@ -50,6 +50,20 @@ function dbConfig() {
   };
 }
 
+
+async function ensureWallet(conn, firebaseUid, seedEcoin = 0) {
+  await conn.execute(`CREATE TABLE IF NOT EXISTS website_ecoin_wallets (
+    firebase_uid VARCHAR(128) NOT NULL PRIMARY KEY,
+    ecoin BIGINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+  const seed=Math.max(0,Math.floor(Number(seedEcoin)||0));
+  await conn.execute(`INSERT INTO website_ecoin_wallets (firebase_uid,ecoin) VALUES (?,?) ON DUPLICATE KEY UPDATE firebase_uid=VALUES(firebase_uid)`,[firebaseUid,seed]);
+  const [rows]=await conn.execute('SELECT ecoin FROM website_ecoin_wallets WHERE firebase_uid=? LIMIT 1',[firebaseUid]);
+  return Number(rows[0]?.ecoin||0);
+}
+
 function cleanCode(value) {
   return String(value||"").trim().toUpperCase().replace(/\s+/g, "");
 }
@@ -114,13 +128,15 @@ exports.handler = async (event) => {
           [c.id,c.code,authUser.uid,serverUid,c.ecoin_reward,0]
         );
         await conn.execute("UPDATE website_redeem_codes SET used_count = used_count + 1 WHERE id = ?",[c.id]);
+        await ensureWallet(conn,authUser.uid,players[0].ecoin);
         await conn.execute(
-          "UPDATE users SET ecoin=COALESCE(ecoin,0)+? WHERE uid=?",
-          [c.ecoin_reward,serverUid]
+          "UPDATE website_ecoin_wallets SET ecoin=ecoin+? WHERE firebase_uid=?",
+          [c.ecoin_reward,authUser.uid]
         );
-        const [updated]=await conn.execute("SELECT uid,username,ecoin,cash FROM users WHERE uid=? LIMIT 1",[serverUid]);
+        const [wallet]=await conn.execute("SELECT ecoin FROM website_ecoin_wallets WHERE firebase_uid=? LIMIT 1",[authUser.uid]);
+        const [updatedPlayer]=await conn.execute("SELECT uid,username,cash FROM users WHERE uid=? LIMIT 1",[serverUid]);
         await conn.commit();
-        return response(200,{ok:true,redeemed:true,reward:{ecoin:Number(c.ecoin_reward),cash:0},account:updated[0]});
+        return response(200,{ok:true,redeemed:true,reward:{ecoin:Number(c.ecoin_reward),cash:0},account:{...updatedPlayer[0],ecoin:Number(wallet[0]?.ecoin||0)},ecoin:Number(wallet[0]?.ecoin||0)});
       }catch(e){ try{await conn.rollback();}catch{} throw e; }
     }
 

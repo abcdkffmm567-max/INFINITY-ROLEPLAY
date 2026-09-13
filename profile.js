@@ -261,7 +261,9 @@ function renderRewardStatus(data){
   if(!data.linked){
     rewardEls.linkArea.classList.remove("hidden");
     rewardEls.linkedArea.classList.add("hidden");
-    rewardEls.linkStatus.textContent="Server account not linked";
+    const walletEcoin=Number(data.ecoin ?? data.wallet?.ecoin ?? 0);
+    rewardEls.linkStatus.textContent=`Server account not linked • Website eCoin: ${walletEcoin.toLocaleString()}`;
+    window.dispatchEvent(new Event("ecoin-balance-changed"));
     return;
   }
   rewardEls.linkArea.classList.add("hidden");
@@ -369,7 +371,7 @@ if(rewardEls.claimBtn){
     rewardEls.claimBtn.textContent="CLAIMING...";
     try{
       const data=await rewardApi("claim");
-      showNotice("100 eCoin added to your SA-MP account!","Daily Reward Claimed","success");
+      showNotice("100 eCoin added to your website account!","Daily Reward Claimed","success");
       renderRewardStatus({...data,linked:true,claimedToday:true});
     }catch(err){
       showNotice(rewardErrorMessage(err.message),"Claim Failed","danger");

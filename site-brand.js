@@ -61,14 +61,15 @@
         body:JSON.stringify({action:"status"})
       });
       const data=await res.json().catch(()=>({}));
-      if(res.ok && data.ok && data.linked){
-        if(amount) amount.textContent=Number(data.account?.ecoin||0).toLocaleString();
-        badge.classList.add("linked");
-        badge.title="Server eCoin balance";
+      if(res.ok && data.ok){
+        const ecoin=Number(data.ecoin ?? data.wallet?.ecoin ?? data.account?.ecoin ?? 0);
+        if(amount) amount.textContent=ecoin.toLocaleString();
+        badge.classList.toggle("linked",!!data.linked);
+        badge.title=data.linked ? "Website eCoin balance" : "Website eCoin balance (server account not linked)";
       }else{
         if(amount) amount.textContent="0";
         badge.classList.remove("linked");
-        badge.title="Link your SA-MP account to show eCoin balance";
+        badge.title="eCoin balance unavailable";
       }
     }catch(err){
       if(amount) amount.textContent="—";

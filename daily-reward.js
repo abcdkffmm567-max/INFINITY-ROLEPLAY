@@ -69,6 +69,28 @@ function nextSriLankaMidnightISO() {
   return new Date(Date.UTC(y, m-1, d+1, -5, -30, 0)).toISOString();
 }
 
+
+async function ensureWallet(conn, firebaseUid, seedEcoin = 0) {
+  await conn.execute(`CREATE TABLE IF NOT EXISTS website_ecoin_wallets (
+    firebase_uid VARCHAR(128) NOT NULL,
+    ecoin BIGINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (firebase_uid)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+  const safeSeed = Math.max(0, Math.floor(Number(seedEcoin) || 0));
+  await conn.execute(
+    `INSERT INTO website_ecoin_wallets (firebase_uid, ecoin) VALUES (?, ?)
+     ON DUPLICATE KEY UPDATE firebase_uid = VALUES(firebase_uid)`,
+    [firebaseUid, safeSeed]
+  );
+  const [rows] = await conn.execute(
+    "SELECT ecoin FROM website_ecoin_wallets WHERE firebase_uid = ? LIMIT 1",
+    [firebaseUid]
+  );
+  return Number(rows[0]?.ecoin || 0);
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return response(405, { ok:false, error:"METHOD_NOT_ALLOWED" });
 
@@ -121,10 +143,12 @@ exports.handler = async (event) => {
         [authUser.uid, serverUid, players[0].username]
       );
 
+      const walletEcoin = await ensureWallet(conn, authUser.uid, players[0].ecoin);
       return response(200, {
         ok:true,
         linked:true,
-        account:{ uid:players[0].uid, username:players[0].username, ecoin:players[0].ecoin, cash:players[0].cash }
+        ecoin:walletEcoin,
+        account:{ uid:players[0].uid, username:players[0].username, ecoin:walletEcoin, cash:players[0].cash }
       });
     }
 
@@ -145,6 +169,12 @@ exports.handler = async (event) => {
         return response(409, { ok:false, error:"UNLINK_ACCOUNT_CHANGED" });
       }
 
+      const [unlinkPlayer] = await conn.execute(
+        "SELECT ecoin FROM users WHERE uid = ? LIMIT 1",
+        [Number(body.serverUid)]
+      );
+      const walletEcoin = await ensureWallet(conn, authUser.uid, unlinkPlayer[0]?.ecoin || 0);
+
       await conn.execute(
         "DELETE FROM website_account_links WHERE firebase_uid = ? AND server_uid = ?",
         [authUser.uid, Number(body.serverUid)]
@@ -153,6 +183,8 @@ exports.handler = async (event) => {
       return response(200, {
         ok:true,
         linked:false,
+        ecoin:walletEcoin,
+        wallet:{ecoin:walletEcoin},
         unlinkedAccount:{ uid:links[0].server_uid, username:links[0].server_username }
       });
     }
@@ -165,7 +197,10 @@ exports.handler = async (event) => {
          WHERE l.firebase_uid = ? LIMIT 1`,
         [authUser.uid]
       );
-      if (!links.length) return response(200, { ok:true, linked:false });
+      if (!links.length) {
+        const walletEcoin = await ensureWallet(conn, authUser.uid, 0);
+        return response(200, { ok:true, linked:false, ecoin:walletEcoin, wallet:{ecoin:walletEcoin} });
+      }
 
       const dateKey = sriLankaDateKey();
       const [claims] = await conn.execute(
@@ -173,15 +208,18 @@ exports.handler = async (event) => {
         [authUser.uid, dateKey]
       );
 
+      const walletEcoin = await ensureWallet(conn, authUser.uid, links[0].ecoin);
       return response(200, {
         ok:true,
         linked:true,
+        ecoin:walletEcoin,
+        wallet:{ecoin:walletEcoin},
         claimedToday:claims.length > 0,
         nextClaimAt:nextSriLankaMidnightISO(),
         account:{
           uid:links[0].server_uid,
           username:links[0].server_username,
-          ecoin:links[0].ecoin,
+          ecoin:walletEcoin,
           cash:links[0].cash
         }
       });
@@ -225,15 +263,21 @@ exports.handler = async (event) => {
           throw e;
         }
 
+        await ensureWallet(conn, authUser.uid, players[0].ecoin);
         await conn.execute(
-          "UPDATE users SET ecoin = COALESCE(ecoin,0) + 100 WHERE uid = ?",
-          [serverUid]
+          "UPDATE website_ecoin_wallets SET ecoin = ecoin + 100 WHERE firebase_uid = ?",
+          [authUser.uid]
         );
 
-        const [updated] = await conn.execute(
-          "SELECT uid, username, ecoin, cash FROM users WHERE uid = ? LIMIT 1",
+        const [updatedPlayer] = await conn.execute(
+          "SELECT uid, username, cash FROM users WHERE uid = ? LIMIT 1",
           [serverUid]
         );
+        const [walletRows] = await conn.execute(
+          "SELECT ecoin FROM website_ecoin_wallets WHERE firebase_uid = ? LIMIT 1",
+          [authUser.uid]
+        );
+        const updated = [{...updatedPlayer[0], ecoin:Number(walletRows[0]?.ecoin||0)}];
 
         await conn.commit();
         return response(200, {
@@ -276,7 +320,7 @@ exports.handler = async (event) => {
           return response(404, { ok:false, error:"SERVER_ACCOUNT_NOT_FOUND" });
         }
 
-        const currentEcoin = Number(players[0].ecoin || 0);
+        const currentEcoin = await ensureWallet(conn, authUser.uid, players[0].ecoin);
         if (currentEcoin < amount) {
           await conn.rollback();
           return response(409, { ok:false, error:"NOT_ENOUGH_ECOIN", available:currentEcoin });
@@ -284,14 +328,23 @@ exports.handler = async (event) => {
 
         const cashToAdd = amount * 10;
         await conn.execute(
-          "UPDATE users SET ecoin = COALESCE(ecoin,0) - ?, cash = COALESCE(cash,0) + ? WHERE uid = ?",
-          [amount, cashToAdd, serverUid]
+          "UPDATE website_ecoin_wallets SET ecoin = ecoin - ? WHERE firebase_uid = ?",
+          [amount, authUser.uid]
+        );
+        await conn.execute(
+          "UPDATE users SET cash = COALESCE(cash,0) + ? WHERE uid = ?",
+          [cashToAdd, serverUid]
         );
 
-        const [updated] = await conn.execute(
-          "SELECT uid, username, ecoin, cash FROM users WHERE uid = ? LIMIT 1",
+        const [updatedPlayer] = await conn.execute(
+          "SELECT uid, username, cash FROM users WHERE uid = ? LIMIT 1",
           [serverUid]
         );
+        const [walletRows] = await conn.execute(
+          "SELECT ecoin FROM website_ecoin_wallets WHERE firebase_uid = ? LIMIT 1",
+          [authUser.uid]
+        );
+        const updated = [{...updatedPlayer[0], ecoin:Number(walletRows[0]?.ecoin||0)}];
         await conn.commit();
         return response(200, {
           ok:true,
