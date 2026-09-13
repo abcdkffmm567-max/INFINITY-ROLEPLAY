@@ -30,7 +30,7 @@ async function ensureInfinityUser(user, extra={}){
   const updates={
     displayName: extra.displayName || user.displayName || old.displayName || "Player",
     email: old.email || extra.email || user.email || "",
-    photoURL: extra.photoURL || user.photoURL || old.photoURL || "",
+    photoURL: extra.photoURL || old.photoURL || user.photoURL || "",
     infinityId: old.infinityId || makeInfinityId(user.uid),
     banned: old.banned === true,
     verified: old.verified === true,
@@ -74,7 +74,7 @@ window.syncUniqueInfinityUser=async function(user){
   const profile={
     displayName:user.displayName||old.displayName||"Player",
     email:user.email||old.email||"",
-    photoURL:user.photoURL||old.photoURL||"",
+    photoURL:old.photoURL||user.photoURL||"",
     infinityId:infinityId,
     banned:old.banned===true,
     verified:old.verified===true,

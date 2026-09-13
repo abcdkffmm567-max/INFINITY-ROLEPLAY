@@ -187,6 +187,7 @@ $("#resetGooglePhotoBtn").onclick=async()=>{
       photoURL:googlePhoto,
       updatedAt:firebase.database.ServerValue.TIMESTAMP
     });
+    try{ await db.ref("publicUsers/"+currentUser.uid).update({photoURL:googlePhoto}); }catch(e){}
     currentProfile.photoURL=googlePhoto;
     setAvatar(googlePhoto,currentProfile.displayName);
     showNotice("Google profile photo restored.","Profile Updated","success");
