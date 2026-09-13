@@ -129,15 +129,25 @@ exports.handler = async (event) => {
     }
 
     if (action === "unlink") {
+      // Destructive action protection: a refresh/status request can NEVER unlink an account.
+      // The client must explicitly send confirmUnlink=true AND the currently linked server UID.
+      if (body.confirmUnlink !== true || !Number.isInteger(Number(body.serverUid))) {
+        return response(400, { ok:false, error:"UNLINK_CONFIRMATION_REQUIRED" });
+      }
+
       const [links] = await conn.execute(
         "SELECT server_uid, server_username FROM website_account_links WHERE firebase_uid = ? LIMIT 1",
         [authUser.uid]
       );
       if (!links.length) return response(200, { ok:true, linked:false, alreadyUnlinked:true });
 
+      if (Number(links[0].server_uid) !== Number(body.serverUid)) {
+        return response(409, { ok:false, error:"UNLINK_ACCOUNT_CHANGED" });
+      }
+
       await conn.execute(
-        "DELETE FROM website_account_links WHERE firebase_uid = ?",
-        [authUser.uid]
+        "DELETE FROM website_account_links WHERE firebase_uid = ? AND server_uid = ?",
+        [authUser.uid, Number(body.serverUid)]
       );
 
       return response(200, {
@@ -151,7 +161,7 @@ exports.handler = async (event) => {
       const [links] = await conn.execute(
         `SELECT l.server_uid, l.server_username, u.ecoin, u.cash
          FROM website_account_links l
-         INNER JOIN users u ON u.uid = l.server_uid
+         LEFT JOIN users u ON u.uid = l.server_uid
          WHERE l.firebase_uid = ? LIMIT 1`,
         [authUser.uid]
       );

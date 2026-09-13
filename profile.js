@@ -247,7 +247,10 @@ async function rewardApi(action, extra={}){
   return data;
 }
 
+let currentLinkedServerUid = null;
+
 function renderRewardStatus(data){
+  currentLinkedServerUid = data && data.linked && data.account ? Number(data.account.uid) : null;
   if(!rewardEls.linkArea)return;
   if(!data.linked){
     rewardEls.linkArea.classList.remove("hidden");
@@ -311,7 +314,8 @@ if(rewardEls.unlinkBtn){
     rewardEls.unlinkBtn.disabled=true;
     rewardEls.unlinkBtn.textContent="UNLINKING...";
     try{
-      await rewardApi("unlink");
+      if(!currentLinkedServerUid) throw new Error("NO_LINKED_ACCOUNT");
+      await rewardApi("unlink",{confirmUnlink:true,serverUid:currentLinkedServerUid});
       showNotice("Server account unlinked successfully. You can link another account now.","Account Unlinked","success");
       if(rewardEls.usernameInput) rewardEls.usernameInput.value="";
       await loadDailyRewardStatus();
