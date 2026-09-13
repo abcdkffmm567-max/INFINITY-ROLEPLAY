@@ -1,5 +1,5 @@
 [build]
-  command = "mkdir -p netlify/functions && cp samp-status.js netlify/functions/samp-status.js && cp daily-reward.js netlify/functions/daily-reward.js && cp redeem-code.js netlify/functions/redeem-code.js && cp whitelist-account.js netlify/functions/whitelist-account.js && cp vehicle-shop-api.js netlify/functions/vehicle-shop-api.js"
+  command = "mkdir -p netlify/functions && cp samp-status.js netlify/functions/samp-status.js && cp daily-reward.js netlify/functions/daily-reward.js && cp redeem-code.js netlify/functions/redeem-code.js && cp whitelist-account.js netlify/functions/whitelist-account.js && cp vehicle-shop-api.js netlify/functions/vehicle-shop-api.js && cp vehicle-delivery.js netlify/functions/vehicle-delivery.js && cp vehicle-delivery-lib.js netlify/functions/vehicle-delivery-lib.js"
   publish = "."
 
 [functions]
@@ -34,3 +34,6 @@
   to = "/.netlify/functions/vehicle-shop-api"
   status = 200
   force = true
+
+[functions."vehicle-delivery"]
+  schedule = "*/5 * * * *"

@@ -141,8 +141,15 @@
 
     <section class="card admin-section vehicle-shop-admin-section">
       <div class="section-row">
-        <div><h2>Vehicle Shop</h2><p>Add vehicles that players can buy with eCoin. Purchases are added directly to the linked SA-MP account.</p></div>
+        <div><h2>Vehicle Shop</h2><p>Add vehicles that players can buy with eCoin. Purchases are queued and automatically delivered to the linked SA-MP account after the configured delay.</p></div>
         <button id="refreshVehicleShopBtn" class="btn ghost small" type="button">Refresh</button>
+      </div>
+      <div class="vehicle-delivery-settings card-subsection">
+        <div><h3>Vehicle Delivery Time</h3><p>Set how long a purchased vehicle waits before it is added to the player's SA-MP account. Default: 3 hours.</p></div>
+        <div class="form-grid">
+          <label>Delivery Delay (Hours)<input id="adminVehicleDeliveryHours" type="number" min="0" max="168" step="0.25" value="3"></label>
+          <div class="full"><button id="saveVehicleDeliveryDelayBtn" class="btn primary" type="button">Save Delivery Time</button> <span id="adminVehicleDeliveryStatus"></span></div>
+        </div>
       </div>
       <form id="vehicleShopAdminForm" class="form-grid">
         <label>Vehicle Name<input id="adminVehicleName" maxlength="60" placeholder="Infernus" required></label>
