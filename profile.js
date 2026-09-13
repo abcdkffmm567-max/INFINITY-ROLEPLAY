@@ -55,6 +55,11 @@ auth.onAuthStateChanged(async user=>{
   $("#profileInfinityId").textContent=currentProfile.infinityId||makeInfinityId(user.uid);
   $("#displayNameInput").value=displayName;
   setAvatar(photoURL,displayName);
+
+  // Load the linked SA-MP account only after the Firebase profile has finished
+  // loading. This avoids the refresh race where the reward UI checked status
+  // before the saved server-link backup was available.
+  setTimeout(loadDailyRewardStatus, 0);
 });
 
 $("#profileForm").onsubmit=async e=>{
@@ -280,7 +285,22 @@ async function loadDailyRewardStatus(){
   if(!currentUser||!rewardEls.linkArea)return;
   try{
     rewardEls.message && (rewardEls.message.textContent="Checking reward status...");
-    const data=await rewardApi("status");
+    let data=await rewardApi("status");
+
+    // Persistent backup: if the MySQL link row is missing for any reason after
+    // a refresh, restore it from this user's own Firebase profile. The backup
+    // is written only after a successful explicit link and removed only after
+    // an explicit unlink.
+    const savedLink=currentProfile?.serverLink;
+    if(!data.linked && savedLink?.username){
+      try{
+        await rewardApi("link",{username:String(savedLink.username)});
+        data=await rewardApi("status");
+      }catch(restoreErr){
+        console.warn("Server link restore skipped:",restoreErr);
+      }
+    }
+
     renderRewardStatus(data);
   }catch(err){
     const msg=rewardErrorMessage(err.message);
@@ -296,6 +316,17 @@ if(rewardEls.linkBtn){
     rewardEls.linkBtn.textContent="LINKING...";
     try{
       const data=await rewardApi("link",{username});
+
+      // Keep a per-user Firebase backup of the link so a page refresh can
+      // safely restore the MySQL link if it ever disappears.
+      const linkBackup={
+        uid:Number(data.account?.uid||0),
+        username:String(data.account?.username||username),
+        linkedAt:firebase.database.ServerValue.TIMESTAMP
+      };
+      await db.ref("users/"+currentUser.uid+"/serverLink").set(linkBackup);
+      if(currentProfile) currentProfile.serverLink={...linkBackup,linkedAt:Date.now()};
+
       showNotice("SA-MP account linked successfully.","Account Linked","success");
       await loadDailyRewardStatus();
     }catch(err){
@@ -316,6 +347,8 @@ if(rewardEls.unlinkBtn){
     try{
       if(!currentLinkedServerUid) throw new Error("NO_LINKED_ACCOUNT");
       await rewardApi("unlink",{confirmUnlink:true,serverUid:currentLinkedServerUid});
+      try{ await db.ref("users/"+currentUser.uid+"/serverLink").remove(); }catch(e){ console.warn("Server link backup cleanup skipped:",e); }
+      if(currentProfile) delete currentProfile.serverLink;
       showNotice("Server account unlinked successfully. You can link another account now.","Account Unlinked","success");
       if(rewardEls.usernameInput) rewardEls.usernameInput.value="";
       await loadDailyRewardStatus();
@@ -344,10 +377,8 @@ if(rewardEls.claimBtn){
   });
 }
 
-// Current Firebase user is set by the main auth listener above.
-auth.onAuthStateChanged(user=>{
-  if(user) setTimeout(loadDailyRewardStatus,150);
-});
+// Daily reward status is loaded by the main auth listener after the
+// user's Firebase profile (including the persistent serverLink backup) is ready.
 
 
 // ===== eCoin -> Server Cash conversion =====
