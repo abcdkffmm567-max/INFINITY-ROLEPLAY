@@ -10,8 +10,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+<script data-early-security src="security.js"></script>
 </head>
-<body>
+<body oncontextmenu="return false">
 <div class="bg-grid"></div>
 <header class="nav"><a class="brand" href="index.html"><span class="logo-mark">∞</span>INFINITY <b>ADMIN</b></a><a class="btn small ghost" href="index.html">← Website</a></header>
 
@@ -311,6 +312,22 @@
       <div id="serverAdminsAdminList" class="server-admins-admin-list"></div>
     </section>
 
+
+    <section class="card admin-section">
+      <div class="section-row">
+        <div>
+          <h2>Admin Application Access</h2>
+          <p>Lock or unlock the public Admin Application page.</p>
+        </div>
+        <span id="adminApplyAccessBadge" class="status-pill">Loading</span>
+      </div>
+      <label class="full apply-checkbox">
+        <input id="adminApplicationsOpen" type="checkbox">
+        <span>Admin applications are OPEN</span>
+      </label>
+      <button id="saveAdminApplyAccessBtn" class="btn primary" type="button">Save Admin Apply Access</button>
+      <span id="adminApplyAccessStatus"></span>
+    </section>
 
     <section class="card admin-section">
       <div class="section-row">

@@ -5,7 +5,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
-</head><body><div class="bg-grid"></div>
+<script data-early-security src="security.js"></script>
+</head><body oncontextmenu="return false"><div class="bg-grid"></div>
 <header class="nav"><a class="brand" href="index.html"><span class="logo-mark">∞</span>INFINITY <b>ROLE PLAY</b></a>
 <a class="btn small ghost" href="index.html">← Home</a></header>
 <main class="section admin-apply-page"><section class="admins-hero">
@@ -42,17 +43,47 @@
 <script src="firebase-config.js"></script>
 <script src="site-brand.js"></script><script>
 const f=document.getElementById("adminApplyForm"),st=document.getElementById("status"),ms=document.getElementById("myStatus"),ln=document.getElementById("loginNotice");
-let cu=null; const applyLock=document.getElementById("adminApplyLock");
+let cu=null;
+let adminApplicationsOpen=true;
+const applyLock=document.getElementById("adminApplyLock");
+const lockTitle=applyLock?.querySelector("h2");
+const lockText=applyLock?.querySelector("p");
+const lockActions=applyLock?.querySelector(".form-lock-actions");
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-auth.onAuthStateChanged(u=>{cu=u||null;if(!u){
-if(applyLock) applyLock.classList.remove("hidden");
-ln.classList.remove("hidden");
-f.querySelectorAll("input,textarea,button").forEach(x=>x.disabled=true);
-return}
-if(applyLock) applyLock.classList.add("hidden");
-ln.classList.add("hidden");db.ref("adminApplications/"+u.uid).on("value",s=>{const a=s.val();if(!a){ms.innerHTML='<span class="status-pill pending">No application yet</span>';return}
-const x=a.status||"Pending";ms.innerHTML=`<span class="status-pill ${esc(x.toLowerCase())}">${esc(x)}</span>${a.adminNote?`<p><b>Admin Note:</b> ${esc(a.adminNote)}</p>`:""}`})});
-f.onsubmit=async e=>{e.preventDefault();if(!cu)return;const d={uid:cu.uid,accountEmail:cu.email||"",serverName:serverName.value.trim(),realName:realName.value.trim(),age:+age.value,phone:phone.value.trim(),discord:discord.value.trim(),playTime:playTime.value.trim(),experience:experience.value.trim(),reason:reason.value.trim(),availability:availability.value.trim(),status:"Pending",submittedAt:firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP};
+function updateAdminApplyAccess(){
+  const loggedIn=!!cu;
+  const allowed=loggedIn && adminApplicationsOpen;
+  f.querySelectorAll("input,textarea,button").forEach(x=>x.disabled=!allowed);
+  if(allowed){
+    applyLock?.classList.add("hidden");
+    ln?.classList.add("hidden");
+    return;
+  }
+  applyLock?.classList.remove("hidden");
+  if(!loggedIn){
+    if(lockTitle) lockTitle.textContent="Admin Application Locked";
+    if(lockText) lockText.textContent="You must Register or Login before applying for the Infinity Role Play Admin Team.";
+    if(lockActions) lockActions.style.display="flex";
+    ln?.classList.remove("hidden");
+  }else{
+    if(lockTitle) lockTitle.textContent="Admin Applications Closed";
+    if(lockText) lockText.textContent="Admin applications are currently locked by the server administration. Please check again later.";
+    if(lockActions) lockActions.style.display="none";
+    ln?.classList.add("hidden");
+  }
+}
+db.ref("siteSettings/adminApplicationsOpen").on("value",snap=>{
+  adminApplicationsOpen=snap.val()!==false;
+  updateAdminApplyAccess();
+});
+auth.onAuthStateChanged(u=>{
+  cu=u||null;
+  updateAdminApplyAccess();
+  if(!u){ms.innerHTML='Login to view status.';return;}
+  db.ref("adminApplications/"+u.uid).on("value",s=>{const a=s.val();if(!a){ms.innerHTML='<span class="status-pill pending">No application yet</span>';return}
+  const x=a.status||"Pending";ms.innerHTML=`<span class="status-pill ${esc(x.toLowerCase())}">${esc(x)}</span>${a.adminNote?`<p><b>Admin Note:</b> ${esc(a.adminNote)}</p>`:""}`});
+});
+f.onsubmit=async e=>{e.preventDefault();if(!cu)return;if(!adminApplicationsOpen){st.textContent="Admin applications are currently locked.";return;}const d={uid:cu.uid,accountEmail:cu.email||"",serverName:serverName.value.trim(),realName:realName.value.trim(),age:+age.value,phone:phone.value.trim(),discord:discord.value.trim(),playTime:playTime.value.trim(),experience:experience.value.trim(),reason:reason.value.trim(),availability:availability.value.trim(),status:"Pending",submittedAt:firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP};
 try{st.textContent="Submitting...";await db.ref("adminApplications/"+cu.uid).set(d);st.textContent="Application submitted successfully!"}catch(e){st.textContent="Submit failed: "+e.message}}
 </script><script src="security.js"></script>
 </body></html>

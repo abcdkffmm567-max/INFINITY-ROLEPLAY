@@ -195,6 +195,17 @@ function startDashboard(){
  });
  adminDb.ref("adminApplications").on("value",x=>{allAdminApplications=x.val()||{};renderAdminApplications();},err=>{const b=$("#adminApplicationsList");if(b)b.innerHTML="<p>"+esc(err.message)+"</p>";});
  adminDb.ref("siteSettings/adminApplyBackgroundURL").on("value",s=>{const i=$("#adminApplyBackgroundURL");if(i)i.value=s.val()||"";});
+ adminDb.ref("siteSettings/adminApplicationsOpen").on("value",s=>{
+   const open=s.val()!==false;
+   const cb=$("#adminApplicationsOpen");
+   const badge=$("#adminApplyAccessBadge");
+   if(cb) cb.checked=open;
+   if(badge){
+     badge.textContent=open?"OPEN":"LOCKED";
+     badge.className="status-pill "+(open?"accepted":"rejected");
+   }
+ });
+
  adminDb.ref("siteSettings/whitelistApplicationsOpen").on("value",s=>{
    const open=s.val()!==false;
    const cb=$("#whitelistApplicationsOpen");
@@ -505,6 +516,19 @@ if($("#clearAllChatBtn")) $("#clearAllChatBtn").onclick=async()=>{
 
 
 
+if($("#saveAdminApplyAccessBtn")) $("#saveAdminApplyAccessBtn").onclick=async()=>{
+  if(!adminUser)return;
+  const open=$("#adminApplicationsOpen").checked;
+  const st=$("#adminApplyAccessStatus");
+  try{
+    st.textContent="Saving...";
+    await adminDb.ref("siteSettings/adminApplicationsOpen").set(open);
+    st.textContent=open?"Admin Application page unlocked.":"Admin Application page locked.";
+  }catch(err){
+    st.textContent="Save failed: "+(err.message||err);
+  }
+};
+
 if($("#saveWhitelistAccessBtn")) $("#saveWhitelistAccessBtn").onclick=async()=>{
   if(!adminUser)return;
   const open=$("#whitelistApplicationsOpen").checked;
@@ -537,7 +561,7 @@ function appHtml(a){
    return `<article class="application-card">
     <div class="section-row"><div><h3>${esc(a.rpName||"Unknown")}</h3><div class="application-meta"><span>${esc(a.realName||"")}</span><span>Age: ${esc(a.age||"")}</span><span>${esc(a.discord||"")}</span><span>${fmt(a.createdAt)}</span></div></div><span class="status-badge status-${a.status}">${String(a.status||"pending").toUpperCase()}</span></div>
     <div class="answers"><div class="answer"><b>Why join?</b>${esc(a.reason||"")}</div><div class="answer"><b>What is Roleplay?</b>${esc(a.rpExplain||"")}</div><div class="answer"><b>RDM / VDM / MG example</b>${esc(a.scenario||"")}</div></div>
-    <div class="app-actions"><button class="btn success small" onclick="setAppStatus('${a.id}','accepted')">Accept</button><button class="btn danger small" onclick="setAppStatus('${a.id}','rejected')">Reject</button><button class="btn ghost small" onclick="addNote('${a.id}')">Admin Note</button></div>
+    <div class="app-actions"><button class="btn success small" onclick="setAppStatus('${a.id}','accepted')">Accept</button><button class="btn danger small" onclick="setAppStatus('${a.id}','rejected')">Reject</button><button class="btn ghost small" onclick="addNote('${a.id}')">Admin Note</button><button class="btn danger small" onclick="deleteWhitelistApplication('${a.id}','${a.uid||""}')">Delete</button></div>
    </article>`;
  }
  return `<article class="application-card">
@@ -569,11 +593,24 @@ function appHtml(a){
      <div class="answer"><b>14. First Job</b>${esc(a.firstJob||"")}</div>
      <div class="answer full-answer"><b>13. Character Backstory</b>${esc(a.backstory||"")}</div>
    </div>
-   <div class="app-actions"><button class="btn success small" onclick="setAppStatus('${a.id}','accepted')">Accept</button><button class="btn danger small" onclick="setAppStatus('${a.id}','rejected')">Reject</button><button class="btn ghost small" onclick="addNote('${a.id}')">Admin Note</button></div>
+   <div class="app-actions"><button class="btn success small" onclick="setAppStatus('${a.id}','accepted')">Accept</button><button class="btn danger small" onclick="setAppStatus('${a.id}','rejected')">Reject</button><button class="btn ghost small" onclick="addNote('${a.id}')">Admin Note</button><button class="btn danger small" onclick="deleteWhitelistApplication('${a.id}','${a.uid||""}')">Delete</button></div>
  </article>`
 }
 window.setAppStatus=async(id,status)=>{await adminDb.ref("whitelist/"+id).update({status,reviewedAt:firebase.database.ServerValue.TIMESTAMP,reviewedBy:adminUser.uid})}
 window.addNote=async id=>{const n=prompt("Admin note:");if(n!==null)await adminDb.ref("whitelist/"+id+"/adminNote").set(n)}
+window.deleteWhitelistApplication=async(id,uid)=>{
+  if(!adminUser)return;
+  if(!confirm("Delete this whitelist application permanently?"))return;
+  try{
+    const updates={};
+    updates["whitelist/"+id]=null;
+    if(uid) updates["userApplications/"+uid+"/"+id]=null;
+    await adminDb.ref().update(updates);
+    showNotice("Whitelist application deleted.","Whitelist");
+  }catch(err){
+    showNotice("Delete failed: "+(err.message||err),"Error","danger");
+  }
+};
 function updateStats(){
  const a=Object.values(allApps);$("#pendingCount").textContent=a.filter(x=>x.status==="pending").length;$("#acceptedCount").textContent=a.filter(x=>x.status==="accepted").length;$("#rejectedCount").textContent=a.filter(x=>x.status==="rejected").length;
 }
