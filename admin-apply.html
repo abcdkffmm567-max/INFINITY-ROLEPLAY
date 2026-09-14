@@ -54,4 +54,5 @@ ln.classList.add("hidden");db.ref("adminApplications/"+u.uid).on("value",s=>{con
 const x=a.status||"Pending";ms.innerHTML=`<span class="status-pill ${esc(x.toLowerCase())}">${esc(x)}</span>${a.adminNote?`<p><b>Admin Note:</b> ${esc(a.adminNote)}</p>`:""}`})});
 f.onsubmit=async e=>{e.preventDefault();if(!cu)return;const d={uid:cu.uid,accountEmail:cu.email||"",serverName:serverName.value.trim(),realName:realName.value.trim(),age:+age.value,phone:phone.value.trim(),discord:discord.value.trim(),playTime:playTime.value.trim(),experience:experience.value.trim(),reason:reason.value.trim(),availability:availability.value.trim(),status:"Pending",submittedAt:firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP};
 try{st.textContent="Submitting...";await db.ref("adminApplications/"+cu.uid).set(d);st.textContent="Application submitted successfully!"}catch(e){st.textContent="Submit failed: "+e.message}}
-</script></body></html>
+</script><script src="security.js"></script>
+</body></html>
