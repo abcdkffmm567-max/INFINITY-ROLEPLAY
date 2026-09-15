@@ -83,36 +83,13 @@ function normalizeServerName(v){
   return String(v||"").trim().replace(/\s+/g,"_");
 }
 
-async function createServerAccount(payload){
-  const token=await currentUser.getIdToken(true);
-  const r=await fetch("/api/whitelist-account",{
-    method:"POST",
-    headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
-    body:JSON.stringify(payload)
-  });
-  let data={};
-  try{data=await r.json();}catch{}
-  if(!r.ok||!data.ok){
-    const err=new Error(data.error||"SERVER_ACCOUNT_CREATE_FAILED");
-    err.details=data;
-    throw err;
-  }
-  return data;
-}
-
 $("#whitelistForm").onsubmit=async e=>{
   e.preventDefault();
   if(!whitelistOpen){ $("#wlStatus").textContent="Whitelist applications are currently closed."; return; }
   if(!currentUser){ location.href="login.html"; return; }
 
   const f=new FormData(e.target);
-  const accountPassword=String(f.get("accountPassword")||"");
-  const confirmAccountPassword=String(f.get("confirmAccountPassword")||"");
-  if(accountPassword!==confirmAccountPassword){
-    $("#wlStatus").textContent="RP Account Passwords do not match. Please type the same password twice.";
-    e.target.querySelector('[name="confirmAccountPassword"]')?.focus();
-    return;
-  }
+
 
   const backstory=String(f.get("backstory")||"").trim();
   const backstoryWords=countWords(backstory);
@@ -133,19 +110,10 @@ $("#whitelistForm").onsubmit=async e=>{
   const applicationId=db.ref("whitelist").push().key;
   const btn=$("#submitWhitelistBtn");
   const oldText=btn?.textContent;
-  if(btn){btn.disabled=true;btn.textContent="Creating Server Account...";}
-  $("#wlStatus").textContent="Creating your SA-MP account securely...";
+  if(btn){btn.disabled=true;btn.textContent="Submitting...";}
+  $("#wlStatus").textContent="Submitting your whitelist application...";
 
   try{
-    const account=await createServerAccount({
-      action:"create",
-      applicationId,
-      inGameName:String(f.get("inGameName")||"").trim(),
-      password:accountPassword,
-      characterAge:Number(f.get("characterAge")),
-      skinId:Number(f.get("skinId"))
-    });
-
     const data={
       uid:currentUser.uid,
       email:currentUser.email||"",
@@ -153,7 +121,6 @@ $("#whitelistForm").onsubmit=async e=>{
       infinityId:currentProfile?.infinityId||makeInfinityId(currentUser.uid),
       discord:String(f.get("discord")||"").trim(),
       inGameName:String(f.get("inGameName")||"").trim(),
-      serverUsername:account.account?.username||normalizeServerName(f.get("inGameName")),
       oocAge:Number(f.get("oocAge")),
       countryTimezone:String(f.get("countryTimezone")||"").trim(),
       workingMic:String(f.get("workingMic")||""),
@@ -169,36 +136,23 @@ $("#whitelistForm").onsubmit=async e=>{
       backstory,
       firstJob:String(f.get("firstJob")||""),
       rulesAccepted:true,
-      accountCreated:true,
-      accountAlreadyLinked:account.alreadyLinked===true,
-      serverUid:Number(account.account?.uid||0),
+      accountCreated:false,
       status:"pending",
       createdAt:firebase.database.ServerValue.TIMESTAMP
     };
 
-    // Never store the RP account password in Firebase.
     await db.ref("whitelist/"+applicationId).set(data);
     await db.ref("userApplications/"+currentUser.uid+"/"+applicationId).set(true);
-    $("#wlStatus").textContent=`Submitted successfully. Server account ${data.serverUsername} (UID ${data.serverUid}) is ready.`;
+    $("#wlStatus").textContent="Whitelist application submitted successfully. An admin will review it.";
     e.target.reset();
     if($("#backstoryWords")) $("#backstoryWords").textContent="0";
     loadMyApplication();
   }catch(err){
     console.error(err);
-    const messages={
-      INVALID_SERVER_NAME:"In-Game Name is invalid. Use a realistic name such as John Carter or John_Carter.",
-      SERVER_USERNAME_EXISTS:"That In-Game Name already exists on the SA-MP server. Choose another name.",
-      WEBSITE_ACCOUNT_ALREADY_LINKED:"Your website account is already linked to a different SA-MP account.",
-      INVALID_PASSWORD:"RP account password must be 6-64 characters.",
-      INVALID_SKIN_ID:"Character Skin ID must be between 0 and 311.",
-      INVALID_CHARACTER_AGE:"Character age must be between 18 and 100.",
-      SERVER_ACCOUNT_CREATE_FAILED:"Could not create the SA-MP account. Please contact an admin.",
-      LOGIN_REQUIRED:"Please login again and retry.",
-      INVALID_LOGIN:"Your login session expired. Please login again."
-    };
+    const messages={LOGIN_REQUIRED:"Please login again and retry.",INVALID_LOGIN:"Your login session expired. Please login again."};
     $("#wlStatus").textContent=messages[err.message]||err.message||"Submission failed.";
   }finally{
-    if(btn){btn.disabled=false;btn.textContent=oldText||"Submit Whitelist & Create Account";}
+    if(btn){btn.disabled=false;btn.textContent=oldText||"Submit Whitelist Application";}
   }
 };
 

@@ -11,8 +11,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script data-early-security src="security.js"></script>
 </head>
-<body>
+<body oncontextmenu="return false">
   <div class="bg-grid"></div>
   <header class="nav">
     <a class="brand" href="index.html"><span class="logo-mark">∞</span><span>INFINITY <b>ROLE PLAY</b></span></a>
@@ -90,14 +91,6 @@
         <label>10. Date of Birth
           <input required type="date" name="characterDob">
         </label>
-        <label>11. RP Account Password
-          <input required type="password" minlength="6" maxlength="64" name="accountPassword" autocomplete="new-password" placeholder="Create server account password">
-          <small>Use the exact password you want to type when joining the SA-MP server.</small>
-        </label>
-        <label>11. Confirm RP Account Password
-          <input required type="password" minlength="6" maxlength="64" name="confirmAccountPassword" autocomplete="new-password" placeholder="Type the same password again">
-          <small>The two passwords must match. The password is not stored in Firebase or shown to admins.</small>
-        </label>
         <label>12. Character Skin ID
           <input required type="number" min="0" max="311" name="skinId" placeholder="299">
         </label>
@@ -110,10 +103,7 @@
         </label>
 
         <label class="checkbox full"><input required type="checkbox" name="rulesAccepted"> I have read and agree to follow the Infinity Role Play server rules.</label>
-        <div class="full whitelist-account-note">
-          <b>Automatic Server Account:</b> When you submit this application, a SA-MP server account will be created automatically using your In-Game Name, password, character age and skin ID. Your website account will also be linked to that server account.
-        </div>
-        <div class="full form-actions"><button class="btn primary" id="submitWhitelistBtn" type="submit">Submit Whitelist & Create Account</button><span id="wlStatus"></span></div>
+        <div class="full form-actions"><button class="btn primary" id="submitWhitelistBtn" type="submit">Submit Whitelist Application</button><span id="wlStatus"></span></div>
       </form>
     </div>
 
