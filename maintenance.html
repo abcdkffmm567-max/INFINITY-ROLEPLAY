@@ -1,36 +1,56 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#07111f">
-  <title>Under Maintenance | Infinity Role Play</title>
-  <style>
-    *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;
-      font-family:Arial,Helvetica,sans-serif;color:#fff;
-      background:radial-gradient(circle at top,#123b70 0,#07111f 42%,#03070d 100%)}
-    .card{width:min(620px,100%);padding:42px 26px;text-align:center;border-radius:26px;
-      background:rgba(8,20,36,.86);border:1px solid rgba(74,163,255,.35);
-      box-shadow:0 24px 80px rgba(0,0,0,.45),0 0 45px rgba(27,127,255,.12)}
-    .badge{display:inline-block;padding:8px 14px;border-radius:999px;background:#0c65d8;
-      font-weight:800;font-size:12px;letter-spacing:1.5px}
-    h1{font-size:clamp(32px,8vw,58px);margin:20px 0 10px;line-height:1}
-    h1 span{color:#4aa3ff}
-    p{color:#b9c8d9;font-size:17px;line-height:1.65;margin:0 auto;max-width:470px}
-    .loader{width:54px;height:54px;margin:28px auto;border:5px solid rgba(255,255,255,.12);
-      border-top-color:#4aa3ff;border-radius:50%;animation:spin .9s linear infinite}
-    .brand{margin-top:28px;font-weight:900;letter-spacing:2px;color:#dcecff}
-    @keyframes spin{to{transform:rotate(360deg)}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Under Maintenance | Infinity Role Play</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,Helvetica,sans-serif}
+.bg{
+ position:fixed;inset:-25px;
+ background:
+ linear-gradient(rgba(0,20,45,.22),rgba(0,10,25,.35)),
+ url("/index.html");
+ filter:blur(11px);transform:scale(1.08);
+ background:#071426;
+}
+.bg:after{
+ content:"";position:absolute;inset:0;
+ background:linear-gradient(135deg,#071426,#0a315d 50%,#06101d);
+ opacity:.92
+}
+.overlay{
+ position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+ padding:20px;background:rgba(0,5,14,.38);backdrop-filter:blur(8px)
+}
+.card{
+ width:min(590px,94vw);text-align:center;color:white;padding:42px 25px;
+ border:1px solid rgba(72,160,255,.38);border-radius:25px;
+ background:rgba(5,17,32,.72);box-shadow:0 25px 90px rgba(0,0,0,.55)
+}
+.small{font-size:12px;font-weight:800;letter-spacing:2px;color:#69b4ff}
+h1{font-size:clamp(35px,8vw,62px);line-height:.98;margin:15px 0}
+h1 span{color:#3e9cff}
+p{color:#c4d3e3;line-height:1.65;font-size:16px;max-width:470px;margin:0 auto 24px}
+.whatsapp{
+ display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:white;
+ background:#168c4c;padding:13px 20px;border-radius:13px;font-weight:800
+}
+.dot{width:9px;height:9px;background:#54ffa2;border-radius:50%;box-shadow:0 0 15px #54ffa2}
+.note{margin-top:17px;font-size:12px;color:#8094aa}
+</style>
 </head>
 <body>
-  <main class="card">
-    <div class="badge">INFINITY ROLE PLAY</div>
-    <h1>UNDER <span>MAINTENANCE</span></h1>
-    <p>Our website is currently undergoing scheduled maintenance. We’ll be back online soon. Thank you for your patience.</p>
-    <div class="loader"></div>
-    <div class="brand">INFINITY ROLE PLAY • SRI LANKA</div>
-  </main>
+<div class="bg"></div>
+<div class="overlay">
+ <main class="card">
+   <div class="small">INFINITY ROLE PLAY</div>
+   <h1>UNDER<br><span>MAINTENANCE</span></h1>
+   <p>Our website is currently under maintenance. We are working on improvements and will be back online soon. For assistance, contact us on WhatsApp.</p>
+   <a class="whatsapp" href="https://wa.me/94740682507"><span class="dot"></span> WhatsApp • 074 068 2507</a>
+   <div class="note">Thank you for your patience.</div>
+ </main>
+</div>
 </body>
 </html>
