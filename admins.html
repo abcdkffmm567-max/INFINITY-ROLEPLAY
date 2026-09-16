@@ -14,6 +14,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 <script data-early-security src="security.js"></script>
   <script src="maintenance.js"></script>
+<link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://www.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="//firebasestorage.googleapis.com">
+<link rel="dns-prefetch" href="//www.googleapis.com">
 </head>
 <body oncontextmenu="return false">
 <div class="bg-grid"></div>
@@ -58,7 +62,7 @@ db.ref("serverAdmins").on("value",snap=>{
     const phone=String(a.phone||"").trim();
     return `<article class="card server-admin-card">
       <div class="server-admin-photo-wrap">
-        <img class="server-admin-photo" src="${escAttr(photo)}" alt="${escAttr(a.serverName||"Server Admin")}">
+        <img decoding="async" class="server-admin-photo" src="${escAttr(photo)}" alt="${escAttr(a.serverName||"Server Admin")}">
         <span class="server-admin-rank">${esc(a.rank||"Server Admin")}</span>
       </div>
       <div class="server-admin-info">
@@ -76,5 +80,6 @@ db.ref("serverAdmins").on("value",snap=>{
 </script>
 <script src="security.js"></script>
 <script src="remove-old-pwa.js"></script>
+<script src="image-speed.js"></script>
 </body>
 </html>
