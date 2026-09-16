@@ -1,40 +1,92 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VIP Membership | Infinity Role Play</title><link rel="manifest" href="/manifest.json"><style>
-*{box-sizing:border-box}body{margin:0;background:#05080e;color:#fff;font-family:Arial,sans-serif}main{max-width:1200px;margin:auto;padding:80px 18px 45px}header{text-align:center;margin-bottom:28px}h1{font-size:clamp(30px,6vw,54px);margin:0}header span,.price{color:#42aaff}header p{color:#9aaabe}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}.card,.box{background:linear-gradient(145deg,#0c1522,#080c13);border:1px solid #24364c;border-radius:20px;padding:22px}.card ul{padding-left:20px;line-height:1.65;color:#d5dfeb;min-height:300px}.price{font-size:20px;font-weight:900}.buy{display:block;text-align:center;background:#138cff;color:#fff;text-decoration:none;padding:13px;border-radius:12px;font-weight:900}.box{margin-top:22px;line-height:1.7}.home{position:fixed;top:15px;left:15px;background:#102033;color:#fff;text-decoration:none;padding:10px 14px;border-radius:10px;z-index:10}</style><script defer src="/pwa.js"></script>
-<style id="vip-premium-animations">
-html{scroll-behavior:smooth}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background:
-radial-gradient(circle at 15% 20%,rgba(34,166,255,.13),transparent 30%),
-radial-gradient(circle at 85% 35%,rgba(124,54,255,.12),transparent 32%);
-animation:bgPulse 7s ease-in-out infinite alternate}
-.vip-wrap,main{animation:pageEnter .75s cubic-bezier(.2,.8,.2,1) both}
-.vip-head,header{animation:dropIn .8s .1s both}
-.vip-head h1,header h1{animation:titleGlow 2.8s ease-in-out infinite alternate}
-.vip-grid .vip-card,.grid .card{opacity:0;transform:translateY(38px) scale(.96);animation:cardReveal .75s forwards}
-.vip-grid .vip-card:nth-child(1),.grid .card:nth-child(1){animation-delay:.15s}
-.vip-grid .vip-card:nth-child(2),.grid .card:nth-child(2){animation-delay:.28s}
-.vip-grid .vip-card:nth-child(3),.grid .card:nth-child(3){animation-delay:.41s}
-.vip-grid .vip-card:nth-child(4),.grid .card:nth-child(4){animation-delay:.54s}
-.vip-card,.card{position:relative;overflow:hidden;transition:transform .35s ease,border-color .35s ease,box-shadow .35s ease}
-.vip-card:before,.card:before{content:"";position:absolute;top:-150%;left:-80%;width:45%;height:400%;transform:rotate(25deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);animation:shine 5.5s ease-in-out infinite;pointer-events:none}
-.vip-card:hover,.card:hover{transform:translateY(-9px) scale(1.015);border-color:#39adff;box-shadow:0 22px 60px rgba(0,126,255,.22)}
-.price{animation:priceGlow 2s ease-in-out infinite alternate}
-.buy{position:relative;overflow:hidden;transition:transform .25s ease,box-shadow .25s ease;animation:buttonPulse 2.4s ease-in-out infinite}
-.buy:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 12px 35px rgba(31,164,255,.42)}
-.buy:after{content:"";position:absolute;inset:0;transform:translateX(-120%);background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);animation:buttonShine 3.2s infinite}
-.addons,.info,.box{animation:fadeUp .8s .65s both}
-@keyframes pageEnter{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
-@keyframes dropIn{from{opacity:0;transform:translateY(-25px)}to{opacity:1;transform:none}}
-@keyframes cardReveal{to{opacity:1;transform:none}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
-@keyframes titleGlow{from{text-shadow:0 0 8px rgba(52,171,255,.15)}to{text-shadow:0 0 28px rgba(52,171,255,.45)}}
-@keyframes priceGlow{from{text-shadow:0 0 5px rgba(67,172,255,.2)}to{text-shadow:0 0 18px rgba(67,172,255,.75)}}
-@keyframes bgPulse{from{filter:saturate(.9)}to{filter:saturate(1.25)}}
-@keyframes shine{0%,55%{left:-80%}75%,100%{left:145%}}
-@keyframes buttonShine{0%,55%{transform:translateX(-120%)}85%,100%{transform:translateX(120%)}}
-@keyframes buttonPulse{0%,100%{box-shadow:0 0 0 rgba(28,157,255,0)}50%{box-shadow:0 0 25px rgba(28,157,255,.28)}}
-@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#05070b">
+<title>VIP Membership | Infinity Role Play</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script data-early-security src="security.js"></script>
+<script src="maintenance.js"></script>
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script defer src="/pwa.js"></script>
+<style>
+.vip-page{padding-top:110px}
+.vip-page-hero{max-width:820px;margin:0 auto 34px;text-align:center}
+.vip-page-hero h1{font-size:clamp(42px,7vw,78px);line-height:.95;margin:10px 0 16px;font-weight:900;letter-spacing:-2px}
+.vip-page-hero h1 span{color:#32bfff}
+.vip-page-hero p{color:var(--muted,#9eafc2);font-size:16px;line-height:1.7}
+.vip-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;align-items:stretch}
+.vip-card{position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:100%;border:1px solid rgba(58,174,255,.18)}
+.vip-card h2{margin:0 0 8px;font-size:22px}
+.vip-price{font-size:20px;font-weight:900;color:#39baff;margin-bottom:14px}
+.vip-card ul{padding-left:20px;line-height:1.7;color:#c8d4e1;flex:1}
+.vip-buy{margin-top:auto;width:100%;justify-content:center;text-decoration:none}
+.vip-box{margin-top:22px}
+.vip-card:before{content:"";position:absolute;top:-160%;left:-80%;width:42%;height:420%;transform:rotate(25deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.10),transparent);animation:vipShine 5.5s ease-in-out infinite;pointer-events:none}
+.vip-card{opacity:0;transform:translateY(28px);animation:vipReveal .65s forwards;transition:.3s ease}
+.vip-card:nth-child(2){animation-delay:.12s}.vip-card:nth-child(3){animation-delay:.24s}.vip-card:nth-child(4){animation-delay:.36s}
+.vip-card:hover{transform:translateY(-7px);border-color:rgba(50,191,255,.65);box-shadow:0 20px 55px rgba(0,128,255,.16)}
+.vip-buy{position:relative;overflow:hidden;animation:vipPulse 2.5s infinite}
+@keyframes vipReveal{to{opacity:1;transform:none}}
+@keyframes vipShine{0%,55%{left:-80%}75%,100%{left:145%}}
+@keyframes vipPulse{0%,100%{box-shadow:0 0 0 rgba(40,170,255,0)}50%{box-shadow:0 0 24px rgba(40,170,255,.2)}}
+@media(max-width:700px){.vip-page{padding-top:92px}.vip-page-hero{text-align:left}.vip-page-hero h1{font-size:44px}}
 </style>
 
-</head><body><a class="home" href="index.html">← HOME</a><main><header><h1>💎 INFINITY SAMP <span>VIP MEMBERSHIP</span></h1><p>Economy Balanced • Premium Benefits • 30 Days Validity</p></header><section class="grid"><article class="card"><h2>🥉 BRONZE VIP</h2><div class="price">LKR 500 / 30 DAYS</div><ul><li>💰 Starting Money — $500,000</li><li>🏠 Free Level 1 Small House</li><li>🚗 1x Sultan / Elegy</li><li>🛠️ /repair — 3 Times Per Day</li><li>⭐ Exclusive [BRONZE] VIP Tag</li><li>🎁 Daily Reward — $25,000</li></ul><a class="buy" href="https://wa.me/94740682507?text=Hello%20INFINITY%20SAMP%2C%20I%20want%20to%20buy%20🥉%20BRONZE%20VIP%20-%20LKR%20500.">BUY ON WHATSAPP</a></article><article class="card"><h2>🥈 SILVER VIP</h2><div class="price">LKR 1,200 / 30 DAYS</div><ul><li>💰 Starting Money — $1,250,000</li><li>🏠 Free Level 2 Medium House</li><li>🚗 1x Donate Vehicle — Turismo / Infernus / Bullet</li><li>🛠️ /repair — Unlimited</li><li>⭐ [SILVER] VIP Tag</li><li>🎨 Special Colored Nickname</li><li>🎁 Daily Reward — $50,000</li><li>💼 1x Business Slot</li></ul><a class="buy" href="https://wa.me/94740682507?text=Hello%20INFINITY%20SAMP%2C%20I%20want%20to%20buy%20🥈%20SILVER%20VIP%20-%20LKR%201200.">BUY ON WHATSAPP</a></article><article class="card"><h2>🥇 GOLD VIP</h2><div class="price">LKR 2,500 / 30 DAYS</div><ul><li>💰 Starting Money — $2,500,000</li><li>🏠 Level 3 Big House + Garage</li><li>🚗 2x Donate Vehicles</li><li>🏍️ 1x Bike of Your Choice</li><li>📜 Driving + Flying + Boating Licenses</li><li>🛠️ /repair — Unlimited</li><li>⭐ [GOLD] VIP Tag</li><li>🎨 Special Colored Nickname</li><li>👕 Special VIP Skin</li><li>🎁 Daily Reward — $100,000</li><li>💼 2x Business Slots</li><li>⛽ No Fuel Charges</li><li>🔧 No Pay'n'Spray Fees</li></ul><a class="buy" href="https://wa.me/94740682507?text=Hello%20INFINITY%20SAMP%2C%20I%20want%20to%20buy%20🥇%20GOLD%20VIP%20-%20LKR%202500.">BUY ON WHATSAPP</a></article><article class="card"><h2>👑💎 DIAMOND VIP</h2><div class="price">LKR 5,000 / 30 DAYS</div><ul><li>💰 Starting Money — $5,000,000</li><li>🏰 Level 4 Mansion + 2 Garages</li><li>🚗 3x Donate Vehicles</li><li>🚁 1x Helicopter</li><li>📜 All Standard Licenses Free</li><li>🛠️ /repair — Unlimited</li><li>❤️ /heal — VIP Access</li><li>💎 [DIAMOND] VIP Tag</li><li>🎨 Premium Colored Nickname</li><li>👕 Custom VIP Skin</li><li>🎁 Daily Reward — $200,000</li><li>💼 3x Business Slots</li><li>⛽ No Fuel Charges</li><li>🔧 No Pay'n'Spray Fees</li><li>💸 Reduced Server Taxes</li><li>⚡ Priority Login Queue</li><li>🎉 Diamond VIP Events</li></ul><a class="buy" href="https://wa.me/94740682507?text=Hello%20INFINITY%20SAMP%2C%20I%20want%20to%20buy%20👑💎%20DIAMOND%20VIP%20-%20LKR%205000.">BUY ON WHATSAPP</a></article></section>
-<section class="box"><h2>⚡ VIP EXTRA ADD-ONS</h2><p>💵 Money Pack — $5,000,000 — LKR 300<br>🚘 Donate Vehicle — 1x Vehicle — LKR 800<br>🏠 House Upgrade — +1 House Level — LKR 400</p></section>
-<section class="box"><h2>📌 IMPORTANT INFORMATION</h2><p>• VIP Membership validity is 30 Days.<br>• VIP benefits cannot be transferred to another account.<br>• VIP purchases are non-refundable after activation.<br>• Vehicles, houses and businesses are subject to server availability.<br>• VIP does NOT give permission to break server rules.<br>• VIP players receive the same punishments as normal players for rule violations.<br>• Admins may modify/remove a VIP benefit if it negatively affects the server economy.<br>• VIP expiry does not automatically renew unless another payment is made.<br>• Server management reserves the right to balance VIP rewards when required.</p></section></main></body></html>
+<style id="vip-security-fallback">
+html,body,body *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important}
+input,textarea,select,[contenteditable="true"],input *,textarea *,select *{-webkit-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important}
+</style>
+
+</head>
+<body oncontextmenu="return false">
+<div class="bg-grid"></div>
+<header class="nav">
+  <a class="brand" href="index.html"><span class="logo-mark">∞</span><span>INFINITY <b>ROLE PLAY</b></span></a>
+  <div class="redeem-page-nav"><a class="btn small ghost" href="index.html">HOME</a><a class="btn small ghost" href="profile.html">PROFILE</a></div>
+</header>
+<main class="section vip-page">
+<section class="vip-page-hero">
+  <span class="eyebrow">INFINITY ROLE PLAY</span>
+  <h1>VIP <span>MEMBERSHIP</span></h1>
+  <p>Economy Balanced • Premium Benefits • 30 Days Validity</p>
+</section>
+<section class="vip-grid">
+<article class="card vip-card"><h2>🥉 BRONZE VIP</h2><div class="vip-price">LKR 500 / 30 DAYS</div><ul><li>💰 Starting Money — $500,000</li><li>🏠 Free Level 1 Small House</li><li>🚗 1x Sultan / Elegy</li><li>🛠️ /repair — 3 Times Per Day</li><li>⭐ Exclusive [BRONZE] VIP Tag</li><li>🎁 Daily Reward — $25,000</li></ul><a class="btn vip-buy" href="https://wa.me/94740682507?text=Hello%20INFINITY%20SAMP%2C%20I%20want%20to%20buy%20🥉%20BRONZE%20VIP%20-%20LKR%20500.">BUY ON WHATSAPP</a></article><article class="card vip-card"><h2>🥈 SILVER VIP</h2><div class="vip-price">LKR 1,200 / 30 DAYS</div><ul><li>💰 Starting Money — $1,250,000</li><li>🏠 Free Level 2 Medium House</li><li>🚗 1x Donate Vehicle — Turismo / Infernus / Bullet</li><li>🛠️ /repair — Unlimited</li><li>⭐ [SILVER] VIP Tag</li><li>🎨 Special Colored Nickname</li><li>🎁 Daily Reward — $50,000</li><li>💼 1x Business Slot</li></ul><a class="btn vip-buy" href="https://wa.me/94740682507?text=Hello%20INFINITY%20SAMP%2C%20I%20want%20to%20buy%20🥈%20SILVER%20VIP%20-%20LKR%201200.">BUY ON WHATSAPP</a></article><article class="card vip-card"><h2>🥇 GOLD VIP</h2><div class="vip-price">LKR 2,500 / 30 DAYS</div><ul><li>💰 Starting Money — $2,500,000</li><li>🏠 Level 3 Big House + Garage</li><li>🚗 2x Donate Vehicles</li><li>🏍️ 1x Bike of Your Choice</li><li>📜 Driving + Flying + Boating Licenses</li><li>🛠️ /repair — Unlimited</li><li>⭐ [GOLD] VIP Tag</li><li>🎨 Special Colored Nickname</li><li>👕 Special VIP Skin</li><li>🎁 Daily Reward — $100,000</li><li>💼 2x Business Slots</li><li>⛽ No Fuel Charges</li><li>🔧 No Pay'n'Spray Fees</li></ul><a class="btn vip-buy" href="https://wa.me/94740682507?text=Hello%20INFINITY%20SAMP%2C%20I%20want%20to%20buy%20🥇%20GOLD%20VIP%20-%20LKR%202500.">BUY ON WHATSAPP</a></article><article class="card vip-card"><h2>👑💎 DIAMOND VIP</h2><div class="vip-price">LKR 5,000 / 30 DAYS</div><ul><li>💰 Starting Money — $5,000,000</li><li>🏰 Level 4 Mansion + 2 Garages</li><li>🚗 3x Donate Vehicles</li><li>🚁 1x Helicopter</li><li>📜 All Standard Licenses Free</li><li>🛠️ /repair — Unlimited</li><li>❤️ /heal — VIP Access</li><li>💎 [DIAMOND] VIP Tag</li><li>🎨 Premium Colored Nickname</li><li>👕 Custom VIP Skin</li><li>🎁 Daily Reward — $200,000</li><li>💼 3x Business Slots</li><li>⛽ No Fuel Charges</li><li>🔧 No Pay'n'Spray Fees</li><li>💸 Reduced Server Taxes</li><li>⚡ Priority Login Queue</li><li>🎉 Diamond VIP Events</li></ul><a class="btn vip-buy" href="https://wa.me/94740682507?text=Hello%20INFINITY%20SAMP%2C%20I%20want%20to%20buy%20👑💎%20DIAMOND%20VIP%20-%20LKR%205000.">BUY ON WHATSAPP</a></article>
+</section>
+<section class="card vip-box"><h2>⚡ VIP EXTRA ADD-ONS</h2><p>💵 Money Pack — $5,000,000 — LKR 300<br>🚘 Donate Vehicle — 1x Vehicle — LKR 800<br>🏠 House Upgrade — +1 House Level — LKR 400</p></section>
+<section class="card vip-box"><h2>📌 IMPORTANT INFORMATION</h2><p>• VIP Membership validity is 30 Days.<br>• VIP benefits cannot be transferred to another account.<br>• VIP purchases are non-refundable after activation.<br>• Vehicles, houses and businesses are subject to server availability.<br>• VIP does NOT give permission to break server rules.<br>• VIP players receive the same punishments as normal players for rule violations.<br>• Admins may modify/remove a VIP benefit if it negatively affects the server economy.<br>• VIP expiry does not automatically renew unless another payment is made.<br>• Server management reserves the right to balance VIP rewards when required.</p></section>
+</main>
+<script src="firebase-config.js"></script>
+<script src="site-brand.js"></script>
+<script src="user-utils.js"></script>
+<script src="notifications.js"></script>
+<script src="security.js"></script>
+
+<script id="vip-security-page">
+(function(){
+  const stop=e=>{e.preventDefault();e.stopPropagation();return false};
+  ["contextmenu","selectstart","copy","cut"].forEach(ev=>{
+    window.addEventListener(ev,stop,true);
+    document.addEventListener(ev,stop,true);
+  });
+  window.addEventListener("keydown",function(e){
+    const k=(e.key||"").toLowerCase();
+    if(e.key==="F12" ||
+       (e.ctrlKey&&e.shiftKey&&["i","j","c","k"].includes(k)) ||
+       (e.ctrlKey&&["u","s","a","c","x"].includes(k))){
+      stop(e);
+    }
+  },true);
+})();
+</script>
+
+</body>
+</html>
