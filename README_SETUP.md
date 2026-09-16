@@ -56,7 +56,7 @@ Admin Panel > Server Settings:
 The generated Firebase download URL is automatically saved in Realtime Database.
 
 ## 7) Default Server IP
-51.68.107.75:11999
+148.113.8.119:26000
 You can change it at any time from Admin Panel.
 
 ## 8) Hosting
@@ -377,3 +377,12 @@ After this, User Management can securely:
 - Unban
 
 No email is shown or typed in the Admin Panel UI.
+
+## Vehicle Shop Delayed Delivery
+- Default vehicle delivery delay: 3 hours (180 minutes).
+- Admin Panel > Vehicle Shop can change the delay in hours.
+- A purchase deducts eCoin immediately, then stays PENDING until its delivery time.
+- Netlify scheduled function `vehicle-delivery` runs every 5 minutes and inserts due vehicles into the SA-MP `vehicles` table.
+- Player Vehicle Shop history shows a live countdown and delivery status.
+- Import `infinity_vehicle_delivery_delay.sql` ONCE after the existing vehicle shop SQL.
+- Existing purchased vehicles are marked delivered by the migration.
