@@ -1,0 +1,1 @@
+(function(){if('serviceWorker'in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister()));}if('caches'in window){caches.keys().then(k=>Promise.all(k.map(x=>caches.delete(x))));}})();
