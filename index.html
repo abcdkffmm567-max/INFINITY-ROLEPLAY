@@ -20,6 +20,12 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <script defer src="/pwa.js"></script>
+<style id="vip-button-fix">
+.vip-nav-link{color:#fff!important;background:linear-gradient(135deg,#7b35ff,#18a9ff)!important;border-radius:10px!important;padding:9px 11px!important;font-weight:900!important;white-space:nowrap!important}
+.vip-hero-btn{background:linear-gradient(135deg,#7b35ff,#18a9ff)!important;color:#fff!important}
+.hero-actions{display:flex!important;align-items:center!important;gap:12px!important;flex-wrap:wrap!important}
+@media (max-width:1100px){.nav-toggle{display:flex!important}#navMenu:not(.open){display:none!important}#navMenu.open{display:flex!important;position:absolute!important;top:100%!important;left:0!important;right:0!important;flex-direction:column!important;background:#041725!important;padding:18px!important;z-index:99999!important}.vip-nav-link{display:block!important;width:100%!important;text-align:center!important}}
+</style>
 </head>
 <body class="nexora-blue-home" oncontextmenu="return false">
   <header class="nav">
@@ -37,6 +43,7 @@
       <a href="admin-apply.html">ADMIN APPLY</a>
       <a href="redeem.html">REDEEM CODE</a>
       <a href="vehicle-shop.html">VEHICLE SHOP</a>
+      <a href="vip.html" class="vip-nav-link">💎 VIP</a>
       <a class="btn small ghost" id="loginNavBtn" href="login.html">LOGIN</a>
       <a class="btn small primary" id="registerNavBtn" href="Register.html">REGISTER</a>
       <a id="profileIconBtn" class="profile-icon-btn hidden" href="profile.html" title="My Profile" aria-label="My Profile">
@@ -45,7 +52,6 @@
       </a>
       <button class="btn small ghost hidden" id="logoutNavBtn">LOGOUT</button>
       <a class="btn small admin-link" href="admin.html">ADMIN</a>
-    <a href="vip.html">VIP MEMBERSHIP</a>
 </nav>
   </header>
 
@@ -65,6 +71,7 @@
 
         <div class="hero-actions nx-reveal nx-delay-4">
           <a class="nex-pill-btn" href="whitelist.html">● &nbsp; WHITELIST APPLY</a>
+          <a class="nex-pill-btn vip-hero-btn" href="vip.html">💎 &nbsp; VIP MEMBERSHIP</a>
           <button class="nex-text-btn" id="copyIpBtn">COPY SERVER IP →</button>
         </div>
 
