@@ -7,10 +7,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 <script data-early-security src="security.js"></script>
   <script src="maintenance.js"></script>
-<link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>
-<link rel="preconnect" href="https://www.googleapis.com" crossorigin>
-<link rel="dns-prefetch" href="//firebasestorage.googleapis.com">
-<link rel="dns-prefetch" href="//www.googleapis.com">
 </head><body oncontextmenu="return false"><div class="bg-grid"></div>
 <header class="nav"><a class="brand" href="index.html"><span class="logo-mark">∞</span>INFINITY <b>ROLE PLAY</b></a>
 <a class="btn small ghost" href="index.html">← Home</a></header>
@@ -91,6 +87,4 @@ auth.onAuthStateChanged(u=>{
 f.onsubmit=async e=>{e.preventDefault();if(!cu)return;if(!adminApplicationsOpen){st.textContent="Admin applications are currently locked.";return;}const d={uid:cu.uid,accountEmail:cu.email||"",serverName:serverName.value.trim(),realName:realName.value.trim(),age:+age.value,phone:phone.value.trim(),discord:discord.value.trim(),playTime:playTime.value.trim(),experience:experience.value.trim(),reason:reason.value.trim(),availability:availability.value.trim(),status:"Pending",submittedAt:firebase.database.ServerValue.TIMESTAMP,updatedAt:firebase.database.ServerValue.TIMESTAMP};
 try{st.textContent="Submitting...";await db.ref("adminApplications/"+cu.uid).set(d);st.textContent="Application submitted successfully!"}catch(e){st.textContent="Submit failed: "+e.message}}
 </script><script src="security.js"></script>
-<script src="remove-old-pwa.js"></script>
-<script src="image-speed.js"></script>
 </body></html>

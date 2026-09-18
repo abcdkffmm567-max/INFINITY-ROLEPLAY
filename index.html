@@ -15,16 +15,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 <script data-early-security src="security.js"></script>
   <script src="maintenance.js"></script>
-<style id="vip-button-fix">
-.vip-nav-link{color:#fff!important;background:linear-gradient(135deg,#7b35ff,#18a9ff)!important;border-radius:10px!important;padding:9px 11px!important;font-weight:900!important;white-space:nowrap!important}
-.vip-hero-btn{background:linear-gradient(135deg,#7b35ff,#18a9ff)!important;color:#fff!important}
-.hero-actions{display:flex!important;align-items:center!important;gap:12px!important;flex-wrap:wrap!important}
-@media (max-width:1100px){.nav-toggle{display:flex!important}#navMenu:not(.open){display:none!important}#navMenu.open{display:flex!important;position:absolute!important;top:100%!important;left:0!important;right:0!important;flex-direction:column!important;background:#041725!important;padding:18px!important;z-index:99999!important}.vip-nav-link{display:block!important;width:100%!important;text-align:center!important}}
+<style id="vip-button-style">
+.vip-nav-link{color:#fff!important;background:linear-gradient(135deg,#703cff,#16aaff)!important;border-radius:10px!important;padding:9px 12px!important;font-weight:900!important;white-space:nowrap}
+.vip-hero-btn{background:linear-gradient(135deg,#703cff,#16aaff)!important;color:#fff!important}
 </style>
-<link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>
-<link rel="preconnect" href="https://www.googleapis.com" crossorigin>
-<link rel="dns-prefetch" href="//firebasestorage.googleapis.com">
-<link rel="dns-prefetch" href="//www.googleapis.com">
 </head>
 <body class="nexora-blue-home" oncontextmenu="return false">
   <header class="nav">
@@ -46,12 +40,12 @@
       <a class="btn small ghost" id="loginNavBtn" href="login.html">LOGIN</a>
       <a class="btn small primary" id="registerNavBtn" href="Register.html">REGISTER</a>
       <a id="profileIconBtn" class="profile-icon-btn hidden" href="profile.html" title="My Profile" aria-label="My Profile">
-        <img decoding="async" id="profileIconImg" alt="Profile">
+        <img id="profileIconImg" alt="Profile">
         <span id="profileIconFallback">👤</span>
       </a>
       <button class="btn small ghost hidden" id="logoutNavBtn">LOGOUT</button>
       <a class="btn small admin-link" href="admin.html">ADMIN</a>
-</nav>
+    </nav>
   </header>
 
   <main>
@@ -189,7 +183,7 @@
     <section class="section community-strip">
       <div class="card community-banner-card">
         <a id="communityBannerLink" href="#" target="_blank" rel="noopener noreferrer">
-          <img decoding="async" id="communityBannerImage" class="community-banner-image hidden" alt="Infinity Role Play Banner">
+          <img id="communityBannerImage" class="community-banner-image hidden" alt="Infinity Role Play Banner">
           <div id="communityBannerFallback" class="community-banner-fallback">
             <div class="community-infinity">∞</div>
             <div class="community-title">INFINITY ROLE PLAY</div>
@@ -220,7 +214,7 @@
         <h2>SERVER<br>TRAILER</h2>
       </div>
       <div id="trailerPhotoCard" class="card trailer-photo-card hidden">
-        <img decoding="async" id="trailerPhoto" alt="Infinity Role Play Trailer">
+        <img id="trailerPhoto" alt="Infinity Role Play Trailer">
       </div>
     </section>
 
@@ -320,7 +314,5 @@
 </script>
 
 <script src="security.js"></script>
-<script src="remove-old-pwa.js"></script>
-<script src="image-speed.js"></script>
 </body>
 </html>
