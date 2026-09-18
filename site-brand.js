@@ -12,7 +12,7 @@
           el.textContent="";
           el.appendChild(img);
         }
-        img.src=url;
+        img.onerror=()=>{ el.innerHTML='∞'; }; img.src=url;
       }else{
         el.innerHTML="∞";
       }
